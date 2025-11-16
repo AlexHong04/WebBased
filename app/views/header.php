@@ -6,10 +6,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="icon" href="../../public/img/icon/logo.png" />
 	<title><?php echo $title ?? "My site"; ?></title>
-	<link rel="stylesheet" href="../../public/css/pc_reset.css" />
-	<link rel="stylesheet" href="../../public/css/header_footer.css" />
+	<link rel="stylesheet" href="/public/css/pc_reset.css" />
+	<link rel="stylesheet" href="/public/css/header_footer.css" />
 	<?php if (!empty($pageCSS)): ?>
-		<link rel="stylesheet" href="../../public/css/<?php echo $pageCSS; ?>" />
+		<link rel="stylesheet" href="/public/css/<?php echo $pageCSS; ?>" />
 	<?php endif; ?>
 </head>
 
