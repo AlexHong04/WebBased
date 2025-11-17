@@ -13,9 +13,11 @@
 } */
 
 :root {
-  --primary: #ffeae6; /* Soft Blush Pink - Main theme color */
-  --primary-dark: #d48a98; /* Dusty Rose Pink - Buttons, titles */
-  --primary-light: #ffb7c7; /* Sweet Candy Pink - Hover, accents */
+  /* --primary: #ffeae6;  Soft Blush Pink - Main theme color */
+  --primary: #f1a2b8; /* Soft Blush Pink - Main theme color */
+  /*--primary-dark: #d48a98;  Dusty Rose Pink - Buttons, titles */
+  --primary-dark: #de8ea4; /* Dusty Rose Pink - Buttons, titles */
+  --primary-light: #ff859f; /* Sweet Candy Pink - Hover, accents */
   --secondary: #fff5f3; /* Light Peach Pink - Soft background */
 
   --dark: #333333; /* Charcoal Gray - Main readable text */
@@ -23,7 +25,7 @@
 
   --dark: #ff8f87; /* Soft Gray - Subtext, descriptions */
   --light-gray: #f5eded; /* Blush Tint Gray - Card backgrounds */
-  --info: rgb(255, 255, 255);  /* Soft white */
+  --info: rgb(255, 255, 255); /* Soft white */
 }
 
 /* Header */
@@ -34,8 +36,6 @@ header {
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  border-bottom: 3px solid var(--primary-dark);
   transition: all 0.3s ease;
 }
 
@@ -51,8 +51,9 @@ header {
 .logo {
   font-size: 2rem;
   font-weight: bold;
-  color: var(--primary-dark);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  color: rgb(234, 143, 143);
+  /* text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); */
+  /* -webkit-text-stroke: 0.2px #fff; */
   letter-spacing: 1px;
   transition: all 0.3s ease;
 }
@@ -63,11 +64,11 @@ header {
   vertical-align: baseline;
 }
 
-.logo:hover {
+/* .logo:hover {
   transform: scale(1.05);
-  /* text-shadow: 0 0 10px rgba(196, 90, 99, 0.7); */
+  text-shadow: 0 0 10px rgba(196, 90, 99, 0.7);
   text-shadow: 0 0 10px rgba(176, 75, 87, 0.6);
-}
+} */
 
 .logo span {
   color: #fff;
@@ -87,17 +88,25 @@ nav li {
   position: relative;
 }
 
-nav a {
-  color: var(--primary-light);
+nav div,
+a {
+  color: white;
   text-decoration: none;
   font-weight: 500;
   padding: 0.5rem 0;
   transition: all 0.3s ease;
   padding-left: 0px !important;
+  display: flex;
+  align-items: center;
+  position: relative;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
 }
 
 nav a:hover {
-  color: var(--primary-light);
+  /* color: rgb(244, 236, 236); */
+  /* transition: all 0.3s ease; */
+  transform: scale(1.1);
 }
 
 nav a::after {
@@ -186,7 +195,7 @@ nav a:hover::after {
 }
 
 .cart-count {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-light);
   color: white;
   border-radius: 50%;
   width: 20px;
@@ -202,7 +211,7 @@ nav a:hover::after {
 }
 
 .cart-link:hover .cart-count {
-  background-color: var(--primary-light);
+  background-color: var(--primary-dark);
   transform: scale(1.1);
 }
 
@@ -231,7 +240,7 @@ nav a:hover::after {
 
 /* Footer */
 .footer {
-  background-color: #2a2a2a;
+  background-color: var(--primary);
   color: #fff;
   position: relative;
   overflow: hidden;
@@ -252,7 +261,7 @@ nav a:hover::after {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px; 
+  gap: 8px;
   padding: 0 8px;
   position: relative;
   z-index: 2;
@@ -276,7 +285,7 @@ nav a:hover::after {
   font-weight: 600;
   margin-bottom: 20px;
   /* color: var(--primary); */
-  color: var(--primary-dark);
+  color: white;
   position: relative;
   padding-bottom: 10px;
 }
@@ -288,7 +297,7 @@ nav a:hover::after {
   bottom: 0;
   width: 40px;
   height: 2px;
-  background-color: var(--primary-dark);
+  background-color: white;
 }
 
 .footer-links {
@@ -302,7 +311,7 @@ nav a:hover::after {
 }
 
 .footer-links a {
-  color: #aaa;
+  color: white;
   text-decoration: none;
   transition: all 0.3s ease;
   display: flex;
@@ -311,13 +320,13 @@ nav a:hover::after {
 }
 
 .footer-links a:hover {
-  color: var(--primary-light);
+  color: rgb(255, 255, 255);
   transform: translateX(5px);
 }
 
 .link-icon {
   margin-right: 8px;
-  color: var(--primary-dark);
+  color: white;
   font-weight: bold;
 }
 
@@ -328,7 +337,7 @@ nav a:hover::after {
 }
 
 .social-icon {
-  width: 40px;
+  width: 55px;
   height: 40px;
   border-radius: 50%;
   background-color: var(--primary-dark);
@@ -382,11 +391,11 @@ nav a:hover::after {
 }
 
 .footer-links-bottom a:hover {
-  color: var(--primary-light);
+  color: rgb(150, 61, 61);
 }
 
 .footer-links-bottom span {
-  color: #555;
+  color: #ffffff;
   font-size: 14px;
 }
 
