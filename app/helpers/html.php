@@ -146,3 +146,5 @@ function table_headers($fields, $sort, $dir, $href = '')
         echo "<th><a href='?sort=$k&dir=$d&$href' class='$c'>$v</a></th>";
     }
 }
+
+

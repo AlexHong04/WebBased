@@ -11,13 +11,24 @@
 	<?php if (!empty($pageCSS)): ?>
 		<link rel="stylesheet" href="/public/css/<?php echo $pageCSS; ?>" />
 	<?php endif; ?>
+
+	<!-- <?php if (!empty($pageCSS)) {
+		if (is_array($pageCSS)) {
+			foreach ($pageCSS as $css) {
+				echo '<link rel="stylesheet" href="/public/css/' . $css . '">' . "\n";
+			}
+		} else {
+			echo '<link rel="stylesheet" href="/public/css/' . $pageCSS . '">' . "\n";
+		}
+	}
+	?> -->
 </head>
 
 <body>
 
 	<header>
 		<div class="header-container">
-			<div class="logo">Company<span>Name</span></div>
+			<div class="logo">Lo<span>vine</span></div>
 			<nav>
 				<ul>
 					<li><a href="#">Home</a></li>
