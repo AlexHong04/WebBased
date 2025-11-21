@@ -21,7 +21,8 @@ class Database
 
         $options = [
             PDO::ATTR_PERSISTENT => true,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ
         ];
 
         try {
@@ -48,6 +49,7 @@ class Database
     // Fetches and returns all rows from the executed query.
     public function resultAll()
     {
+        $this->execute();
         return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
