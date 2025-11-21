@@ -27,7 +27,7 @@
     	<div class="footer-container">
     		<div class="footer-section">
     			<div class="logo-wrapper">
-    				<div class="logo">Company<span>Name</span></div>
+    				<div class="logo">Lo<span>vine</span></div>
     			</div>
     			<ul class="footer-links">
     				<li>Call Us: <a href="tel:+60341450123">+603-41450123</a></li>

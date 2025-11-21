@@ -125,6 +125,56 @@ nav a:hover::after {
   width: 100%;
 }
 
+/* Do not show the underline for icon-only links (cart / profile) */
+nav a.cart-link::after,
+nav a.cart-link:hover::after {
+  display: none;
+}
+
+/* Also prevent underline for links that contain only svg icons */
+nav a > svg::after { display: none; }
+
+/* Header search bar */
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 16px;
+}
+.header-search input[type="search"] {
+  width: 220px;
+  max-width: 40vw;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  color: #333;
+  font-size: 0.95rem;
+}
+.header-search input[type="search"]:focus {
+  outline: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+.header-search button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0px;
+  border-radius: 0;
+  border: none;
+  background: transparent; /* removed colored background behind icon */
+  color: #fff; /* keep icon visible on pink header */
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 880px) {
+  /* hide search on narrower screens (prevent header wrapping) */
+  .header-search {
+    display: none;
+  }
+}
+
 /* Dropdown */
 .dropdown {
   position: relative;
@@ -349,10 +399,32 @@ nav a:hover::after {
   transition: all 0.3s ease;
 }
 
-.social-icon:hover {
-  background-color: #e62429;
-  transform: translateY(-3px);
+.social-icon{
+  transition: all 0.25s ease;
 }
+
+/* hover: swap to white background and color the SVG icon with the brand color */
+.social-icon:hover {
+  background-color: #ffffff; /* white circle */
+  transform: translateY(-3px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.social-icon[aria-label="Facebook"]:hover {
+  color: #1877F2; /* Facebook blue icon */
+}
+.social-icon[aria-label="Twitter"]:hover {
+  color: #1DA1F2; /* Twitter blue icon */
+}
+.social-icon[aria-label="Instagram"]:hover {
+  color: #E1306C; /* Instagram magenta icon (approx) */
+}
+.social-icon[aria-label="YouTube"]:hover {
+  color: #FF0000; /* YouTube red icon */
+}
+
+/* ensure SVG paths use currentColor for stroke/fill where applicable */
+.social-icon svg { color: inherit; }
 
 .social-icon svg {
   width: 20px;
