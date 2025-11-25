@@ -27,10 +27,9 @@ class Database
 
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->password, $options);
-            echo "<script>Connect database successful</script>";
+            echo "<script>console.log('Connect database successful')</script>";
         } catch (PDOException $e) {
-            $this->error = $e->getMessage();
-            echo $this->error;
+            die("Connection failed: " . $e->getMessage());
         }
     }
 
