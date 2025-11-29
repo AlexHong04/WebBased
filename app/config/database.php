@@ -17,7 +17,7 @@ class Database
     // Creates the PDO connection using the provided database settings.
     public function __construct()
     {
-        $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbName . ';port=' . $this->dbPort;
+        $dsn = 'mysql:host=' . $this->host . ';port=' . $this->dbPort . ';dbname=' . $this->dbName ;
 
         $options = [
             PDO::ATTR_PERSISTENT => true,
@@ -81,5 +81,21 @@ class Database
         $stm = $_db->prepare("SELECT COUNT(*) FROM $table WHERE $field = ?");
         $stm->execute([$value]);
         return $stm->fetchColumn() > 0;
+    }
+
+    function generateId($table, $column, $prefix)
+    {
+        $this->query("SELECT $column FROM $table ORDER BY $column DESC LIMIT 1");
+        $lastRow = $this->result();
+
+        if ($lastRow) {
+            $lastId = $lastRow[$column];
+            $number = intval(substr($lastId, strlen($prefix)));
+            $newNumber = $number + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
 }
