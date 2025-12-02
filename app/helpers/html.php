@@ -20,10 +20,11 @@ function html_hidden($key, $attr = '')
 }
 
 // Generate <input type='text'>
-function html_text($key, $attr = '')
+function html_text($key, $attr = '' ,$value=null)
 {
-    $value = encode($GLOBALS[$key] ?? '');
-    echo "<input type='text' id='$key' name='$key' value='$value' $attr>";
+    $finalValue = $value ?? $GLOBALS[$key] ?? '';
+    $safeValue = encode($finalValue);
+    echo "<input type='text' id='$key' name='$key' value='$safeValue' $attr>";
 }
 
 // Generate <input type='password'>

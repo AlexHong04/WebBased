@@ -8,6 +8,7 @@
 	<title><?php echo $title ?? "My site"; ?></title>
 	<link rel="stylesheet" href="/public/css/pc_reset.css" />
 	<link rel="stylesheet" href="/public/css/header_footer.css" />
+	<!-- <link rel="stylesheet" href="/public/css/animation.css" /> -->
 	<?php if (!empty($pageCSS)): ?>
 		<link rel="stylesheet" href="/public/css/<?php echo $pageCSS; ?>" />
 	<?php endif; ?>
@@ -19,7 +20,7 @@
 			<div class="logo">Lo<span>vine</span></div>
 			<nav>
 				<ul>
-					<li><a href="#">Home</a></li>
+					<li><a href="/app/views/home.php">Home</a></li>
 					<li class="dropdown">
 						<a href="#">Category</a>
 						<ul class="dropdown-menu">
@@ -59,13 +60,13 @@
 						</a>
 					</li>
 					<li>
-						<a href="../userProfile/profile.php" class="cart-link">
+						<a href="/app/views/userProfile/profile.php" class="cart-link">
 							<svg class="cart-icon" viewBox="0 0 640 640" width="24" height="24">
 								<path fill="currentColor" d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z" />
 							</svg>
 						</a>
 					</li>
-					<li><a href="../security/signIn.php">Sign Up/Login</a></li>
+					<li><a href="/app/views/security/signIn.php">Sign In/Sign Up</a></li>
 				</ul>
 			</nav>
 		</div>

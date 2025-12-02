@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 27, 2025 at 05:56 PM
+-- Generation Time: Dec 02, 2025 at 09:26 AM
 -- Server version: 8.0.43
 -- PHP Version: 8.2.12
 
@@ -26,19 +26,44 @@ USE `lovine`;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `address`
+--
+
+CREATE TABLE `address` (
+  `address_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
+  `customer_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
+  `recipient_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `recipient_phone` varchar(15) COLLATE utf8mb4_general_ci NOT NULL,
+  `street_line` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `city` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `state` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `postcode` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
+  `is_default` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `address`
+--
+
+INSERT INTO `address` (`address_id`, `customer_id`, `recipient_name`, `recipient_phone`, `street_line`, `city`, `state`, `postcode`, `is_default`) VALUES
+('ADR001', 'CU0001', 'System Default Address', '0121234567', 'Migration Street 101', 'Kuala Lumpur', 'W.P. Kuala Lumpur', '50000', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `admin`
 --
 
 CREATE TABLE `admin` (
-  `admin_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `firstName` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `lastName` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `phone` varchar(15) COLLATE utf8mb4_general_ci NOT NULL,
-  `address` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `admin_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `firstName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `lastName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `phone` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL,
-  `position` varchar(20) COLLATE utf8mb4_general_ci NOT NULL
+  `position` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -59,8 +84,8 @@ INSERT INTO `admin` (`admin_id`, `email`, `firstName`, `lastName`, `password`, `
 --
 
 CREATE TABLE `cart` (
-  `cart_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `customer_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
+  `cart_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `customer_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_datetime` timestamp NOT NULL,
   `updated_datetime` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -83,9 +108,9 @@ INSERT INTO `cart` (`cart_id`, `customer_id`, `created_datetime`, `updated_datet
 --
 
 CREATE TABLE `cart_items` (
-  `cart_item_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `cart_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `product_variant_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
+  `cart_item_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `cart_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `product_variant_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `quantity` int NOT NULL,
   `cart_status` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -108,8 +133,8 @@ INSERT INTO `cart_items` (`cart_item_id`, `cart_id`, `product_variant_id`, `quan
 --
 
 CREATE TABLE `category` (
-  `category_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `category_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL
+  `category_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `category_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -130,30 +155,31 @@ INSERT INTO `category` (`category_id`, `category_name`) VALUES
 --
 
 CREATE TABLE `customer` (
-  `customer_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `firstname` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `lastname` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `phone` varchar(15) COLLATE utf8mb4_general_ci NOT NULL,
-  `address` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `customer_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `firstName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `lastName` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `gender` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `phone` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `rewardPoint` int DEFAULT NULL,
-  `isActive` tinyint(1) NOT NULL,
-  `isBlocked` tinyint(1) NOT NULL
+  `isActive` tinyint(1) DEFAULT NULL,
+  `isBlocked` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `customer`
 --
 
-INSERT INTO `customer` (`customer_id`, `firstname`, `lastname`, `email`, `password`, `phone`, `address`, `created_at`, `updated_at`, `rewardPoint`, `isActive`, `isBlocked`) VALUES
-('CU0001', 'Adam', 'Lim', 'adam@gmail.com', 'pass123', '0123456789', 'KL', '2025-11-27 16:53:47', NULL, 100, 1, 0),
-('CU0002', 'Bella', 'Tan', 'bella@gmail.com', 'pass123', '0112223333', 'Penang', '2025-11-27 16:53:47', NULL, 50, 1, 0),
-('CU0003', 'Chris', 'Lee', 'chris@gmail.com', 'pass123', '0198887777', 'Johor', '2025-11-27 16:53:47', NULL, 20, 1, 0),
-('CU0004', 'Diana', ' Wong', 'diana@gmail.com', 'pass123', '0135558888', 'Sabah', '2025-11-27 16:53:47', NULL, 10, 1, 1),
-('CU0005', 'Edwin', 'Kong', 'edwin@gmail.com', 'pass123', '0166677777', 'Sarawak', '2025-11-27 16:53:47', NULL, 0, 1, 0);
+INSERT INTO `customer` (`customer_id`, `firstName`, `lastName`, `email`, `gender`, `password`, `phone`, `created_at`, `updated_at`, `rewardPoint`, `isActive`, `isBlocked`) VALUES
+('CU0001', 'Adam', 'Lim', 'adam@gmail.com', '', 'pass123', '0123456789', '2025-11-27 16:53:47', NULL, 100, 1, 0),
+('CU0002', 'Bella', 'Tan', 'bella@gmail.com', '', 'pass123', '0112223333', '2025-11-27 16:53:47', NULL, 50, 1, 0),
+('CU0003', 'Chris', 'Lee', 'chris@gmail.com', '', 'pass123', '0198887777', '2025-11-27 16:53:47', NULL, 20, 1, 0),
+('CU0004', 'Diana', ' Wong', 'diana@gmail.com', '', 'pass123', '0135558888', '2025-11-27 16:53:47', NULL, 10, 1, 1),
+('CU0005', 'Edwin', 'Kong', 'edwin@gmail.com', '', 'pass123', '0166677777', '2025-11-27 16:53:47', NULL, 0, 1, 0),
+('CU0006', 'Tan', 'Kok Hong', 'kokhong704@gmail.com', 'Male', '$2y$10$6n2Ttd62sQ5HJYq0nI6Jw./LgCYRIDjThjn2d9p3NN00cIzGmvViu', '012-3333445', '2025-11-29 16:36:44', '2025-11-30 15:11:50', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -162,26 +188,27 @@ INSERT INTO `customer` (`customer_id`, `firstname`, `lastname`, `email`, `passwo
 --
 
 CREATE TABLE `ordertable` (
-  `order_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
+  `order_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `total_amount` double NOT NULL,
-  `order_status` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `order_status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_datetime` timestamp NOT NULL,
   `total_order_qty` int NOT NULL,
   `reward` double DEFAULT NULL,
   `tax_fee` double NOT NULL,
-  `customer_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL
+  `customer_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `address_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `ordertable`
 --
 
-INSERT INTO `ordertable` (`order_id`, `total_amount`, `order_status`, `created_datetime`, `total_order_qty`, `reward`, `tax_fee`, `customer_id`) VALUES
-('O00001', 199, 'Completed', '2025-11-27 16:53:47', 1, 10, 2, 'CU0001'),
-('O00002', 178, 'Pending', '2025-11-27 16:53:47', 2, 5, 1.5, 'CU0002'),
-('O00003', 799, 'Completed', '2025-11-27 16:53:47', 1, 20, 5, 'CU0003'),
-('O00004', 49, 'Cancelled', '2025-11-27 16:53:47', 1, NULL, 1, 'CU0004'),
-('O00005', 159, 'Completed', '2025-11-27 16:53:47', 1, 10, 1.5, 'CU0005');
+INSERT INTO `ordertable` (`order_id`, `total_amount`, `order_status`, `created_datetime`, `total_order_qty`, `reward`, `tax_fee`, `customer_id`, `address_id`) VALUES
+('O00001', 199, 'Completed', '2025-11-27 16:53:47', 1, 10, 2, 'CU0001', 'ADR001'),
+('O00002', 178, 'Pending', '2025-11-27 16:53:47', 2, 5, 1.5, 'CU0002', 'ADR001'),
+('O00003', 799, 'Completed', '2025-11-27 16:53:47', 1, 20, 5, 'CU0003', 'ADR001'),
+('O00004', 49, 'Cancelled', '2025-11-27 16:53:47', 1, NULL, 1, 'CU0004', 'ADR001'),
+('O00005', 159, 'Completed', '2025-11-27 16:53:47', 1, 10, 1.5, 'CU0005', 'ADR001');
 
 -- --------------------------------------------------------
 
@@ -190,8 +217,8 @@ INSERT INTO `ordertable` (`order_id`, `total_amount`, `order_status`, `created_d
 --
 
 CREATE TABLE `order_items` (
-  `order_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `product_variant_id` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `order_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `product_variant_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `price` double NOT NULL,
   `order_qty` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -214,10 +241,10 @@ INSERT INTO `order_items` (`order_id`, `product_variant_id`, `price`, `order_qty
 --
 
 CREATE TABLE `payment` (
-  `payment_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `order_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `payment_method` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `payment_status` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `payment_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `order_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `payment_method` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `payment_status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `amount` double NOT NULL,
   `created_datetime` timestamp NOT NULL,
   `updated_datetime` timestamp NULL DEFAULT NULL
@@ -241,11 +268,11 @@ INSERT INTO `payment` (`payment_id`, `order_id`, `payment_method`, `payment_stat
 --
 
 CREATE TABLE `photo` (
-  `photo_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `img_url` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `product_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `review_id` varchar(6) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `product_variant_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL
+  `photo_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `img_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `product_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `review_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `product_variant_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -266,17 +293,17 @@ INSERT INTO `photo` (`photo_id`, `img_url`, `product_id`, `review_id`, `product_
 --
 
 CREATE TABLE `product` (
-  `product_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `product_name` varchar(25) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `product_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `product_name` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL,
   `updated_at` timestamp NOT NULL,
   `total_sold` int DEFAULT NULL,
   `cost_price` double NOT NULL,
   `rate` double DEFAULT NULL,
-  `img_url` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `img_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `sale_price` double NOT NULL,
-  `category_id` varchar(20) COLLATE utf8mb4_general_ci NOT NULL
+  `category_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -297,12 +324,12 @@ INSERT INTO `product` (`product_id`, `product_name`, `description`, `created_at`
 --
 
 CREATE TABLE `product_variant` (
-  `product_variant_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
+  `product_variant_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `min_stock_level` int NOT NULL,
   `stock_qty` int NOT NULL,
-  `stock_status` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `variant_id` varchar(6) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `product_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL
+  `stock_status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `variant_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `product_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -323,11 +350,11 @@ INSERT INTO `product_variant` (`product_variant_id`, `min_stock_level`, `stock_q
 --
 
 CREATE TABLE `review` (
-  `review_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `review_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `rating` double NOT NULL,
   `created_at` timestamp NOT NULL,
-  `order_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL
+  `order_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -348,16 +375,16 @@ INSERT INTO `review` (`review_id`, `description`, `rating`, `created_at`, `order
 --
 
 CREATE TABLE `shipments` (
-  `shipment_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `order_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `receiver_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `receiver_phone` varchar(15) COLLATE utf8mb4_general_ci NOT NULL,
-  `receiver_address` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `shipment_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `order_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `receiver_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `receiver_phone` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `receiver_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `shipment_date` date DEFAULT NULL,
-  `status` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_datetime` timestamp NOT NULL,
   `updated_datetime` timestamp NULL DEFAULT NULL,
-  `update_by` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL
+  `update_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -378,8 +405,8 @@ INSERT INTO `shipments` (`shipment_id`, `order_id`, `receiver_name`, `receiver_p
 --
 
 CREATE TABLE `variant` (
-  `variant_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `variant_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL
+  `variant_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `variant_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -400,8 +427,8 @@ INSERT INTO `variant` (`variant_id`, `variant_name`) VALUES
 --
 
 CREATE TABLE `wishlist` (
-  `wishlist_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `customer_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL
+  `wishlist_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `customer_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -422,9 +449,9 @@ INSERT INTO `wishlist` (`wishlist_id`, `customer_id`) VALUES
 --
 
 CREATE TABLE `wishlist_items` (
-  `wishlist_item_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `wishlist_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL,
-  `product_variant_id` varchar(6) COLLATE utf8mb4_general_ci NOT NULL
+  `wishlist_item_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `wishlist_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `product_variant_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -441,6 +468,13 @@ INSERT INTO `wishlist_items` (`wishlist_item_id`, `wishlist_id`, `product_varian
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `address`
+--
+ALTER TABLE `address`
+  ADD PRIMARY KEY (`address_id`),
+  ADD KEY `fk_address_customer` (`customer_id`);
 
 --
 -- Indexes for table `admin`
@@ -480,7 +514,8 @@ ALTER TABLE `customer`
 --
 ALTER TABLE `ordertable`
   ADD PRIMARY KEY (`order_id`),
-  ADD KEY `customer_id` (`customer_id`);
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `fk_order_address` (`address_id`);
 
 --
 -- Indexes for table `order_items`
@@ -560,6 +595,12 @@ ALTER TABLE `wishlist_items`
 --
 
 --
+-- Constraints for table `address`
+--
+ALTER TABLE `address`
+  ADD CONSTRAINT `fk_address_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
+
+--
 -- Constraints for table `cart`
 --
 ALTER TABLE `cart`
@@ -576,6 +617,7 @@ ALTER TABLE `cart_items`
 -- Constraints for table `ordertable`
 --
 ALTER TABLE `ordertable`
+  ADD CONSTRAINT `fk_order_address` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`),
   ADD CONSTRAINT `ordertable_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
 
 --

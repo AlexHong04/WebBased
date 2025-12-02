@@ -101,7 +101,7 @@
     				<a href="#">Cookie Policy</a>
     			</div>
     			<div class="copyright">
-    				<p>&copy; 2025 Company Name. All rights reserved. All character images and logos are property of their respective owners.</p>
+    				<p>&copy; 2025 Lovine. All rights reserved. All character images and logos are property of their respective owners.</p>
     			</div>
     		</div>
     	</div>
