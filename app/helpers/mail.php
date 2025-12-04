@@ -71,7 +71,7 @@ function prepareReceiptContent($orderId) {
     //clean output buffer
     ob_start();
     //load view
-    include __DIR__ . '/../views/template/receipt.php';
+    include __DIR__ . '/../views/template/paymentReceipt.php';
     //get the content and clean
     return ob_get_clean();
 }
