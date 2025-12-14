@@ -3,31 +3,34 @@ require_once __DIR__ . '/../lib/PHPMailer/src/Exception.php';
 require_once __DIR__ . '/../lib/PHPMailer/src/PHPMailer.php';
 require_once __DIR__ . '/../lib/PHPMailer/src/SMTP.php';
 require_once __DIR__ . '/../config/database.php';
+
 require_once __DIR__ . '/html.php';
 require_once __DIR__ . '/../models/OrderModel.php';
+
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-function _sendEmail($toEmail, $toName, $subject, $body, $altBody = '') {
+function _sendEmail($toEmail, $toName, $subject, $body, $altBody = '')
+{
     $mail = new PHPMailer(true);
     try {
         $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';                     
-        $mail->SMTPAuth   = true;                             
-        $mail->Username   = 'unknowsuser050@gmail.com';          
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'unknowsuser050@gmail.com';
         $mail->Password   = 'dgsj nahj zsld nekl';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
-        $mail->setFrom('no-reply@lovine.com', 'Lovine'); 
-        $mail->addAddress($toEmail, $toName);           
+        $mail->setFrom('no-reply@lovine.com', 'Lovine');
+        $mail->addAddress($toEmail, $toName);
 
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body    = $body;
         $mail->AltBody = !empty($altBody) ? $altBody : strip_tags($body);
-        
+
         $mail->send();
         return true;
     } catch (Exception $e) {
@@ -36,7 +39,8 @@ function _sendEmail($toEmail, $toName, $subject, $body, $altBody = '') {
     }
 }
 
-function sendOrderReceipt($orderId, $customerEmail, $customerName) {
+function sendOrderReceipt($orderId, $customerEmail, $customerName)
+{
     $htmlContent = prepareReceiptContent($orderId);
     if (!$htmlContent) return false;
 
@@ -45,7 +49,8 @@ function sendOrderReceipt($orderId, $customerEmail, $customerName) {
     return _sendEmail($customerEmail, $customerName, $subject, $htmlContent, $plainText);
 }
 
-function prepareReceiptContent($orderId) {
+function prepareReceiptContent($orderId)
+{
     $orderModel = new OrderModel();
 
     //get data from ordermodel
@@ -87,4 +92,22 @@ function prepareReceiptContent($orderId) {
     //get the content and clean
     return ob_get_clean();
 }
-?>
+
+// ... existing code in mail.php ...
+
+// Add this function at the bottom
+function sendWelcomeEmail($toEmail, $toName, $loginLink)
+{
+    $subject = "Welcome to Lovine! Account Activation";
+
+    // You can customize this HTML to look nicer
+// Ensure your base() function is available or use full URL
+    //clean output buffer
+    ob_start();
+    include __DIR__ . '/../views/template/accountActive.php';
+      
+    $body = ob_get_clean();
+    $altBody = "Welcome $toName! Thank you for signing up. Please login at: $loginLink";
+
+    return _sendEmail($toEmail, $toName, $subject, $body, $altBody);
+}
