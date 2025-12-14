@@ -4,13 +4,13 @@ require_once __DIR__ . '../../helpers/html.php';
 
 require_once __DIR__ . '/../models/cartModel.php';
 require_once __DIR__ . '/../models/orderModel.php';
-require_once __DIR__ . '/../models/userModel.php';
+require_once __DIR__ . '/../models/customerModel.php';
 require_once __DIR__ . '/../models/addressModel.php';
 
 class CheckoutController
 {
     private $cartModel;
-    private $userModel;
+    private $customerModel;
     private $orderModel;
     private $addressModel;
 
@@ -20,7 +20,7 @@ class CheckoutController
             session_start();
         }
         $this->cartModel = new cartModel();
-        $this->userModel = new userModel();
+        $this->customerModel = new customerModel();
         $this->orderModel = new orderModel();
         $this->addressModel = new addressModel();
     }
@@ -45,7 +45,7 @@ class CheckoutController
 
         $currentUser = [];
         $defaultAddress = $this->addressModel->getDefaultAddress($customerId);
-        $custProfile = $this->userModel->getCustomerDetails($customerId);
+        $custProfile = $this->customerModel->getCustomerDetails($customerId);
 
         if ($defaultAddress) {
             $currentUser['username'] = $defaultAddress['name'];
