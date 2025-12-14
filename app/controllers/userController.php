@@ -22,7 +22,7 @@ class userController
             $user = $this->userModel->getUser($email, $password);
 
             if ($user && password_verify($password, $user['password'])) {
-                session_start();            
+                session_start();
                 // Password is correct, start a session
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['customerId'] = $user['customer_id'];
