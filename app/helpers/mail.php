@@ -3,6 +3,7 @@ require_once __DIR__ . '/../lib/PHPMailer/src/Exception.php';
 require_once __DIR__ . '/../lib/PHPMailer/src/PHPMailer.php';
 require_once __DIR__ . '/../lib/PHPMailer/src/SMTP.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/html.php';
 require_once __DIR__ . '/../models/OrderModel.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -58,15 +59,26 @@ function prepareReceiptContent($orderId) {
     $totalPaid = $order['total_amount'];
     $points = $order['reward'] ?? 0;
     $discountAmount = $points / 100;
-    $subtotal = $totalPaid + $discountAmount - $taxFee - $shippingFee;
+    $subtotal = 0;
+    foreach ($items as $itm) {
+        $subtotal += $itm['price'] * $itm['order_qty'];
+    }
 
-    $calculations = [
+    date_default_timezone_set('Asia/Kuala_Lumpur');
+    $rawDate = !empty($order['payment_updated_at']) ? $order['payment_updated_at'] : $order['payment_created_at'];
+    $formattedDate = date('d M Y, h:i A', strtotime($rawDate));
+
+    $viewData = [
+        'order' => $order,
+        'items' => $items,
         'shippingFee' => $shippingFee,
         'taxFee' => $taxFee,
         'totalPaid' => $totalPaid,
         'discountAmount' => $discountAmount,
-        'subtotal' => $subtotal
+        'subtotal' => $subtotal,
+        'formattedDate' => $formattedDate 
     ];
+    extract($viewData);
 
     //clean output buffer
     ob_start();

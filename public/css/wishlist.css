@@ -1,0 +1,466 @@
+.wishlist-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.select-all-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+}
+
+.select-all-wrapper input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #fc84a3;
+  cursor: pointer;
+}
+
+.btn-batch-delete {
+  background-color: #e0e0e0;
+  color: #999;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-batch-delete.active {
+  background-color: #e74c3c;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+}
+
+.btn-batch-delete.active:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+}
+.wishlist-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.wishlist-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.2s ease;
+  height: 140px;
+}
+
+.wishlist-card:hover {
+  border-color: #fc84a3;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.card-checkbox-wrapper {
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #fcfcfc;
+  border-right: 1px solid #f0f0f0;
+}
+
+.wishlist-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: #fc84a3;
+  cursor: pointer;
+}
+
+.wishlist-img-wrapper {
+  width: 140px;
+  height: 100%;
+  flex-shrink: 0;
+  position: relative;
+  background-color: #fff;
+}
+
+.wishlist-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sold-out-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+}
+
+.wishlist-details {
+  flex: 1;
+  padding: 15px 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.wishlist-details h4 {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.variant-name {
+  font-size: 0.9rem;
+  color: #888;
+  margin: 0 0 10px 0;
+}
+
+.price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fc84a3;
+}
+
+.wishlist-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  padding-left: 0;
+  min-width: 140px;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.btn-view {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100%;
+  background: #333;
+  color: #fff;
+  padding: 8px 0;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: 0.2s;
+  height: 36px;
+  line-height: normal;
+}
+
+.btn-view:hover {
+  background: #fc84a3;
+}
+
+.btn-view.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-remove {
+  background: transparent;
+  border: 1px solid #eee;
+  color: #999;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 15px;
+  border-radius: 6px;
+  width: 100%;
+  transition: 0.2s;
+}
+
+.btn-remove:hover {
+  background-color: #fff5f5;
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.empty-wishlist {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  background: #fff;
+  border: 1px dashed #ddd;
+  border-radius: 12px;
+  height: 300px;
+}
+.empty-wishlist i {
+  font-size: 3rem;
+  color: #eee;
+  margin-bottom: 15px;
+}
+.empty-wishlist p {
+  color: #777;
+  margin-bottom: 20px;
+}
+
+.btn-shop {
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  line-height: 1 !important;
+  background: #fc84a3;
+  color: white !important;
+  border-radius: 50px;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 1rem;
+  min-width: 160px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+}
+.btn-shop:hover {
+  background: #f06b90;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(252, 132, 163, 0.3);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease-out;
+}
+
+.modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  transform: scale(0.95);
+  transition: all 0.2s ease-out;
+  font-family: "Poppins", sans-serif;
+}
+
+.modal-overlay.show .modal-content {
+  transform: scale(1);
+}
+
+.modal-icon.warning {
+  font-size: 3.5rem;
+  color: #ffcc00;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.modal-title {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.modal-text {
+  color: #555;
+  margin-bottom: 30px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.modal-text b {
+  color: #333;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.modal-actions button {
+  padding: 12px 0;
+  width: 140px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background-color: #f2f2f2;
+  color: #333;
+}
+.cancel-btn:hover {
+  background-color: #e6e6e6;
+}
+
+.confirm-delete-btn {
+  background-color: #dc3545;
+  color: white;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+.confirm-delete-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+}
+
+.toast-notification {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 9999;
+  animation: slideIn 0.3s ease;
+  border-left: 5px solid #ccc;
+  min-width: 300px;
+}
+
+.toast-success {
+  border-left-color: #2ecc71;
+}
+.toast-success i {
+  color: #2ecc71;
+}
+
+.toast-error {
+  border-left-color: #e74c3c;
+}
+.toast-error i {
+  color: #e74c3c;
+}
+
+.toast-warning {
+  border-left-color: #f1c40f;
+}
+.toast-warning i {
+  color: #f1c40f;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+.toast-message {
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.toast-icon {
+  font-size: 1.2rem;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .wishlist-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn-batch-delete {
+    width: 100%;
+    justify-content: center;
+  }
+  .wishlist-card {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px;
+    align-items: flex-start;
+  }
+  .card-checkbox-wrapper {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: transparent;
+    border: none;
+    z-index: 10;
+    padding: 0;
+  }
+  .wishlist-img-wrapper {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 10px;
+  }
+  .wishlist-actions {
+    flex-direction: row;
+    width: 100%;
+    padding: 10px 0 0 0;
+  }
+  .btn-view,
+  .btn-remove {
+    flex: 1;
+    justify-content: center;
+  }
+}

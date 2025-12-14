@@ -1,3 +1,21 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+	session_start();
+}
+
+require_once __DIR__ . '/../models/CartModel.php';
+
+$cartCount = 0;
+$cartModel = new CartModel();
+
+if (isset($_SESSION['customerId'])) {
+	$cid = $_SESSION['customerId'];
+	$cartCount = $cartModel->getCartCount($cid);
+} elseif (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
+	$cartCount = array_sum($_SESSION['cart']);
+}
+?>
+
 <!DOCTYPE html>
 <html>
 
@@ -52,15 +70,15 @@
 					</form>
 
 					<li>
-						<a href="#" class="cart-link">
-							<span class="cart-count">0</span>
+						<a href="/app/views/shoppingCart/cart.php" class="cart-link">
+							<span class="cart-count" id="globalCartCount"><?php echo $cartCount; ?></span>
 							<svg class="cart-icon" viewBox="0 0 24 24" width="24" height="24">
 								<path fill="currentColor" d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z" />
 							</svg>
 						</a>
 					</li>
 					<li>
-						<a href="/app/views/userProfile/profile.php" class="cart-link">
+						<a href="../userProfile/profile.php" class="cart-link">
 							<svg class="cart-icon" viewBox="0 0 640 640" width="24" height="24">
 								<path fill="currentColor" d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z" />
 							</svg>

@@ -1,27 +1,35 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/../../controllers/productController.php';
 require_once __DIR__ . '/../../helpers/html.php';
 require_once __DIR__ . '/../../helpers/request.php';
 require_once __DIR__ . '/../../helpers/validation.php';
 
+$id = get('id', 'P00001');
+
+$controller = new productController();
+$product = $controller->getProductDetails($id);
+
+if (!$product) {
+    $product = null; 
+}
+
 $title = $product['product_name'] ?? "Product Details";
 $pageCSS = "product_details.css";
 
-include './header.php';
+include '../header.php'; 
 
-// Constants for photo path
-define('IMG_BASE_URL', '/public/');
+// Constants
 define('DEFAULT_IMG', 'https://via.placeholder.com/600x600/text=No+Image');
-define('REVIEW_IMG_BASE_URL', '/public/images/');
 
-// Image Path
-function getImgPath($dbPath)
-{
-    if (empty($dbPath)) return DEFAULT_IMG;
-    if (str_starts_with($dbPath, 'http')) return $dbPath;
-    return IMG_BASE_URL . $dbPath;
-}
-
-// Renders Star
+// --- UI Helper Functions (Render Stars) ---
 function renderStars($rating)
 {
     $starsHtml = '<span class="star-rating" style="color:#f0ad4e; font-size:0.9rem;">';
@@ -35,7 +43,7 @@ function renderStars($rating)
     return $starsHtml;
 }
 
-// Get Variant Photo
+// Find Variant Image
 $galleryImages = $product['gallery'] ?? [];
 function findVariantImage($vid, $gallery)
 {
@@ -44,61 +52,30 @@ function findVariantImage($vid, $gallery)
         $pUrl = is_object($photo) ? $photo->img_url : $photo['img_url'];
 
         if ($pVid == $vid) {
-            return getImgPath($pUrl);
+            return $pUrl;
         }
     }
     return null;
 }
 
-// Get default main photo
-$mainImageUrl = !empty($product['img_url']) ? getImgPath($product['img_url']) : DEFAULT_IMG;
+// Get default main photo 
+$mainImageUrl = !empty($product['img_url']) ? $product['img_url'] : DEFAULT_IMG;
 
 // --- Toast Message ---
 $toastMsg = '';
 $toastType = '';
 $toastIcon = '';
 
-if (isset($_SESSION['flash_error']) && !empty($_SESSION['flash_error'])) {
-    $toastMsg = $_SESSION['flash_error'];
-    $toastType = 'error';
-    $toastIcon = 'fa-times-circle';
-    unset($_SESSION['flash_error']);
-} elseif (isset($_SESSION['flash_warning']) && !empty($_SESSION['flash_warning'])) {
-    $toastMsg = $_SESSION['flash_warning'];
-    $toastType = 'warning';
-    $toastIcon = 'fa-exclamation-triangle';
-    unset($_SESSION['flash_warning']);
-} elseif (isset($_SESSION['flash_success']) && !empty($_SESSION['flash_success'])) {
-    $toastMsg = $_SESSION['flash_success'];
-    $toastType = 'success';
-    $toastIcon = 'fa-check-circle';
-    unset($_SESSION['flash_success']);
+if ($msg = temp('flash_error')) {
+    $toastMsg = $msg; $toastType = 'error'; $toastIcon = 'fa-times-circle';
+} elseif ($msg = temp('flash_warning')) {
+    $toastMsg = $msg; $toastType = 'warning'; $toastIcon = 'fa-exclamation-triangle';
+} elseif ($msg = temp('flash_success')) {
+    $toastMsg = $msg; $toastType = 'success'; $toastIcon = 'fa-check-circle';
 }
 
-// Variant Logic
-$selectedVid = $_SESSION['keep_variant_id'] ?? null;
-unset($_SESSION['keep_variant_id']);
-
-$currentVariant = !empty($product['variants']) ? $product['variants'][0] : null;
-
-if ($selectedVid && !empty($product['variants'])) {
-    foreach ($product['variants'] as $v) {
-        if ($v['product_variant_id'] == $selectedVid) {
-            $currentVariant = $v;
-            break;
-        }
-    }
-}
-
-$currVid = $currentVariant ? $currentVariant['product_variant_id'] : '';
-$currStock = $currentVariant ? $currentVariant['stock_qty'] : 0;
-$currStatus = $currentVariant ? $currentVariant['stock_status'] : 'Out of Stock';
-
-$variantImgFound = findVariantImage($currVid, $galleryImages);
-$currImg = $variantImgFound ? $variantImgFound : $mainImageUrl;
-// Variant Logic
-$selectedVid = $_SESSION['keep_variant_id'] ?? null;
-unset($_SESSION['keep_variant_id']);
+// --- Variant Logic ---
+$selectedVid = temp('keep_variant_id');
 
 $currentVariant = !empty($product['variants']) ? $product['variants'][0] : null;
 
@@ -124,6 +101,7 @@ if ($selectedVid && $variantImgFound) {
 }
 
 $realAvailable = $currStock;
+$isWishlisted = $product['is_wishlisted'] ?? false; 
 ?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -140,13 +118,12 @@ $realAvailable = $currStock;
             <div class="thumbnail-slider-container">
                 <?php
                 if (empty($galleryImages) && !empty($product['img_url'])) {
-                    $singleUrl = getImgPath($product['img_url']);
+                    $singleUrl = $product['img_url'];
                     echo '<img src="' . encode($singleUrl) . '" class="thumbnail active" onclick="changeMainImage(\'' . encode($singleUrl) . '\', this)">';
                 }
 
                 foreach ($galleryImages as $index => $photo):
-                    $rawUrl = is_object($photo) ? $photo->img_url : $photo['img_url'];
-                    $pUrl = getImgPath($rawUrl);
+                    $pUrl = is_object($photo) ? $photo->img_url : $photo['img_url'];
                 ?>
                     <img src="<?= encode($pUrl) ?>"
                         class="thumbnail <?= ($pUrl === $currImg) ? 'active' : '' ?>"
@@ -175,6 +152,7 @@ $realAvailable = $currStock;
                             $isOOS = $variant['stock_qty'] <= 0;
                             $isActive = ($variant['product_variant_id'] == $currVid);
                             $badgeClass = ($isActive ? 'active-variant ' : '') . ($isOOS ? 'out-of-stock-variant' : '');
+                            
                             $vImgUrl = findVariantImage($variant['product_variant_id'], $galleryImages);
                             $vImgUrlStr = $vImgUrl ? encode($vImgUrl) : '';
                             ?>
@@ -195,7 +173,7 @@ $realAvailable = $currStock;
                 </div>
             </div>
 
-            <form class="purchase-form" action="../controllers/cart_router.php?action=add" method="POST">
+            <form class="purchase-form" action="../../controllers/cart_router.php?action=add" method="POST">
                 <?php
                 $GLOBALS['product_variant_id'] = $currVid;
                 html_hidden('product_variant_id');
@@ -217,19 +195,15 @@ $realAvailable = $currStock;
 
                         <?php
                         $maxQty = ($realAvailable > 0) ? $realAvailable : 0;
-                        $disabled = ($realAvailable <= 0) ? 'disabled' : '';
+                        $isDisabledStr = ($realAvailable <= 0) ? 'disabled' : '';
 
                         $GLOBALS['quantity'] = ($realAvailable > 0) ? 1 : 0;
 
-                        html_number(
-                            'quantity',
-                            '0',
-                            $maxQty,
-                            '1',
-                            "onchange='validateQuantity()' 
-                             onkeydown=\"if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }\" 
-                             $disabled"
-                        );
+                        $qtyAttrs = "onchange='validateQuantity()' 
+                                     onkeydown=\"if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }\" 
+                                     $isDisabledStr";
+
+                        html_number('quantity', '0', $maxQty, '1', $qtyAttrs);
                         ?>
 
                         <button type="button" onclick="increaseQuantity()">+</button>
@@ -239,8 +213,8 @@ $realAvailable = $currStock;
                         <i class="fas fa-shopping-bag"></i> ADD TO CART
                     </button>
 
-                    <button type="button" class="wishlist-btn" onclick="toggleWishlist(this)">
-                        <i class="far fa-heart"></i>
+                    <button type="button" class="wishlist-btn <?= $isWishlisted ? 'active' : '' ?>" onclick="toggleWishlist(this)">
+                        <i class="<?= $isWishlisted ? 'fas' : 'far' ?> fa-heart"></i>
                     </button>
                 </div>
             </form>
@@ -268,23 +242,14 @@ $realAvailable = $currStock;
 
             <div class="review-list">
                 <?php foreach ($product['reviews'] as $review):
-                    $r_name = is_object($review) ? $review->customer_name : $review['customer_name'];
-                    $r_rating = is_object($review) ? $review->rating : $review['rating'];
-                    $r_desc = is_object($review) ? $review->description : $review['description'];
-                    $r_date = is_object($review) ? $review->created_at : $review['created_at'];
-                    $r_variant = is_object($review) ? ($review->variant_name ?? null) : ($review['variant_name'] ?? null);
-                    $r_photos = is_object($review) ? ($review->photos ?? []) : ($review['photos'] ?? []);
-
-                    $photoUrls = [];
-                    foreach ($r_photos as $rp) {
-                        $rawUrl = is_object($rp) ? $rp->img_url : $rp['img_url'];
-
-                        if (str_starts_with($rawUrl, 'http')) {
-                            $photoUrls[] = $rawUrl;
-                        } else {
-                            $photoUrls[] = REVIEW_IMG_BASE_URL . $rawUrl;
-                        }
-                    }
+                    $review = is_object($review) ? (array)$review : $review;
+                    $r_name = $review['customer_name'] ?? 'Anonymous';
+                    $r_rating = $review['rating'] ?? 5;
+                    $r_desc = $review['description'] ?? '';
+                    $r_date = $review['created_at'] ?? '';
+                    $r_variant = $review['variant_name'] ?? '';
+                    
+                    $photoUrls = $review['processed_photos'] ?? [];
                     $photosJson = htmlspecialchars(json_encode($photoUrls), ENT_QUOTES, 'UTF-8');
                 ?>
                     <div class="review-item">
@@ -308,8 +273,8 @@ $realAvailable = $currStock;
                                 <div class="review-photos">
                                     <?php foreach ($photoUrls as $idx => $pUrl): ?>
                                         <img src="<?= encode($pUrl) ?>"
-                                            class="review-photo"
-                                            onclick="openReviewGallery(<?= $idx ?>, <?= $photosJson ?>)">
+                                             class="review-photo"
+                                             onclick="openReviewGallery(<?= $idx ?>, <?= $photosJson ?>)">
                                     <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
@@ -348,8 +313,7 @@ $realAvailable = $currStock;
         <h2>More Options</h2>
         <div class="related-product-grid related-grid">
             <?php foreach ($product['related_products'] as $related):
-                $rawUrl = !empty($related['img_url']) ? $related['img_url'] : '';
-                $rImg = getImgPath($rawUrl);
+                $rImg = !empty($related['img_url']) ? $related['img_url'] : DEFAULT_IMG;
             ?>
                 <a href="?id=<?= $related['product_id'] ?>" class="product-card">
                     <div class="product-card-img-wrapper">
@@ -376,7 +340,9 @@ $realAvailable = $currStock;
 <?php endif; ?>
 
 <script>
-    // --- Toast Notification ---
+    const WISHLIST_API_URL = '/app/controllers/wishlist_router.php';
+    
+    // Toast Auto Hide
     document.addEventListener("DOMContentLoaded", function() {
         const toast = document.getElementById('toast-notification');
         if (toast) {
@@ -388,7 +354,7 @@ $realAvailable = $currStock;
         }
     });
 
-    // --- Review Lightbox Logic --- 
+    // Review Lightbox Logic
     let currentReviewPhotos = [];
     let currentPhotoIndex = 0;
 
@@ -438,7 +404,7 @@ $realAvailable = $currStock;
         }
     });
 
-    // --- Auto Slide & Image Navigation ---
+    // Auto Slide & Image Navigation
     let slideInterval;
     let currentIndex = 0;
     const intervalTime = 3000;
@@ -583,15 +549,79 @@ $realAvailable = $currStock;
         }
     }
 
+    // Dynamically Show Toast
+    function showToast(message, type = 'success') {
+        const oldToast = document.getElementById('js-toast');
+        if(oldToast) oldToast.remove();
+
+        const div = document.createElement('div');
+        div.id = 'js-toast';
+        div.className = `toast-notification toast-${type}`;
+        
+        let iconClass = 'fa-check-circle';
+        if (type === 'error') iconClass = 'fa-times-circle';
+        if (type === 'warning') iconClass = 'fa-exclamation-triangle';
+
+        div.innerHTML = `
+            <div class="toast-content">
+                <i class="fas ${iconClass} toast-icon"></i>
+                <span class="toast-message">${message}</span>
+            </div>
+            <div class="toast-progress"></div>
+        `;
+
+        document.body.appendChild(div);
+
+        setTimeout(() => {
+            div.style.opacity = '0';
+            div.style.transform = 'translateY(-20px)';
+            setTimeout(() => div.remove(), 500);
+        }, 4000);
+    }
+
+    // Wishlist Functionality
     function toggleWishlist(btn) {
-        btn.classList.toggle('active');
-        const icon = btn.querySelector('i');
-        if (btn.classList.contains('active')) {
-            icon.className = 'fas fa-heart';
-        } else {
-            icon.className = 'far fa-heart';
+        const variantId = document.getElementById('product_variant_id').value;
+        
+        if (!variantId) {
+            showToast('Please select a variant first.', 'warning');
+            return;
         }
+
+        const formData = new URLSearchParams();
+        formData.append('product_variant_id', variantId);
+
+        fetch(WISHLIST_API_URL + '?action=toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const icon = btn.querySelector('i');
+                if (data.status === 'added') {
+                    btn.classList.add('active');
+                    icon.className = 'fas fa-heart';
+                    showToast(data.message, 'success');
+                } else {
+                    btn.classList.remove('active');
+                    icon.className = 'far fa-heart';
+                    showToast(data.message, 'success');
+                }
+            } else {
+                if (data.code === 'LOGIN_REQUIRED') {
+                    window.location.href = '/app/views/security/signIn.php';
+                } else {
+                    showToast(data.message, 'error');
+                }
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('Something went wrong.', 'error');
+        });
     }
 </script>
 
-<?php include './footer.php' ?>
+<?php include '../footer.php' ?>
