@@ -6,6 +6,17 @@ $controller = new CheckoutController();
 $data = $controller->getCheckoutData();
 extract($data);
 
+$toastMsg = '';
+$toastType = '';
+
+if ($msg = temp('flash_error')) {
+    $toastMsg = $msg; $toastType = 'error';
+} elseif ($msg = temp('flash_warning')) {
+    $toastMsg = $msg; $toastType = 'warning';
+} elseif ($msg = temp('flash_success')) {
+    $toastMsg = $msg; $toastType = 'success';
+}
+
 $currentUser = $customer_info;
 $checkoutItems = $items;
 $initialAddressId = $currentUser['address_id'] ?? '';
@@ -288,7 +299,20 @@ $fullApiUrl = $protocol . $host . $apiPath;
         </div>
     </div>
 </div>
-
+<?php if ($toastMsg): ?>
+    <div id="toast-notification" class="toast-notification toast-<?= $toastType ?>">
+        <div class="toast-content">
+            <i class="fas <?= ($toastType=='success'?'fa-check-circle': ($toastType=='error'?'fa-times-circle':'fa-exclamation-triangle')) ?> toast-icon"></i>
+            <span class="toast-message"><?= encode($toastMsg) ?></span>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => {
+            const t = document.getElementById('toast-notification');
+            if(t) { t.style.opacity='0'; setTimeout(()=>t.remove(), 500); }
+        }, 4000);
+    </script>
+<?php endif; ?>
 <script>
     const BASE_ADDRESS_API_URL = '<?= $fullApiUrl ?>';
     let currentSelectedAddressId = '<?= $initialAddressId ?>';
