@@ -66,10 +66,10 @@ function root($path = '')
 {
     return "$_SERVER[DOCUMENT_ROOT]/$path";
 }
-function base($path = '')
-{
-    return "http://$_SERVER[SERVER_NAME]:$_SERVER[SERVER_PORT]/$path";
+function base($path = '') {
+    return "http://$_SERVER[HTTP_HOST]/$path";
 }
+
 
 function array_all($arr, $fn)
 {

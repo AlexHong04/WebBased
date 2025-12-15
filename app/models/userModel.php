@@ -1,5 +1,5 @@
 <?php
-include __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/database.php';
 class userModel
 {
     private $db;
@@ -9,12 +9,144 @@ class userModel
         $this->db = new Database();
     }
 
-
-    public function getUser($email, $password)
+    public function getCustomerDetails($customerId)
     {
-        $this->db->query("SELECT customer_id,email,password FROM customer WHERE email = :email");
+        $sql = "SELECT customer_id, 
+                       CONCAT(firstname, ' ', lastname) AS username, 
+                       email, 
+                       phone,
+                       rewardPoint
+                FROM customer 
+                WHERE customer_id = ?";
+
+        $this->db->query($sql);
+        $this->db->bind(1, $customerId);
+
+        return $this->db->result();
+    }
+
+    // get all user
+    public function getAllUsers()
+    {
+        $this->db->query("SELECT * FROM customer");
+        return $this->db->resultAll();
+    }
+
+    // get user by id
+    public function getUserById($id)
+    {
+        $this->db->query("SELECT cu.firstName,cu.lastName,cu.email,cu.gender,cu.phone, ad.street_line,ad.city,ad.state, ad.postcode FROM customer cu LEFT JOIN address ad ON cu.customer_id = ad.customer_id WHERE cu.customer_id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->result();
+    }
+
+    // create new user
+    public function createUser($firstName, $lastName, $email, $gender, $password)
+    {
+        $customerId = $this->db->generateId('customer', 'customer_id', 'CU');
+
+        $this->db->query("INSERT INTO customer (customer_id,firstName,lastName,email,gender,password,created_at,isActive) VALUES (:customer_id, :firstName, :lastName, :email, :gender, :password, NOW(), 0)");
+        $this->db->bind(':customer_id', $customerId);
+        $this->db->bind(':firstName', $firstName);
+        $this->db->bind(':lastName', $lastName);
+        $this->db->bind(':email', $email);
+        $this->db->bind(':gender', $gender);
+        $this->db->bind(':password', $password);
+        return $this->db->execute();
+    }
+
+    public function getUser($email)
+    {
+        $this->db->query("SELECT customer_id,email,password,isActive FROM customer WHERE email = :email");
         $this->db->bind(':email', $email);
         // $this->db->bind(':password', $password);
         return $this->db->result();
+    }
+
+    public function updateUser($firstName, $lastName, $phone, $email, $id, $street_line, $city, $state, $postcode)
+    {
+        $this->db->query("UPDATE customer SET firstName=:firstName, lastName=:lastName,phone=:phone,email=:email,updated_at=NOW() WHERE customer_id=:id");
+        $this->db->bind(':firstName', $firstName);
+        $this->db->bind(':lastName', $lastName);
+        $this->db->bind(':phone', $phone);
+        $this->db->bind(':email', $email);
+        $this->db->bind(':id', $id);
+        if (!$this->db->execute()) {
+            return false;
+        }
+
+        // update / insert address table
+        if (!empty($street_line) || !empty($city) || !empty($state) || !empty($postcode)) {
+            $this->db->query("SELECT customer_id FROM address WHERE customer_id=:id");
+            $this->db->bind(':id', $id);
+            $existingAddress = $this->db->result();
+
+            if ($existingAddress) {
+                $this->db->query("UPDATE address SET recipient_name=:recipient_name,recipient_phone=:recipient_phone, street_line=:street_line, city=:city, state=:state, postcode=:postcode, is_default=:is_default WHERE customer_id=:cid");
+            } else {
+                $address_id = $this->db->generateId('address', 'address_id', 'AD');
+                $this->db->query("INSERT INTO address (address_id,customer_id,recipient_name,recipient_phone, street_line, city, state, postcode, is_default) VALUES (:aid,:cid ,:recipient_name, :recipient_phone, :street_line, :city, :state, :postcode, :is_default)");
+                $this->db->bind(':aid', $address_id);
+            }
+            $this->db->bind(':recipient_name', $firstName . ' ' . $lastName);
+            $this->db->bind(':recipient_phone', $phone);
+            $this->db->bind(':street_line', $street_line);
+            $this->db->bind(':city', $city);
+            $this->db->bind(':state', $state);
+            $this->db->bind(':postcode', $postcode);
+            $this->db->bind(':cid', $id);
+            $this->db->bind(':is_default', 1);
+            return $this->db->execute();
+        }
+        return true;
+    }
+
+    public function updateUserIsActive($email)
+    {
+        $this->db->query("UPDATE customer SET isActive = 1 WHERE email = :email");
+        $this->db->bind(':email', $email);
+        return $this->db->execute();
+    }
+
+    public function deleteUser($id)
+    {
+        $this->db->query("DELETE FROM customer WHERE customer_id=:id");
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    public function changePassword($id, $newPassword)
+    {
+        $this->db->query("UPDATE customer SET password = :password WHERE customer_id = :id");
+        $this->db->bind(':password', $newPassword);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    public function getUserCurrentPassword($id)
+    {
+        $this->db->query("SELECT password FROM customer WHERE customer_id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->result();
+    }
+
+    // home
+    public function getTopSalesData()
+    {
+        $this->db->query("SELECT 
+    p.product_id,
+    p.product_name,
+    p.sale_price,
+    p.rate,
+    SUM(oi.order_qty) AS total_units_sold,
+    SUM(oi.order_qty * oi.price) AS total_revenue
+    FROM Product p JOIN Product_Variant pv ON p.product_id = pv.product_id
+    JOIN order_Items oi ON pv.product_variant_id = oi.product_variant_id
+    JOIN `ordertable` o ON oi.order_id = o.order_id
+    WHERE o.order_status = 'Completed'
+    GROUP BY p.product_id, p.product_name, p.sale_price, p.rate
+    ORDER BY total_units_sold DESC
+    LIMIT 3; ");
+        return $this->db->resultAll();
     }
 }

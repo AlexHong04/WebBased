@@ -52,49 +52,61 @@
   line-height: 1.1;
 }
 
-/* ===== Input Fields (Bigger & Taller) ===== */
+/* ===== Input Fields ===== */
 .input-box {
-  position: relative;
-  margin-top: 20px; /* More space between inputs */
+  margin-top: 25px;
 }
 
 .field-label {
   display: block;
-  margin-bottom: 12px;
-  font-size: 1.05rem;
+  margin-bottom: 10px;
+  font-size: 1rem;
   font-weight: 600;
-  color: #333;
-  padding-left: 4px;
+  color: #666;
+  margin-left: 5px;
 }
 
-/* The Input Field Itself */
-.input-box .input-field {
-  width: 100%; 
-  padding: 0.8rem 1rem; /* Padding: Top/Right/Bottom/Left */
-  font-size: 1rem; /* Larger typing text */
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-field {
+  width: 100%;
+  height: 55px;
+  padding: 10px 15px 10px 50px;
+  font-size: 1rem;
   border-radius: 16px;
-  border: 1px solid var(--light-gray);
-  background: transparent;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
   box-sizing: border-box;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  font-family: inherit;
 }
 
-.input-box .input-field:focus {
+.input-field:focus {
   outline: none;
-  border-color: var(--primary);/* Highlights nicely on focus */
-  
+  background: #fff;
+  border-color: #d88a98;
+  box-shadow: 0 4px 12px rgba(216, 138, 152, 0.15);
 }
 
-/* Icons positioning */
-.input-box i {
+/* 图标定位 */
+.input-icon {
   position: absolute;
-  top: 50px; 
+  top: 50%;
+  transform: translateY(-50%);
   left: 18px;
-  font-size: 1.5rem; /* Larger Icon */
-  opacity: 0.6;
+
+  color: #999;
   pointer-events: none;
+  transition: color 0.3s ease;
 }
 
+.input-field:focus + .input-icon {
+  color: #d88a98;
+}
 /* ===== Checkbox & Links ===== */
 .two-col {
   display: flex;
@@ -117,14 +129,16 @@
   cursor: pointer;
 }
 
-.forgetPassword, .signup {
+.forgetPassword,
+.signup {
   font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
   color: var(--primary-dark);
 }
 
-.forgetPassword:hover, .signup:hover {
+.forgetPassword:hover,
+.signup:hover {
   text-decoration: underline;
 }
 
@@ -181,7 +195,7 @@
     max-width: 600px;
     min-height: auto;
   }
-  
+
   .form-box.split {
     flex-direction: column;
   }

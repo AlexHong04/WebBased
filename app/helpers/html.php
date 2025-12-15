@@ -1,10 +1,5 @@
 <?php
 
-// Placeholder for TODO
-function TODO()
-{
-    echo '<span>TODO</span>';
-}
 
 // Encode HTML special characters
 function encode($value)
@@ -20,7 +15,7 @@ function html_hidden($key, $attr = '')
 }
 
 // Generate <input type='text'>
-function html_text($key, $attr = '' ,$value=null)
+function html_text($key, $attr = '', $value = null)
 {
     $finalValue = $value ?? $GLOBALS[$key] ?? '';
     $safeValue = encode($finalValue);
@@ -65,10 +60,11 @@ function html_time($key, $attr = '')
 }
 
 // Generate <textarea>
-function html_textarea($key, $attr = '')
+function html_textarea($key, $attr = '',$value = null)
 {
-    $value = encode($GLOBALS[$key] ?? '');
-    echo "<textarea id='$key' name='$key' $attr>$value</textarea>";
+    $finalValue = $value ?? $GLOBALS[$key] ?? '';
+    $safeValue = encode($finalValue);
+    echo "<textarea id='$key' name='$key' $attr>$safeValue</textarea>";
 }
 
 // Generate SINGLE <input type='checkbox'>
@@ -147,5 +143,201 @@ function table_headers($fields, $sort, $dir, $href = '')
         echo "<th><a href='?sort=$k&dir=$d&$href' class='$c'>$v</a></th>";
     }
 }
+function showToast()
+{
+    // Check which session key is set
+    $type = null;
+    $msg = '';
 
+    if (isset($_SESSION['flash_error']) && !empty($_SESSION['flash_error'])) {
+        $type = 'error';
+        $msg = $_SESSION['flash_error'];
+        unset($_SESSION['flash_error']);
+    } elseif (isset($_SESSION['flash_warning']) && !empty($_SESSION['flash_warning'])) {
+        $type = 'warning';
+        $msg = $_SESSION['flash_warning'];
+        unset($_SESSION['flash_warning']);
+    } elseif (isset($_SESSION['flash_success']) && !empty($_SESSION['flash_success'])) {
+        $type = 'success';
+        $msg = $_SESSION['flash_success'];
+        unset($_SESSION['flash_success']);
+    }
 
+    // Return early if no message
+    if (!$type) return;
+
+    // Configuration for icons (using generic UTF-8 symbols)
+    $config = [
+        'error'   => ['icon' => '&#10006;', 'title' => 'Error'],
+        'warning' => ['icon' => '&#9888;',  'title' => 'Warning'],
+        'success' => ['icon' => '&#10004;', 'title' => 'Success'],
+    ];
+
+    // Handle array messages
+    $toastText = is_array($msg) ? implode('<br>', $msg) : $msg;
+
+    // Output HTML
+?>
+    <style>
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+            /* Keeps progress bar inside corners */
+            z-index: 9999;
+            min-width: 300px;
+            max-width: 400px;
+
+            /* Entrance Animation */
+            animation: slideIn 0.5s ease-out forwards;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        /* Flex container for the content */
+        .toast-notification .toast-body {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            color: #333;
+            gap: 12px;
+        }
+
+        /* Color Themes */
+        .toast-error .toast-icon {
+            color: #e74c3c;
+        }
+
+        .toast-error .toast-progress {
+            background-color: #e74c3c;
+        }
+
+        .toast-warning .toast-icon {
+            color: #f39c12;
+        }
+
+        .toast-warning .toast-progress {
+            background-color: #f39c12;
+        }
+
+        .toast-success .toast-icon {
+            color: #2ecc71;
+        }
+
+        .toast-success .toast-progress {
+            background-color: #2ecc71;
+        }
+
+        /* Icon Styling */
+        .toast-icon {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        /* Text Styling */
+        .toast-text {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .toast-message {
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Close Button */
+        .toast-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 10px;
+            line-height: 1;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        /* Progress Bar - Absolutely positioned at bottom */
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 100%;
+            animation: progress 5s linear forwards;
+        }
+
+        /* Hiding State (Added via JS) */
+        .toast-notification.hide {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes progress {
+            from {
+                width: 100%;
+            }
+
+            to {
+                width: 0;
+            }
+        }
+    </style>
+    <div id="toast-notification" class="toast-notification toast-<?php echo $type; ?>">
+        <div class="toast-body">
+            <span class="toast-icon"><?php echo $config[$type]['icon']; ?></span>
+            <div class="toast-text">
+                <span class="toast-title"><?php echo $config[$type]['title']; ?></span>
+                <span class="toast-message"><?php echo $toastText; ?></span>
+            </div>
+            <button class="toast-close" onclick="closeToast()">&times;</button>
+        </div>
+        <div class="toast-progress"></div>
+    </div>
+
+    <script>
+        // Auto-initialize the logic
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                closeToast();
+            }, 5000); // 5 seconds (must match CSS animation time)
+        });
+
+        function closeToast() {
+            const toast = document.getElementById('toast-notification');
+            if (toast) {
+                toast.classList.add('hide'); // Trigger fade out
+                setTimeout(() => toast.remove(), 500); // Remove from DOM after fade out
+            }
+        }
+    </script>
+<?php
+}
