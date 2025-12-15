@@ -48,12 +48,18 @@ class AddressController {
         if (!is_post()) $this->sendResponse(false, "Invalid Method.");
 
         $id = post('address_id');
-        $name = post('name');
-        $phone = post('phone');
+        $name = post('ReceiverName');
+        $phone = post('phoneNumber');
         $street = post('street_line');
-        $city = post('city');
-        $state = post('state');
-        $postcode = post('postcode');
+        $city = post('City');
+        $state = post('State');
+        $postcode = post('postCode');
+        // $name = post('name');
+        // $phone = post('phone');
+        // $street = post('street_line');
+        // $city = post('city');
+        // $state = post('state');
+        // $postcode = post('postcode');
 
         if (empty($name) || empty($phone) || empty($street) || empty($city) || empty($state) || empty($postcode)) {
             $this->sendResponse(false, "All fields are required.");
