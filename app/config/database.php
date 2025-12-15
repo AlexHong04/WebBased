@@ -58,6 +58,11 @@ class Database
         $this->execute();
         return $this->stmt->fetch(PDO::FETCH_ASSOC);
     }
+    public function single()
+    {
+        $this->execute();
+        return $this->stmt->fetchColumn();
+    }
 
     // Binds a value to a named SQL parameter (prevents SQL injection).
     public function bind($param, $value)
