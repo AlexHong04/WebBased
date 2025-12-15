@@ -14,6 +14,7 @@ function html_hidden($key, $attr = '')
     echo "<input type='hidden' id='$key' name='$key' value='$value' $attr>";
 }
 
+
 // Generate <input type='text'>
 function html_text($key, $attr = '', $value = null)
 {
@@ -30,10 +31,11 @@ function html_password($key, $attr = '')
 }
 
 // Generate <input type='number'>
-function html_number($key, $min = '', $max = '', $step = '', $attr = '')
+function html_number($key, $min = '', $max = '', $step = '', $attr = '', $current_value = '')
 {
-    $value = encode($GLOBALS[$key] ?? '');
-    echo "<input type='number' id='$key' name='$key' value='$value'
+    $display_value = $current_value !== '' ? $current_value : ($GLOBALS[$key] ?? '');
+    $encoded_value = htmlspecialchars($display_value);
+    echo "<input type='number' id='$key' name='$key' value='$encoded_value' 
                  min='$min' max='$max' step='$step' $attr>";
 }
 
@@ -108,17 +110,22 @@ function html_radios($key, $items, $br = false)
 }
 
 // Generate <select>
-function html_select($key, $items, $default = '- Select One -', $attr = '')
+function html_select($key, $items, $default = '- Select One -', $current_value = null, $attr = '')
 {
-    $value = encode($GLOBALS[$key] ?? '');
+    $display_value = $current_value ?? ($GLOBALS[$key] ?? '');
+    $encoded_value = encode($display_value);
+
     echo "<select id='$key' name='$key' $attr>";
+
     if ($default !== null) {
         echo "<option value=''>$default</option>";
     }
+
     foreach ($items as $id => $text) {
-        $state = $id == $value ? 'selected' : '';
+        $state = (string)$id === (string)$encoded_value ? 'selected' : '';
         echo "<option value='$id' $state>$text</option>";
     }
+
     echo '</select>';
 }
 
