@@ -1,0 +1,141 @@
+/*****************************************
+ * ANIMATIONS COLLECTION (Clean & Organized)
+ *****************************************/
+
+/* --- Fade Animations --- */
+
+/* Fade In */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Fade Out */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* --- Fade + Movement Animations --- */
+
+/* Fade In + Move Up */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade Out + Move Down */
+@keyframes fadeOutDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+/*****************************************
+ * Suggested Utility Classes for Usage
+ *****************************************/
+
+/* Fade In on Enter */
+.animate-fadeIn {
+    animation: fadeIn 0.8s ease forwards;
+}
+
+/* Fade Out on Exit */
+.animate-fadeOut {
+    animation: fadeOut 0.8s ease forwards;
+}
+
+/* Enter with upward float */
+.animate-fadeInUp {
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+/* Exit with downward drop */
+.animate-fadeOutDown {
+    animation: fadeOutDown 0.8s ease forwards;
+}
+
+
+:root{
+    --anim-duration: 450ms;
+    --anim-ease: cubic-bezier(.2,.9,.3,1);
+    --card-stagger: 80ms;
+}
+
+/* Page-level entrance */
+main{
+    opacity: 0;
+    transform: translateY(10px);
+    animation: pageFadeIn var(--anim-duration) var(--anim-ease) forwards;
+}
+@keyframes pageFadeIn{
+    to{ opacity:1; transform: translateY(0); }
+}
+
+/* Product card entrance with stagger using nth-child */
+.product-grid .product-card{
+    opacity: 0;
+    transform: translateY(8px);
+    animation: cardFadeUp 520ms var(--anim-ease) forwards;
+}
+@keyframes cardFadeUp{
+    to{ opacity:1; transform: translateY(0); }
+}
+
+/* Stagger delay using nth-child up to 12 items */
+.product-grid .product-card:nth-child(1){ animation-delay: calc(var(--card-stagger) * 1); }
+.product-grid .product-card:nth-child(2){ animation-delay: calc(var(--card-stagger) * 2); }
+.product-grid .product-card:nth-child(3){ animation-delay: calc(var(--card-stagger) * 3); }
+.product-grid .product-card:nth-child(4){ animation-delay: calc(var(--card-stagger) * 4); }
+.product-grid .product-card:nth-child(5){ animation-delay: calc(var(--card-stagger) * 5); }
+.product-grid .product-card:nth-child(6){ animation-delay: calc(var(--card-stagger) * 6); }
+.product-grid .product-card:nth-child(7){ animation-delay: calc(var(--card-stagger) * 7); }
+.product-grid .product-card:nth-child(8){ animation-delay: calc(var(--card-stagger) * 8); }
+.product-grid .product-card:nth-child(9){ animation-delay: calc(var(--card-stagger) * 9); }
+.product-grid .product-card:nth-child(10){ animation-delay: calc(var(--card-stagger) * 10); }
+.product-grid .product-card:nth-child(11){ animation-delay: calc(var(--card-stagger) * 11); }
+.product-grid .product-card:nth-child(12){ animation-delay: calc(var(--card-stagger) * 12); }
+
+/* Subtle fade-in for hero text */
+.hero-content h1, .hero-content p{
+    opacity: 0;
+    transform: translateY(6px);
+    animation: textFadeUp 620ms var(--anim-ease) forwards;
+}
+.hero-content h1{ animation-delay: 120ms; }
+.hero-content p{ animation-delay: 240ms; }
+@keyframes textFadeUp{ to{ opacity:1; transform: translateY(0); } }
+
+/* Buttons/cards small pop */
+.product-actions .quick-add{
+    transform: translateY(4px);
+    opacity: 0;
+    animation: btnPop 520ms var(--anim-ease) forwards;
+}
+.product-grid .product-card:nth-child(1) .product-actions .quick-add{ animation-delay: calc(var(--card-stagger) * 1 + 200ms); }
+.product-grid .product-card:nth-child(2) .product-actions .quick-add{ animation-delay: calc(var(--card-stagger) * 2 + 200ms); }
+.product-grid .product-card:nth-child(3) .product-actions .quick-add{ animation-delay: calc(var(--card-stagger) * 3 + 200ms); }
+
+@keyframes btnPop{ to{ transform: translateY(0); opacity:1; } }
+
+/* Reduce motion support */
+@media (prefers-reduced-motion: reduce){
+    :root{ --anim-duration: 0ms; --card-stagger: 0ms; }
+    main, .product-grid .product-card, .hero-content h1, .hero-content p, .product-actions .quick-add{
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
