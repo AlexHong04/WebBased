@@ -214,12 +214,12 @@ $fullApiUrl = $protocol . $host . $apiPath;
             <input type="hidden" name="address_id" id="addressIdInput">
             <div class="form-group">
                 <label class="form-label">Receiver Name <span style="color:red">*</span></label>
-                <input type="text" name="name" id="nameInput" class="form-control" placeholder="e.g. Adam Lim">
+                <input type="text" name="ReceiverName" id="nameInput" class="form-control" placeholder="e.g. Adam Lim">
                 <small class="error-message" id="nameError"></small>
             </div>
             <div class="form-group">
                 <label class="form-label">Phone Number <span style="color:red">*</span></label>
-                <input type="text" name="phone" id="phoneInput" class="form-control" placeholder="e.g. 012-3456789">
+                <input type="text" name="phoneNumber" id="phoneInput" class="form-control" placeholder="e.g. 012-3456789">
                 <small class="error-message" id="phoneError"></small>
                 <small style="color: #888; font-size: 0.8rem; display:block; margin-top:2px;" id="phoneFormatHint">Format: 011-XXXXXXXX or 01X-XXXXXXX</small>
             </div>
@@ -230,23 +230,24 @@ $fullApiUrl = $protocol . $host . $apiPath;
             </div>
             <div class="form-group">
                 <label class="form-label">Postcode <span style="color:red">*</span></label>
-                <input type="text" name="postcode" id="postcodeInput" class="form-control" placeholder="e.g. 56000" maxlength="5">
+                <input type="text" name="postCode" id="postcodeInput" class="form-control" placeholder="e.g. 56000" maxlength="5">
                 <small class="error-message" id="postcodeError"></small>
             </div>
             <div class="form-group" style="display: flex; gap: 15px;">
                 <div style="flex: 1;">
                     <label class="form-label">City <span style="color:red">*</span></label>
-                    <input type="text" name="city" id="cityInput" class="form-control" placeholder="e.g. Kuala Lumpur">
+                    <input type="text" name="City" id="cityInput" class="form-control" placeholder="e.g. Kuala Lumpur">
                     <small class="error-message" id="cityError"></small>
                 </div>
                 <div style="flex: 1;">
                     <label class="form-label">State <span style="color:red">*</span></label>
-                    <input type="text" name="state" id="stateInput" class="form-control" placeholder="e.g. Selangor">
+                    <input type="text" name="State" id="stateInput" class="form-control" placeholder="e.g. Selangor">
                     <small class="error-message" id="stateError"></small>
                 </div>
             </div>
             <input type="hidden" name="address" id="addressInput" value="">
-            <button type="submit" class="place-order-btn">Save Address</button>
+            
+            <button type="button" id="btnSaveAddress" class="place-order-btn">Save Address</button>
         </form>
     </div>
 </div>
@@ -299,6 +300,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         </div>
     </div>
 </div>
+
 <?php if ($toastMsg): ?>
     <div id="toast-notification" class="toast-notification toast-<?= $toastType ?>">
         <div class="toast-content">
@@ -313,6 +315,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         }, 4000);
     </script>
 <?php endif; ?>
+
 <script>
     const BASE_ADDRESS_API_URL = '<?= $fullApiUrl ?>';
     let currentSelectedAddressId = '<?= $initialAddressId ?>';
@@ -328,9 +331,9 @@ $fullApiUrl = $protocol . $host . $apiPath;
         const displayInfo = document.getElementById('redemptionInfo');
         const displayVal = document.getElementById('displayDiscount');
 
-        const inputPoints = document.getElementById('points_redeemed');
-        const inputDiscount = document.getElementById('discount_amount');
-        const inputTotal = document.getElementById('total_amount');
+        const inputPoints = document.getElementById('inputPointsRedeemed');
+        const inputDiscount = document.getElementById('inputDiscountAmount');
+        const inputTotal = document.getElementById('inputTotalAmount');
 
         if (toggle.checked) {
             const maxPointsPerTransaction = 1000;
@@ -475,12 +478,13 @@ $fullApiUrl = $protocol . $host . $apiPath;
     function validateAddressForm(form) {
         clearErrors(form);
         let isValid = true;
-        const name = form.name.value.trim();
-        const phone = form.phone.value.trim();
+        
+        const name = form.ReceiverName.value.trim();
+        const phone = form.phoneNumber.value.trim();
         const street = form.street_line.value.trim();
-        const postcode = form.postcode.value.trim();
-        const city = form.city.value.trim();
-        const state = form.state.value.trim();
+        const postcode = form.postCode.value.trim(); 
+        const city = form.City.value.trim();   
+        const state = form.State.value.trim(); 
 
         if (!name) {
             showError('nameInput', 'Required');
@@ -520,7 +524,6 @@ $fullApiUrl = $protocol . $host . $apiPath;
                 showError('stateInput', 'State cannot contain numbers');
                 isValid = false;
             }
-
 
             const cleanPhone = phone.replace(/-/g, '');
 
@@ -672,16 +675,24 @@ $fullApiUrl = $protocol . $host . $apiPath;
             });
     }
 
-    // Submit (Add/Edit)
-    document.getElementById('addEditAddressForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const form = e.target;
-        if (!validateAddressForm(form)) return;
+    document.getElementById('btnSaveAddress').addEventListener('click', function(e) {
+        e.preventDefault(); 
+        
+        const form = document.getElementById('addEditAddressForm');
+        
+        if (!validateAddressForm(form)) {
+            return;
+        }
 
         const id = form.address_id.value;
         const action = id ? 'update' : 'add';
         const formData = new URLSearchParams(new FormData(form));
         formData.append('action', action);
+
+        const btn = document.getElementById('btnSaveAddress');
+        const originalText = btn.innerText;
+        btn.innerText = 'Saving...';
+        btn.disabled = true;
 
         fetchAndParseJSON(BASE_ADDRESS_API_URL, {
             method: 'POST',
@@ -690,10 +701,16 @@ $fullApiUrl = $protocol . $host . $apiPath;
             },
             body: formData
         }).then(res => {
+            btn.innerText = originalText;
+            btn.disabled = false;
+
             if (res.success) {
                 const d = res.data;
-                const fullAddr = form.street_line.value + '\n' + form.postcode.value + ' ' + form.city.value + '\n' + form.state.value;
-                selectAddress(d.address_id, form.name.value, form.phone.value, fullAddr);
+                const fullAddr = form.street_line.value + '\n' + form.postCode.value + ' ' + form.City.value + '\n' + form.State.value;
+                
+                selectAddress(d.address_id, form.ReceiverName.value, form.phoneNumber.value, fullAddr);
+                
+                document.getElementById('addEditAddressModalOverlay').style.display = 'none';
                 showSuccess("Address has been saved successfully!");
             } else {
                 const errDiv = document.getElementById('generalErrorMsg');
@@ -704,7 +721,11 @@ $fullApiUrl = $protocol . $host . $apiPath;
                     alert(res.message);
                 }
             }
-        }).catch(err => alert("Error: " + err.message));
+        }).catch(err => {
+            btn.innerText = originalText;
+            btn.disabled = false;
+            alert("Error: " + err.message);
+        });
     });
 
     window.onload = function() {
