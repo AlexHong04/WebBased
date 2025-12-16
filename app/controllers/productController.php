@@ -43,18 +43,29 @@ class productController
 
         // Resolve Main Image
         $rawMainImg = $product['img_url'] ?? $product['photo'] ?? '';
-        $product['img_url'] = empty($rawMainImg) ? '' : $this->resolveImagePath($rawMainImg, $categoryName);
+        
+        $mainImgParts = explode(',', $rawMainImg);
+        
+        $firstMainImg = trim($mainImgParts[0]); 
+        
+        $product['img_url'] = empty($firstMainImg) ? '' : $this->resolveImagePath($firstMainImg, $categoryName);
         $product['display_img_url'] = $product['img_url'];
 
         // Process Gallery
         $photos = $model->getProductVariants($productId);
         $gallery = [];
 
-        if (!empty($product['img_url'])) {
-            $gallery[] = [
-                'img_url' => $product['img_url'], 
-                'display_url' => $product['img_url']
-            ];
+        if (!empty($rawMainImg)) {
+            foreach ($mainImgParts as $imgPart) {
+                $cleanImgPart = trim($imgPart);
+                if (!empty($cleanImgPart)) {
+                    $resolvedMainPath = $this->resolveImagePath($cleanImgPart, $categoryName);
+                    $gallery[] = [
+                        'img_url' => $resolvedMainPath, 
+                        'display_url' => $resolvedMainPath
+                    ];
+                }
+            }
         }
 
         if (!empty($photos)) {
@@ -139,7 +150,10 @@ class productController
                 $r = is_object($r) ? (array)$r : $r;
                 $rRawImg = $r['img_url'] ?? ''; 
                 $rCatName = $r['category_name'] ?? $categoryName;
-                $r['img_url'] = $this->resolveImagePath($rRawImg, $rCatName);
+                $rParts = explode(',', $rRawImg);
+                $rFirst = trim($rParts[0]);
+                
+                $r['img_url'] = $this->resolveImagePath($rFirst, $rCatName);
                 
                 $processedRelated[] = $r;
             }

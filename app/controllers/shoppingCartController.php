@@ -22,17 +22,6 @@ class shoppingCartController {
         if (isset($_SESSION['customerId'])) {
             $customerId = $_SESSION['customerId'];
             $dbItems = $this->cartModel->getMemberCartDetails($customerId);
-        } else {
-            if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
-                $variantIds = array_keys($_SESSION['cart']);
-                $dbItems = $this->cartModel->getGuestCartDetails($variantIds);
-                foreach ($dbItems as &$item) {
-                    $vid = $item['product_variant_id'];
-                    if (isset($_SESSION['cart'][$vid])) {
-                        $item['quantity'] = $_SESSION['cart'][$vid];
-                    }
-                }
-            }
         }
 
         if (!empty($dbItems)) {
@@ -71,6 +60,12 @@ class shoppingCartController {
     private function resolveCartImage($dbPath, $categoryName = '') {
         if (empty($dbPath)) return 'https://via.placeholder.com/150';
         if (str_starts_with($dbPath, 'http')) return $dbPath;
+        
+        if (str_contains($dbPath, ',')) {
+            $parts = explode(',', $dbPath);
+            $dbPath = trim($parts[0]);
+        }
+
         if (str_contains($dbPath, '/')) return IMG_BASE_PATH . $dbPath;
         $categoryFolder = !empty($categoryName) ? trim($categoryName) . '/' : '';
         return IMG_BASE_PATH . 'images/' . $categoryFolder . $dbPath;
@@ -78,6 +73,12 @@ class shoppingCartController {
 
     public function add() {
         if (is_post()) {
+            if (!isset($_SESSION['customerId'])) {
+                temp('flash_login_required', 'You must log in to add items to your cart.');
+                $this->redirectBack();
+                return;
+            }
+
             $variantId = post('product_variant_id');
             $quantity  = (int)post('quantity', 1);
 
@@ -86,15 +87,9 @@ class shoppingCartController {
             }
 
             $stockQty = $this->cartModel->getProductStock($variantId);
-            $currentInCart = 0;
-
-            if (isset($_SESSION['customerId'])) {
-                $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
-                $currentInCart = $this->cartModel->getCartItemQty($cartId, $variantId);
-            } else {
-                if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-                $currentInCart = $_SESSION['cart'][$variantId] ?? 0;
-            }
+            
+            $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
+            $currentInCart = $this->cartModel->getCartItemQty($cartId, $variantId);
 
             $allowedQty = $stockQty - $currentInCart;
 
@@ -112,15 +107,8 @@ class shoppingCartController {
                 temp('flash_success', "Successfully added to cart!");
             }
 
-            if (isset($_SESSION['customerId'])) {
-                $this->cartModel->addCartItem($cartId, $variantId, $finalAddQty);
-            } else {
-                if (isset($_SESSION['cart'][$variantId])) {
-                    $_SESSION['cart'][$variantId] += $finalAddQty;
-                } else {
-                    $_SESSION['cart'][$variantId] = $finalAddQty;
-                }
-            }
+            $this->cartModel->addCartItem($cartId, $variantId, $finalAddQty);
+            
             temp('keep_variant_id', $variantId);
             $this->redirectBack();
         }
@@ -138,23 +126,14 @@ class shoppingCartController {
                 exit;
             }
 
-            if (isset($_SESSION['customerId'])) {
-                $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
-                if (!$cartId) {
-                    echo "Error: Cart ID not found"; 
-                    exit;
-                }
-                
-                $result = $this->cartModel->updateCartItemQty($cartId, $variantId, $quantity);
-                echo $result ? "Success" : "Error: Database Update Failed";
-            } else {
-                if (isset($_SESSION['cart'][$variantId])) {
-                    $_SESSION['cart'][$variantId] = $quantity;
-                    echo "Success";
-                } else {
-                    echo "Error: Session Item Not Found";
-                }
+            $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
+            if (!$cartId) {
+                echo "Error: Cart ID not found"; 
+                exit;
             }
+            
+            $result = $this->cartModel->updateCartItemQty($cartId, $variantId, $quantity);
+            echo $result ? "Success" : "Error: Database Update Failed";
             exit;
         }
     }
@@ -163,6 +142,11 @@ class shoppingCartController {
         while (ob_get_level()) ob_end_clean();
 
         if (is_post()) {
+            if (!isset($_SESSION['customerId'])) {
+                echo "Error: Login Required";
+                exit;
+            }
+
             $variantId = post('product_variant_id');
 
             if (!$variantId) {
@@ -170,20 +154,11 @@ class shoppingCartController {
                 exit;
             }
             
-            if (isset($_SESSION['customerId'])) {
-                $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
-                if ($this->cartModel->removeCartItem($cartId, $variantId)) {
-                    echo "Success";
-                } else {
-                    echo "Error: DB Delete Failed";
-                }
+            $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
+            if ($this->cartModel->removeCartItem($cartId, $variantId)) {
+                echo "Success";
             } else {
-                if (isset($_SESSION['cart'][$variantId])) {
-                    unset($_SESSION['cart'][$variantId]);
-                    echo "Success";
-                } else {
-                    echo "Error: Item not in session";
-                }
+                echo "Error: DB Delete Failed";
             }
             exit;
         }
@@ -193,6 +168,11 @@ class shoppingCartController {
         while (ob_get_level()) ob_end_clean();
 
         if (is_post()) {
+            if (!isset($_SESSION['customerId'])) {
+                echo "Error: Login Required";
+                exit;
+            }
+
             $variantIds = isset($_POST['product_variant_ids']) ? $_POST['product_variant_ids'] : [];
 
             if (empty($variantIds) || !is_array($variantIds)) {
@@ -200,21 +180,11 @@ class shoppingCartController {
                 exit;
             }
 
-            if (isset($_SESSION['customerId'])) {
-                $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
-                if ($this->cartModel->removeBatchCartItems($cartId, $variantIds)) {
-                    echo "Success";
-                } else {
-                    echo "Error: DB Delete Failed";
-                }
-            } else {
-                // Session Guest Cart
-                foreach ($variantIds as $vid) {
-                    if (isset($_SESSION['cart'][$vid])) {
-                        unset($_SESSION['cart'][$vid]);
-                    }
-                }
+            $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
+            if ($this->cartModel->removeBatchCartItems($cartId, $variantIds)) {
                 echo "Success";
+            } else {
+                echo "Error: DB Delete Failed";
             }
             exit;
         }
@@ -226,9 +196,7 @@ class shoppingCartController {
         $count = 0;
         if (isset($_SESSION['customerId'])) {
             $count = $this->cartModel->getCartCount($_SESSION['customerId']);
-        } else {
-            $count = isset($_SESSION['cart']) ? array_sum($_SESSION['cart']) : 0;
-        }
+        } 
         
         echo $count;
         exit;
@@ -239,3 +207,4 @@ class shoppingCartController {
         redirect($referer);
     }
 }
+?>

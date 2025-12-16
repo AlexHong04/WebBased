@@ -149,7 +149,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         </div>
 
         <div class="sidebar-section">
-            <div class="card" style="position: sticky; top: 20px;">
+            <div class="card" style="position: sticky; top: 70px; margin-top: 55px;">
                 <h2 class="section-title">Order Summary</h2>
                 <div class="summary-row">
                     <span>Subtotal (<?= encode($totalItemCount) ?> items)</span>

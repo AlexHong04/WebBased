@@ -18,13 +18,13 @@ $controller = new productController();
 $product = $controller->getProductDetails($id);
 
 if (!$product) {
-    $product = null; 
+    $product = null;
 }
 
 $title = $product['product_name'] ?? "Product Details";
 $pageCSS = "product_details.css";
 
-include '../header.php'; 
+include '../header.php';
 
 // Constants
 define('DEFAULT_IMG', 'https://via.placeholder.com/600x600/text=No+Image');
@@ -67,12 +67,21 @@ $toastType = '';
 $toastIcon = '';
 
 if ($msg = temp('flash_error')) {
-    $toastMsg = $msg; $toastType = 'error'; $toastIcon = 'fa-times-circle';
+    $toastMsg = $msg;
+    $toastType = 'error';
+    $toastIcon = 'fa-times-circle';
 } elseif ($msg = temp('flash_warning')) {
-    $toastMsg = $msg; $toastType = 'warning'; $toastIcon = 'fa-exclamation-triangle';
+    $toastMsg = $msg;
+    $toastType = 'warning';
+    $toastIcon = 'fa-exclamation-triangle';
 } elseif ($msg = temp('flash_success')) {
-    $toastMsg = $msg; $toastType = 'success'; $toastIcon = 'fa-check-circle';
+    $toastMsg = $msg;
+    $toastType = 'success';
+    $toastIcon = 'fa-check-circle';
 }
+
+// --- Check Login Required Flash ---
+$loginRequiredMsg = temp('flash_login_required');
 
 // --- Variant Logic ---
 $selectedVid = temp('keep_variant_id');
@@ -101,7 +110,7 @@ if ($selectedVid && $variantImgFound) {
 }
 
 $realAvailable = $currStock;
-$isWishlisted = $product['is_wishlisted'] ?? false; 
+$isWishlisted = $product['is_wishlisted'] ?? false;
 ?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -152,7 +161,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
                             $isOOS = $variant['stock_qty'] <= 0;
                             $isActive = ($variant['product_variant_id'] == $currVid);
                             $badgeClass = ($isActive ? 'active-variant ' : '') . ($isOOS ? 'out-of-stock-variant' : '');
-                            
+
                             $vImgUrl = findVariantImage($variant['product_variant_id'], $galleryImages);
                             $vImgUrlStr = $vImgUrl ? encode($vImgUrl) : '';
                             ?>
@@ -248,7 +257,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
                     $r_desc = $review['description'] ?? '';
                     $r_date = $review['created_at'] ?? '';
                     $r_variant = $review['variant_name'] ?? '';
-                    
+
                     $photoUrls = $review['processed_photos'] ?? [];
                     $photosJson = htmlspecialchars(json_encode($photoUrls), ENT_QUOTES, 'UTF-8');
                 ?>
@@ -273,8 +282,8 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
                                 <div class="review-photos">
                                     <?php foreach ($photoUrls as $idx => $pUrl): ?>
                                         <img src="<?= encode($pUrl) ?>"
-                                             class="review-photo"
-                                             onclick="openReviewGallery(<?= $idx ?>, <?= $photosJson ?>)">
+                                            class="review-photo"
+                                            onclick="openReviewGallery(<?= $idx ?>, <?= $photosJson ?>)">
                                     <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
@@ -298,6 +307,24 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
     </div>
 <?php endif; ?>
 
+<div class="login-modal-overlay" id="loginModalOverlay">
+    <div class="login-modal-content">
+        <div style="font-size: 3.5rem; color: #ffcc00; margin-bottom: 20px;">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <h3 style="font-size: 1.6rem; margin-bottom: 10px; color:#333;">Login Required</h3>
+        <p style="color: #666; margin-bottom: 25px; font-size:1rem;">You need to log in to add items to your cart.</p>
+        <p style="font-size: 0.9rem; color: #999; margin-bottom: 25px;">
+            Redirecting to login in <span id="countdown" style="font-weight:bold; color:#333;">5</span> seconds...
+        </p>
+
+        <a href="/app/views/security/signIn.php"
+            style="display:inline-block; background:#fc84a3; color:white; width:100px; border-radius:30px; text-decoration:none; font-weight:600; box-shadow:0 5px 15px rgba(252,132,163,0.4);">
+            Login Now
+        </a>
+    </div>
+</div>
+
 <div id="reviewLightbox" class="lightbox-modal" onclick="if(event.target === this) closeReviewGallery()">
     <span class="lightbox-close" onclick="closeReviewGallery()">&times;</span>
     <div class="lightbox-content-wrapper">
@@ -310,21 +337,32 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
 
 <?php if (!empty($product['related_products'])): ?>
     <div class="related-products-section related-section">
-        <h2>More Options</h2>
-        <div class="related-product-grid related-grid">
-            <?php foreach ($product['related_products'] as $related):
-                $rImg = !empty($related['img_url']) ? $related['img_url'] : DEFAULT_IMG;
-            ?>
-                <a href="?id=<?= $related['product_id'] ?>" class="product-card">
-                    <div class="product-card-img-wrapper">
-                        <img src="<?= encode($rImg) ?>" class="product-card-img" alt="<?= encode($related['product_name']) ?>">
-                    </div>
-                    <div class="product-card-body">
-                        <h3 class="product-card-name"><?= encode($related['product_name']) ?></h3>
-                        <span class="product-card-price">RM<?= number_format($related['sale_price'], 2) ?></span>
-                    </div>
-                </a>
-            <?php endforeach; ?>
+        <h2 style="margin-bottom: 20px;">More Options</h2>
+
+        <div class="related-slider-wrapper">
+            <button class="related-arrow related-prev" onclick="scrollRelated(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <div class="related-product-grid related-grid" id="relatedGrid">
+                <?php foreach ($product['related_products'] as $related):
+                    $rImg = !empty($related['img_url']) ? $related['img_url'] : DEFAULT_IMG;
+                ?>
+                    <a href="?id=<?= $related['product_id'] ?>" class="product-card">
+                        <div class="product-card-img-wrapper">
+                            <img src="<?= encode($rImg) ?>" class="product-card-img" alt="<?= encode($related['product_name']) ?>">
+                        </div>
+                        <div class="product-card-body">
+                            <h3 class="product-card-name"><?= encode($related['product_name']) ?></h3>
+                            <span class="product-card-price">RM<?= number_format($related['sale_price'], 2) ?></span>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+
+            <button class="related-arrow related-next" onclick="scrollRelated(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
         </div>
     </div>
 <?php endif; ?>
@@ -341,7 +379,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
 
 <script>
     const WISHLIST_API_URL = '/app/controllers/wishlist_router.php';
-    
+
     // Toast Auto Hide
     document.addEventListener("DOMContentLoaded", function() {
         const toast = document.getElementById('toast-notification');
@@ -353,6 +391,26 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
             }, 4000);
         }
     });
+    <?php if ($loginRequiredMsg): ?>
+        const loginModal = document.getElementById('loginModalOverlay');
+        const countdownEl = document.getElementById('countdown');
+        let seconds = 5;
+
+        if (loginModal) {
+            loginModal.style.display = 'flex';
+
+            const timer = setInterval(() => {
+                seconds--;
+                if (countdownEl) countdownEl.innerText = seconds;
+
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    window.location.href = '/app/views/security/signIn.php';
+                }
+            }, 1000);
+        }
+    <?php endif; ?>
+
 
     // Review Lightbox Logic
     let currentReviewPhotos = [];
@@ -552,12 +610,12 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
     // Dynamically Show Toast
     function showToast(message, type = 'success') {
         const oldToast = document.getElementById('js-toast');
-        if(oldToast) oldToast.remove();
+        if (oldToast) oldToast.remove();
 
         const div = document.createElement('div');
         div.id = 'js-toast';
         div.className = `toast-notification toast-${type}`;
-        
+
         let iconClass = 'fa-check-circle';
         if (type === 'error') iconClass = 'fa-times-circle';
         if (type === 'warning') iconClass = 'fa-exclamation-triangle';
@@ -582,7 +640,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
     // Wishlist Functionality
     function toggleWishlist(btn) {
         const variantId = document.getElementById('product_variant_id').value;
-        
+
         if (!variantId) {
             showToast('Please select a variant first.', 'warning');
             return;
@@ -592,35 +650,64 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         formData.append('product_variant_id', variantId);
 
         fetch(WISHLIST_API_URL + '?action=toggle', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const icon = btn.querySelector('i');
-                if (data.status === 'added') {
-                    btn.classList.add('active');
-                    icon.className = 'fas fa-heart';
-                    showToast(data.message, 'success');
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const icon = btn.querySelector('i');
+                    if (data.status === 'added') {
+                        btn.classList.add('active');
+                        icon.className = 'fas fa-heart';
+                        showToast(data.message, 'success');
+                    } else {
+                        btn.classList.remove('active');
+                        icon.className = 'far fa-heart';
+                        showToast(data.message, 'success');
+                    }
                 } else {
-                    btn.classList.remove('active');
-                    icon.className = 'far fa-heart';
-                    showToast(data.message, 'success');
+                    if (data.code === 'LOGIN_REQUIRED') {
+                        // Show Login Modal
+                        const loginModal = document.getElementById('loginModalOverlay');
+                        const countdownEl = document.getElementById('countdown');
+                        if (loginModal) {
+                            loginModal.style.display = 'flex';
+                            let seconds = 5;
+                            const timer = setInterval(() => {
+                                seconds--;
+                                if (countdownEl) countdownEl.innerText = seconds;
+                                if (seconds <= 0) {
+                                    clearInterval(timer);
+                                    window.location.href = '/app/views/security/signIn.php';
+                                }
+                            }, 1000);
+                        } else {
+                            window.location.href = '/app/views/security/signIn.php';
+                        }
+                    } else {
+                        showToast(data.message, 'error');
+                    }
                 }
-            } else {
-                if (data.code === 'LOGIN_REQUIRED') {
-                    window.location.href = '/app/views/security/signIn.php';
-                } else {
-                    showToast(data.message, 'error');
-                }
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            showToast('Something went wrong.', 'error');
-        });
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('Something went wrong.', 'error');
+            });
+    }
+
+    function scrollRelated(direction) {
+        const container = document.getElementById('relatedGrid');
+        const scrollAmount = 300;
+
+        if (direction === 1) {
+            container.scrollLeft += scrollAmount;
+        } else {
+            container.scrollLeft -= scrollAmount;
+        }
     }
 </script>
 

@@ -66,9 +66,11 @@ class CheckoutController
 
         return $data;
     }
-private function processCartPostData() {
+
+    private function processCartPostData() {
+        $customerId = $_SESSION['customerId'];
         $selectedItems = post('selected_items') ?? [];
-        $quantities = post('qty') ?? [];
+        $postQuantities = post('qty') ?? [];
 
         if (empty($selectedItems)) {
             temp('flash_warning', "Please select items.");
@@ -76,51 +78,50 @@ private function processCartPostData() {
             return;
         }
 
-        $checkoutVariantIds = [];
-        $checkoutQuantities = [];
-
-        foreach ($selectedItems as $vid) {
-            if (isset($quantities[$vid]) && (int)$quantities[$vid] > 0) {
-                $checkoutVariantIds[] = $vid;
-                $checkoutQuantities[$vid] = (int)$quantities[$vid];
-            }
-        }
-
-        $dbItems = $this->cartModel->getGuestCartDetails($checkoutVariantIds);
+        $allCartItems = $this->cartModel->getMemberCartDetails($customerId);
         
         $checkoutItems = [];
         $subtotal = 0;
         $totalItemCount = 0;
         $imgBasePath = '/public/';
 
-        foreach ($dbItems as $item) {
+        foreach ($allCartItems as $item) {
             $vid = $item['product_variant_id'];
-            $qty = $checkoutQuantities[$vid] ?? 0;
-            
-            $rawImg = !empty($item['variant_img']) ? $item['variant_img'] : $item['main_img'];
-            $catName = $item['category_name'] ?? '';
-            
-            if (empty($rawImg)) {
-                $finalImg = 'https://via.placeholder.com/150';
-            } elseif (str_starts_with($rawImg, 'http')) {
-                $finalImg = $rawImg;
-            } else {
-                $filename = basename($rawImg);
-                $folder = !empty($catName) ? trim($catName) . '/' : '';
-                $finalImg = $imgBasePath . 'images/' . $folder . $filename;
+
+            if (in_array($vid, $selectedItems)) {
+                
+                $qty = isset($postQuantities[$vid]) ? (int)$postQuantities[$vid] : (int)$item['quantity'];
+
+                $rawImg = !empty($item['variant_img']) ? $item['variant_img'] : $item['main_img'];
+                $catName = $item['category_name'] ?? '';
+                
+                if (empty($rawImg)) {
+                    $finalImg = 'https://via.placeholder.com/150';
+                } elseif (str_starts_with($rawImg, 'http')) {
+                    $finalImg = $rawImg;
+                } else {
+                    if (str_contains($rawImg, ',')) {
+                        $parts = explode(',', $rawImg);
+                        $rawImg = trim($parts[0]);
+                    }
+                    
+                    $filename = basename($rawImg);
+                    $folder = !empty($catName) ? trim($catName) . '/' : '';
+                    $finalImg = $imgBasePath . 'images/' . $folder . $filename;
+                }
+
+                $checkoutItems[] = [
+                    'variant_id'   => $vid,
+                    'product_name' => $item['product_name'] . ' (' . $item['variant_name'] . ')',
+                    'sale_price'   => $item['sale_price'],
+                    'quantity'     => $qty,
+                    'img_url'      => $finalImg,
+                    'unit_price'   => $item['sale_price'],
+                ];
+
+                $subtotal += $item['sale_price'] * $qty;
+                $totalItemCount += $qty;
             }
-
-            $checkoutItems[] = [
-                'variant_id'   => $vid,
-                'product_name' => $item['product_name'] . ' (' . $item['variant_name'] . ')',
-                'sale_price'   => $item['sale_price'],
-                'quantity'     => $qty,
-                'img_url'      => $finalImg,
-                'unit_price'   => $item['sale_price'],
-            ];
-
-            $subtotal += $item['sale_price'] * $qty;
-            $totalItemCount += $qty;
         }
 
         $shippingFee = 5.00;
@@ -143,7 +144,6 @@ private function processCartPostData() {
     }
 
     public function placeOrder() {
-        
         if (!is_post()) {
             redirect('/app/views/shoppingCart/cart.php');
             return;
@@ -197,6 +197,10 @@ private function processCartPostData() {
         );
 
         if ($paymentId) {
+            $purchasedVariantIds = array_column($items, 'variant_id');
+            $cartId = $this->cartModel->getOrCreateCart($customerId);
+            $this->cartModel->removeBatchCartItems($cartId, $purchasedVariantIds);
+
             unset($_SESSION['checkout_data']);
             redirect("/app/views/shoppingCart/payment.php?payment_id=" . $paymentId);
         } else {

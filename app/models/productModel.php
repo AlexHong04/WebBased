@@ -54,7 +54,7 @@ class productModel
         return $this->db->result();
     }
 
-   public function getProductReviews($productId, $limit = 5, $offset = 0)
+    public function getProductReviews($productId, $limit = 5, $offset = 0)
     {
         $sql = "SELECT 
                     r.review_id,
@@ -75,7 +75,7 @@ class productModel
 
         $this->db->query($sql);
         $this->db->bind(1, $productId);
-        
+
         $reviews = $this->db->resultAll();
 
         return $reviews;
@@ -87,12 +87,20 @@ class productModel
                 FROM product p
                 JOIN category c ON p.category_id = c.category_id
                 WHERE p.category_id = ? AND p.product_id != ? 
-                LIMIT 4";
+                LIMIT 10";
 
         $this->db->query($sql);
         $this->db->bind(1, $categoryId);
         $this->db->bind(2, $currentProductId);
         return $this->db->resultAll();
     }
+    //when user doesnot pay the product, after 4hour will expired and restore stock
+    public function restoreStock($variantId, $quantity)
+    {
+        $sql = "UPDATE product_variant SET stock_qty = stock_qty + ? WHERE product_variant_id = ?";
+        $this->db->query($sql);
+        $this->db->bind(1, $quantity);
+        $this->db->bind(2, $variantId);
+        return $this->db->execute();
+    }
 }
-?>

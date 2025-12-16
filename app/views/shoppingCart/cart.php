@@ -23,6 +23,11 @@ if ($msg = temp('flash_error')) {
     $toastType = 'success';
 }
 
+if (isset($_GET['status']) && $_GET['status'] === 'pending_payment') {
+    $toastMsg = "Pending Payment: Your transaction was not completed.";
+    $toastType = "warning";
+}
+
 include '../header.php';
 ?>
 

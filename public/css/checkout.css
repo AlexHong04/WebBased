@@ -277,9 +277,39 @@ input:checked + .slider:before {
 }
 
 .payment-radio {
-    accent-color: var(--primary-pink);
-    transform: scale(1.2);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
     margin-right: 15px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.payment-radio:checked {
+    border-color: var(--primary-pink);
+}
+
+.payment-radio:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background-color: var(--primary-pink);
+    border-radius: 50%;
+}
+
+.payment-radio:hover {
+    border-color: var(--primary-pink-hover);
 }
 
 .payment-icon {
@@ -288,11 +318,6 @@ input:checked + .slider:before {
     width: 30px;
     text-align: center;
     color: #555;
-}
-
-input[type="radio"]:checked + .payment-content {
-    color: var(--primary-pink);
-    font-weight: 600;
 }
 
 .summary-row {

@@ -77,7 +77,7 @@ class cartModel
         return ($row && isset($row['total_qty'])) ? (int)$row['total_qty'] : 0;
     }
 
-    // Get Cart Count
+    // Get Member Cart Details
     public function getMemberCartDetails($customerId)
     {
         $sql = "SELECT ci.cart_item_id, ci.quantity, pv.product_variant_id, pv.stock_qty, v.variant_name,
@@ -95,30 +95,6 @@ class cartModel
         $this->db->query($sql);
         $this->db->bind(1, $customerId);
         return $this->db->resultAll();
-    }
-
-    // Get Guest Cart Details
-    public function getGuestCartDetails($variantIds)
-    {
-        if (empty($variantIds)) return [];
-        $results = [];
-
-        foreach ($variantIds as $vid) {
-            $sql = "SELECT pv.product_variant_id, pv.stock_qty, v.variant_name,
-                        pv.img_url as variant_img, 
-                        p.product_id, p.product_name, p.sale_price, p.img_url as main_img, cat.category_name
-                    FROM product_variant pv
-                    JOIN product p ON pv.product_id = p.product_id
-                    LEFT JOIN variant v ON pv.variant_id = v.variant_id
-                    LEFT JOIN category cat ON p.category_id = cat.category_id
-                    WHERE pv.product_variant_id = ? LIMIT 1";
-
-            $this->db->query($sql);
-            $this->db->bind(1, $vid);
-            $row = $this->db->result();
-            if ($row) $results[] = $row;
-        }
-        return $results;
     }
 
     // Update Quantity

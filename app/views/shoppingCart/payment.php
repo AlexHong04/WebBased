@@ -130,7 +130,62 @@ extract($data);
         </div>
     </div>
 
+    <div class="modal-overlay" id="leaveModalOverlay" style="display: none;">
+        <div class="modal-content feedback-modal">
+            <div class="modal-icon warning" style="color: #f39c12;">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <h3 class="modal-title centered">Processing...</h3>
+            <p class="modal-message" style="margin-bottom: 20px;">
+                Your request is being processed. If you leave this page now, your transaction might be cancelled.
+            </p>
+            <div class="modal-actions" style="justify-content: center; gap: 15px;">
+                <button type="button" class="modal-btn btn-secondary" onclick="stayOnPage()">Stay</button>
+                <button type="button" class="modal-btn btn-danger" onclick="leavePage()">Leave</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // --- Leave Page Protection Logic ---
+        let isSubmitting = false;
+
+        const paymentForm = document.getElementById('paymentForm');
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', function() {
+                isSubmitting = true;
+            });
+        }
+
+        function showLeaveModal() {
+            document.getElementById('leaveModalOverlay').style.display = 'flex';
+        }
+
+        function stayOnPage() {
+            document.getElementById('leaveModalOverlay').style.display = 'none';
+            history.pushState(null, null, location.href);
+        }
+
+        function leavePage() {
+            isSubmitting = true;
+            window.location.href = '/app/views/shoppingCart/cart.php?status=pending_payment';
+        }
+
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function(event) {
+            if (!isSubmitting) {
+                showLeaveModal();
+            }
+        });
+
+        window.addEventListener('beforeunload', function(e) {
+            if (!isSubmitting) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+
         const paymentMethod = '<?= encode($paymentMethod) ?>';
 
         function showError(inputId, message) {
