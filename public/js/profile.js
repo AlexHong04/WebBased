@@ -84,42 +84,45 @@ function closeAddressModal() {
   document.getElementById("addressModalOverlay").style.display = "none";
 }
 
-// 2. Load Address List from API
+// 2. Load Address List from API (Updated with new UI)
 function loadAddressList() {
   const container = document.getElementById("addressListContainer");
-  container.innerHTML =
-    '<p style="text-align: center; color: #777;">Loading...</p>';
+  container.innerHTML = '<p style="text-align: center; color: #777;">Loading...</p>';
 
   fetchAndParseJSON(BASE_ADDRESS_API_URL + "?action=list")
     .then((res) => {
       if (res.success && res.data.addresses.length > 0) {
         const addresses = res.data.addresses;
         let html = "";
-        addresses.forEach((addr) => {
-          // Escape quotes for HTML attribute
-          const jsonStr = JSON.stringify(addr).replace(/"/g, "&quot;");
+        
+        const currentId = (typeof currentSelectedAddressId !== 'undefined') ? currentSelectedAddressId : null;
 
+        addresses.forEach((addr) => {
+          const jsonStr = JSON.stringify(addr).replace(/"/g, "&quot;");
+          const isSelected = (addr.id == currentId) ? 'selected' : '';
+          const isDef = addr.is_default == 1 ? 1 : 0;
           html += `
-                    <div class="address-list-item" onclick="selectAddressToProfile(${jsonStr})">
-                        <div class="address-list-text">
-                            <strong>${addr.name}</strong> (${addr.phone})<br>
-                            <span style="font-size:0.9rem; color:#555;">${addr.address}</span>
-                        </div>
-                        <div class="address-action-buttons">
-                            <i class="fas fa-edit" style="color:blue; cursor:pointer;" onclick="event.stopPropagation(); editAddress('${addr.id}')"></i>
-                            <i class="fas fa-trash-alt" style="color:red; cursor:pointer;" onclick="event.stopPropagation(); deleteAddress('${addr.id}')"></i>
-                        </div>
-                    </div>`;
+            <div class="address-list-item ${isSelected}" data-id="${addr.id}" onclick="selectAddressToProfile(${jsonStr})">
+                <div class="address-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="address-list-text">
+                    <strong>${addr.name}</strong> (${addr.phone})
+                    ${isDef ? '<span style="color:#fc84a3; margin-left:10px; font-size:0.8rem;">[Default]</span>' : ''}
+                    <p>${(addr.address || '').replace(/\n/g, '<br>')}</p>
+                </div>
+                <div class="address-action-buttons">
+                    <i class="fas fa-edit" onclick="event.stopPropagation(); editAddress('${addr.id}')"></i>
+                    <i class="fas fa-trash-alt" onclick="event.stopPropagation(); deleteAddress('${addr.id}')"></i>
+                </div>
+            </div>`;
         });
         container.innerHTML = html;
       } else {
-        container.innerHTML =
-          '<p style="text-align: center;">No addresses found.</p>';
+        container.innerHTML = '<p style="text-align: center;">No addresses found.</p>';
       }
     })
     .catch((err) => {
-      container.innerHTML =
-        '<p style="text-align: center; color: red;">Failed to load addresses.</p>';
+      container.innerHTML = '<p style="text-align: center; color: red;">Failed to load addresses.</p>';
+      console.error(err);
     });
 }
 
