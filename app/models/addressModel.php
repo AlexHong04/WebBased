@@ -80,8 +80,8 @@ class addressModel
             $newId = $this->db->generateId('address', 'address_id', 'AD');
             $isDefault = $this->countAddresses($customerId) == 0 ? 1 : 0;
 
-            $sql = "INSERT INTO address (address_id, customer_id, recipient_name, recipient_phone, street_line, city, state, postcode, is_default) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO address (address_id, customer_id, recipient_name, recipient_phone, street_line, city, state, postcode, is_default, is_deleted) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
             $this->db->query($sql);
             $this->db->bind(1, $newId);
             $this->db->bind(2, $customerId);

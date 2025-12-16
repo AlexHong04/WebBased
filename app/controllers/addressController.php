@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../models/AddressModel.php';
 require_once __DIR__ . '../../helpers/request.php'; 
+require_once __DIR__ . '/../models/addressModel.php';
 
 class AddressController {
     private $addressModel;
@@ -17,7 +17,7 @@ class AddressController {
         }
 
         try {
-            $this->addressModel = new AddressModel();
+            $this->addressModel = new addressModel();
         } catch (Exception $e) {
             $this->sendResponse(false, "DB Init Error: " . $e->getMessage());
         }
@@ -54,12 +54,6 @@ class AddressController {
         $city = post('City');
         $state = post('State');
         $postcode = post('postCode');
-        // $name = post('name');
-        // $phone = post('phone');
-        // $street = post('street_line');
-        // $city = post('city');
-        // $state = post('state');
-        // $postcode = post('postcode');
 
         if (empty($name) || empty($phone) || empty($street) || empty($city) || empty($state) || empty($postcode)) {
             $this->sendResponse(false, "All fields are required.");
@@ -67,7 +61,7 @@ class AddressController {
 
         try {
             $resultId = $this->addressModel->saveAddress($this->customerId, $id, $name, $phone, $street, $city, $state, $postcode);
-            
+
             if ($resultId) {
                 $savedAddr = $this->addressModel->getAddressById($this->customerId, $resultId);
                 $this->sendResponse(true, "Saved.", $savedAddr);
