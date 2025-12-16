@@ -146,7 +146,7 @@ include __DIR__ . '/../header.php';
         </div>
     </div>
 </section>
-
+<!-- 
 <div class="modal-overlay" id="addressModalOverlay">
     <div class="modal-content" style="text-align:left;">
         <div class="modal-header">
@@ -265,7 +265,7 @@ include __DIR__ . '/../header.php';
             <button type="button" class="modal-btn btn-danger" onclick="executeDeleteAddress()">Delete</button>
         </div>
     </div>
-</div>
+</div> -->
 
 <?php include '../footer.php' ?>
 
