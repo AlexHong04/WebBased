@@ -298,7 +298,7 @@ require_once __DIR__ . '/../../helpers/html.php';
                         
                         <?php if ($discountAmount > 0): ?>
                         <tr>
-                            <td class="total-label discount-text">Points Redeemed (<?= encode($order['reward']) ?>):</td>
+                            <td class="total-label discount-text">Points Redeemed (<?= encode($order['redeemed_point']) ?>):</td>
                             <td class="total-value discount-text">- RM <?= number_format($discountAmount, 2) ?></td>
                         </tr>
                         <?php endif; ?>

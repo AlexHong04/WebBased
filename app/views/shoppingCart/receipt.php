@@ -93,7 +93,7 @@ extract($data);
             <?php endif; ?>
 
             <?php 
-            $discount = ($order['reward'] ?? 0) / 100;
+            $discount = ($order['redeemed_point'] ?? 0) / 100;
             if ($discount > 0): 
             ?>
                 <div class="receipt-total-row">

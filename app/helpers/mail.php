@@ -62,7 +62,7 @@ function prepareReceiptContent($orderId)
     $shippingFee = 5.00;
     $taxFee = $order['tax_fee'];
     $totalPaid = $order['total_amount'];
-    $points = $order['reward'] ?? 0;
+    $points = $order['redeemed_point'] ?? 0;
     $discountAmount = $points / 100;
     $subtotal = 0;
     foreach ($items as $itm) {

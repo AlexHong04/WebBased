@@ -131,20 +131,16 @@ $fullApiUrl = $protocol . $host . $apiPath;
                 </div>
 
                 <?php
-                $GLOBALS['subtotal'] = $subtotal;
-                $GLOBALS['shippingFee'] = $shippingFee;
-                $GLOBALS['taxFee'] = $taxFee;
-                $GLOBALS['total_amount'] = $totalAmount;
-
                 html_hidden('subtotal');
                 html_hidden('shippingFee');
                 html_hidden('taxFee');
-                html_hidden('address_id');
-
-                html_hidden('points_redeemed', 'id="inputPointsRedeemed"');
-                html_hidden('discount_amount', 'id="inputDiscountAmount"');
-                html_hidden('total_amount', 'id="inputTotalAmount"');
                 ?>
+
+                <input type="hidden" name="address_id" id="address_id" value="<?= $initialAddressId ?>">
+                
+                <input type="hidden" name="points_redeemed" id="inputPointsRedeemed" value="0">
+                <input type="hidden" name="discount_amount" id="inputDiscountAmount" value="0">
+                <input type="hidden" name="total_amount"    id="inputTotalAmount"    value="<?= $totalAmount ?>">
             </form>
         </div>
 

@@ -19,8 +19,7 @@ class OrderModel
     try {
       $orderId = $this->db->generateId('`order`', 'order_id', 'O');
 
-      $sqlOrder = "INSERT INTO `order` (order_id, customer_id, address_id, total_amount, tax_fee, total_order_qty, reward) 
-                         VALUES (?, ?, ?, ?, ?, ?, ?)";
+      $sqlOrder = "INSERT INTO `order` (order_id, customer_id, address_id, total_amount, tax_fee, total_order_qty, redeemed_point) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
       $this->db->query($sqlOrder);
       $this->db->bind(1, $orderId);
@@ -89,9 +88,9 @@ class OrderModel
         $this->db->query("SELECT rewardPoint FROM customer WHERE customer_id = ?");
         $this->db->bind(1, $customerId);
         $result = $this->db->result();
-        $userPoints = $result['rewardPoint'] ?? 0;
+        $currentPoints = $result['rewardPoint'] ?? 0;
 
-        if ($userPoints < $pointsRedeemed) {
+        if ($currentPoints < $pointsRedeemed) {
           throw new Exception("Insufficient points.");
         }
 
