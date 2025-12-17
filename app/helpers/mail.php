@@ -96,7 +96,7 @@ function prepareReceiptContent($orderId)
 // ... existing code in mail.php ...
 
 // Add this function at the bottom
-function sendWelcomeEmail($toEmail, $toName, $loginLink)
+function  sendWelcomeEmail($toEmail, $toName, $loginLink)
 {
     $subject = "Welcome to Lovine! Account Activation";
 

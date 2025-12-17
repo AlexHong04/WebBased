@@ -76,3 +76,5 @@ function array_all($arr, $fn)
     foreach ($arr as $k => $v) if (!$fn($v, $k)) return false;
     return true;
 }
+
+

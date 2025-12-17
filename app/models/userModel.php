@@ -55,11 +55,31 @@ class userModel
         return $this->db->execute();
     }
 
+    public function createStaff($firstName, $lastName, $email, $position, $password,$phone)
+    {
+        $adminId = $this->db->generateId('staff', 'admin_id', 'AD');
+        $this->db->query("INSERT INTO admin (admin_id,firstName,lastName,email,position,password, phone ,created_at) VALUES (:admin_id, :firstName, :lastName, :email, :position, :password, :phone, NOW())");
+        $this->db->bind(':admin_id', $adminId);
+        $this->db->bind(':firstName', $firstName);
+        $this->db->bind(':lastName', $lastName);
+        $this->db->bind(':email', $email);
+        $this->db->bind(':phone', $phone);
+        $this->db->bind(':position', $position);
+        $this->db->bind(':password', $password);
+        return $this->db->execute();
+    }
+
     public function getUser($email)
     {
         $this->db->query("SELECT customer_id,email,password,isActive FROM customer WHERE email = :email");
         $this->db->bind(':email', $email);
-        // $this->db->bind(':password', $password);
+        return $this->db->result();
+    }
+
+    public function getStaff($email)
+    {
+        $this->db->query("SELECT admin_id,email,password,position FROM admin WHERE email = :email");
+        $this->db->bind(':email', $email);
         return $this->db->result();
     }
 
