@@ -5,6 +5,11 @@ require_once __DIR__ . '/../helpers/request.php';
 
 class productController
 {
+  private $productModel;
+  public function __construct(){
+    $this->productModel = new productModel();
+  }
+
   const IMG_BASE_URL = '/public/';
   const REVIEW_IMG_BASE_PATH = '/public/images/review/';
 
@@ -31,8 +36,7 @@ class productController
       return null;
     }
 
-    $model = new productModel();
-    $product = $model->getProductById($productId);
+    $product = $this->productModel->getProductById($productId);
 
     if (!$product) {
       return null;
@@ -52,7 +56,7 @@ class productController
     $product['display_img_url'] = $product['img_url'];
 
     // Process Gallery
-    $photos = $model->getProductVariants($productId);
+    $photos = $this->productModel->getProductVariants($productId);
     $gallery = [];
 
     if (!empty($rawMainImg)) {
@@ -89,7 +93,7 @@ class productController
     $product['gallery'] = $gallery;
 
     // Process Variants
-    $variants = $model->getProductVariants($productId);
+    $variants = $this->productModel->getProductVariants($productId);
     $processedVariants = [];
     if (!empty($variants)) {
       foreach ($variants as $v) {
@@ -116,14 +120,14 @@ class productController
     $product['total_stock'] = $totalStock;
 
     // Reviews
-    $stats = $model->getProductGlobalStats($productId);
+    $stats = $this->productModel->getProductGlobalStats($productId);
     $product['review_summary'] = [
       'total_reviews' => is_object($stats) ? $stats->total_reviews : ($stats['total_reviews'] ?? 0),
       'average_rating' => is_object($stats) ? $stats->avg_rating : ($stats['avg_rating'] ?? 0)
     ];
 
     // Process Reviews Images
-    $rawReviews = $model->getProductReviews($productId);
+    $rawReviews = $this->productModel->getProductReviews($productId);
     $processedReviews = [];
 
     if (!empty($rawReviews)) {
@@ -147,7 +151,7 @@ class productController
     $catId = is_array($product) ? ($product['category_id'] ?? null) : ($product->category_id ?? null);
 
     if ($catId) {
-      $related = $model->getRelatedProducts($catId, $productId);
+      $related = $this->productModel->getRelatedProducts($catId, $productId);
       $processedRelated = [];
       foreach ($related as $r) {
         $r = is_object($r) ? (array)$r : $r;
