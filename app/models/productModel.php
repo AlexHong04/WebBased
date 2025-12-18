@@ -65,7 +65,7 @@ class productModel
                     v.variant_name,
                     r.img_url
                 FROM review r
-                JOIN `order` o ON r.order_id = o.order_id
+                JOIN `ordertable` o ON r.order_id = o.order_id
                 JOIN customer c ON o.customer_id = c.customer_id
                 JOIN product_variant pv ON r.product_variant_id = pv.product_variant_id
                 JOIN variant v ON pv.variant_id = v.variant_id
