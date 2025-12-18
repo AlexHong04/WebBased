@@ -13,8 +13,10 @@ $categoryName = $controller->getCategory();
 
 <div class="specific-category-page">
   <div class="container">
-    <h1><?php echo str_replace('_', ' ', $categoryName['category_name']); ?></h1>
-    <hr>
+    <div class="containerHeader">
+      <a href="#" class="back-link" onclick="history.back(); return false;">&#x293A;</a>
+      <h1><?php echo str_replace('_', ' ', $categoryName['category_name']); ?></h1>
+    </div>
 
     <div class="products-grid">
       <?php if (empty($products)): ?>
