@@ -44,6 +44,7 @@ class CheckoutController
         $customerId = $_SESSION['customerId'];
 
         $currentUser = [];
+        // Fetch default address to profile info
         $defaultAddress = $this->addressModel->getDefaultAddress($customerId);
         $custProfile = $this->userModel->getCustomerDetails($customerId);
 
@@ -59,6 +60,7 @@ class CheckoutController
             $currentUser['address_id'] = '';
         }
 
+        // Fetch reward points for redemption feature
         $userPoints = $custProfile['rewardPoint'] ?? 0;
 
         $data['customer_info'] = $currentUser;
@@ -67,10 +69,11 @@ class CheckoutController
         return $data;
     }
 
+    //Process selected items from Cart Page
     private function processCartPostData() {
         $customerId = $_SESSION['customerId'];
-        $selectedItems = post('selected_items') ?? [];
-        $postQuantities = post('qty') ?? [];
+        $selectedItems = post('selected_items') ?? [];// Array of selected variant IDs
+        $postQuantities = post('qty') ?? [];// Array of quantities
 
         if (empty($selectedItems)) {
             temp('flash_warning', "Please select items.");
@@ -78,6 +81,7 @@ class CheckoutController
             return;
         }
 
+        // Fetch fresh data from DB to ensure validity
         $allCartItems = $this->cartModel->getMemberCartDetails($customerId);
         
         $checkoutItems = [];
@@ -88,6 +92,7 @@ class CheckoutController
         foreach ($allCartItems as $item) {
             $vid = $item['product_variant_id'];
 
+            // only process items that were checked in the cart
             if (in_array($vid, $selectedItems)) {
                 
                 $qty = isset($postQuantities[$vid]) ? (int)$postQuantities[$vid] : (int)$item['quantity'];
@@ -110,6 +115,7 @@ class CheckoutController
                     $finalImg = $imgBasePath . 'images/' . $folder . $filename;
                 }
 
+                // Build item structure for checkout view
                 $checkoutItems[] = [
                     'variant_id'   => $vid,
                     'product_name' => $item['product_name'] . ' (' . $item['variant_name'] . ')',
@@ -124,11 +130,13 @@ class CheckoutController
             }
         }
 
+        // --- Calculate Fees ---
         $shippingFee = 5.00;
         $taxPercentage = 6;
         $taxFee = $subtotal * ($taxPercentage / 100);
         $totalAmount = $subtotal + $shippingFee + $taxFee;
 
+        // Store calculations in session for the next step (Checkout Page)
         $_SESSION['checkout_data'] = [
             'items' => $checkoutItems,
             'subtotal' => $subtotal,
@@ -143,6 +151,7 @@ class CheckoutController
         redirect('/app/views/shoppingCart/checkout.php');
     }
 
+    //Place the Order
     public function placeOrder() {
         if (!is_post()) {
             redirect('/app/views/shoppingCart/cart.php');
@@ -164,17 +173,16 @@ class CheckoutController
         $taxFee = $sessionData['taxFee'];
         $items = $sessionData['items'];
 
+        // Handle Points Redemption
         $pointsRedeemed = (int)post('points_redeemed', 0);
-
         $discountAmount = 0;
         if ($pointsRedeemed > 0) {
-            $discountAmount = $pointsRedeemed / 100;
+            $discountAmount = $pointsRedeemed / 100; // 100 points = RM 1.00
         }
 
         $finalTotalAmount = $originalTotal - $discountAmount;
-        
         if ($finalTotalAmount < 0) $finalTotalAmount = 0;
-
+        // Validate Address Selection
         if (empty($addressId)) {
             temp('flash_warning', 'Please select a shipping address before placing order.');
             $this->redirectBack();
@@ -197,6 +205,7 @@ class CheckoutController
         );
 
         if ($paymentId) {
+            // Remove items from cart after successful order creation
             $purchasedVariantIds = array_column($items, 'variant_id');
             $cartId = $this->cartModel->getOrCreateCart($customerId);
             $this->cartModel->removeBatchCartItems($cartId, $purchasedVariantIds);
@@ -210,7 +219,7 @@ class CheckoutController
     }
 
     private function redirectBack() {
-        $referer = $_SERVER['HTTP_REFERER'] ?? '/index.php';
+        $referer = $_SERVER['HTTP_REFERER'] ?? '/app/views/home.php';
         redirect($referer);
     }
 }

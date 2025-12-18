@@ -25,7 +25,7 @@ class receiptController
         $orderId = get('order_id');
 
         if (!$orderId) {
-            redirect('/index.php');
+            redirect('/app/views/home.php');
             return;
         }
 
@@ -37,7 +37,7 @@ class receiptController
 
         if ($order['customer_id'] !== $_SESSION['customerId']) {            
             temp('flash_error', 'Unauthorized access to this receipt.');
-            redirect('/app/views/index.php');
+            redirect('/app/views/home.php');
             return;
         }
 

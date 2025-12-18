@@ -113,7 +113,7 @@ extract($data);
                 <i class="fas fa-print"></i> Print Receipt
             </button>
 
-            <a href="/index.php" class="btn btn-primary">
+            <a href="/app/views/home.php" class="btn btn-primary">
                 Back to Home
             </a>
         </div>

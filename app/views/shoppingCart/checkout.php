@@ -10,11 +10,14 @@ $toastMsg = '';
 $toastType = '';
 
 if ($msg = temp('flash_error')) {
-    $toastMsg = $msg; $toastType = 'error';
+    $toastMsg = $msg;
+    $toastType = 'error';
 } elseif ($msg = temp('flash_warning')) {
-    $toastMsg = $msg; $toastType = 'warning';
+    $toastMsg = $msg;
+    $toastType = 'warning';
 } elseif ($msg = temp('flash_success')) {
-    $toastMsg = $msg; $toastType = 'success';
+    $toastMsg = $msg;
+    $toastType = 'success';
 }
 
 $currentUser = $customer_info;
@@ -137,10 +140,10 @@ $fullApiUrl = $protocol . $host . $apiPath;
                 ?>
 
                 <input type="hidden" name="address_id" id="address_id" value="<?= $initialAddressId ?>">
-                
+
                 <input type="hidden" name="points_redeemed" id="inputPointsRedeemed" value="0">
                 <input type="hidden" name="discount_amount" id="inputDiscountAmount" value="0">
-                <input type="hidden" name="total_amount"    id="inputTotalAmount"    value="<?= $totalAmount ?>">
+                <input type="hidden" name="total_amount" id="inputTotalAmount" value="<?= $totalAmount ?>">
             </form>
         </div>
 
@@ -242,7 +245,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
                 </div>
             </div>
             <input type="hidden" name="address" id="addressInput" value="">
-            
+
             <button type="button" id="btnSaveAddress" class="place-order-btn">Save Address</button>
         </form>
     </div>
@@ -300,14 +303,17 @@ $fullApiUrl = $protocol . $host . $apiPath;
 <?php if ($toastMsg): ?>
     <div id="toast-notification" class="toast-notification toast-<?= $toastType ?>">
         <div class="toast-content">
-            <i class="fas <?= ($toastType=='success'?'fa-check-circle': ($toastType=='error'?'fa-times-circle':'fa-exclamation-triangle')) ?> toast-icon"></i>
+            <i class="fas <?= ($toastType == 'success' ? 'fa-check-circle' : ($toastType == 'error' ? 'fa-times-circle' : 'fa-exclamation-triangle')) ?> toast-icon"></i>
             <span class="toast-message"><?= encode($toastMsg) ?></span>
         </div>
     </div>
     <script>
         setTimeout(() => {
             const t = document.getElementById('toast-notification');
-            if(t) { t.style.opacity='0'; setTimeout(()=>t.remove(), 500); }
+            if (t) {
+                t.style.opacity = '0';
+                setTimeout(() => t.remove(), 500);
+            }
         }, 4000);
     </script>
 <?php endif; ?>
@@ -319,6 +325,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
     const userPoints = <?= (int)$userPoints ?>;
     const initialTotal = <?= (float)$totalAmount ?>;
 
+    // --- Points Redemption Logic ---
     function togglePointRedemption() {
         const toggle = document.getElementById('redeemToggle');
         const summaryRow = document.getElementById('summaryDiscountRow');
@@ -332,6 +339,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         const inputTotal = document.getElementById('inputTotalAmount');
 
         if (toggle.checked) {
+            // Rules: Max 1000 points per transaction, can't exceed total amount
             const maxPointsPerTransaction = 1000;
             let pointsToUse = Math.min(userPoints, maxPointsPerTransaction);
             const maxPointsByValue = Math.floor(initialTotal * 100);
@@ -346,6 +354,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
             const discountRM = pointsToUse / 100;
             const newTotal = initialTotal - discountRM;
 
+            // Update UI
             summaryRow.style.display = 'flex';
             summaryVal.innerText = discountRM.toFixed(2);
             grandTotalEl.innerText = newTotal.toFixed(2);
@@ -353,15 +362,18 @@ $fullApiUrl = $protocol . $host . $apiPath;
             if (displayInfo) displayInfo.style.display = 'block';
             if (displayVal) displayVal.innerText = discountRM.toFixed(2);
 
+            // Update hidden inputs for backend
             if (inputPoints) inputPoints.value = pointsToUse;
             if (inputDiscount) inputDiscount.value = discountRM.toFixed(2);
             if (inputTotal) inputTotal.value = newTotal.toFixed(2);
 
         } else {
+            // Reset UI
             summaryRow.style.display = 'none';
             grandTotalEl.innerText = initialTotal.toFixed(2);
             if (displayInfo) displayInfo.style.display = 'none';
 
+            // Reset Inputs
             if (inputPoints) inputPoints.value = 0;
             if (inputDiscount) inputDiscount.value = 0;
             if (inputTotal) inputTotal.value = initialTotal.toFixed(2);
@@ -384,7 +396,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         }
     }
 
-    // Modal Control
+    // --- Modal Controls ---
     function openAddressModal() {
         document.getElementById('addressModalOverlay').style.display = 'flex';
         loadAddressList();
@@ -419,7 +431,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         document.getElementById('warningModalOverlay').style.display = 'none';
     }
 
-    // Add/Edit Modal
+    //Add/Edit Address Form 
     function openAddAddressModal(event, address = null) {
         if (event) event.preventDefault();
         const form = document.getElementById('addEditAddressForm');
@@ -443,7 +455,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         openAddressModal();
     }
 
-    // Validation
+    // Form Validation
     function showError(inputId, message) {
         const input = document.getElementById(inputId);
         const errorSmall = document.getElementById(inputId.replace('Input', 'Error'));
@@ -474,13 +486,13 @@ $fullApiUrl = $protocol . $host . $apiPath;
     function validateAddressForm(form) {
         clearErrors(form);
         let isValid = true;
-        
+
         const name = form.ReceiverName.value.trim();
         const phone = form.phoneNumber.value.trim();
         const street = form.street_line.value.trim();
-        const postcode = form.postCode.value.trim(); 
-        const city = form.City.value.trim();   
-        const state = form.State.value.trim(); 
+        const postcode = form.postCode.value.trim();
+        const city = form.City.value.trim();
+        const state = form.State.value.trim();
 
         if (!name) {
             showError('nameInput', 'Required');
@@ -549,9 +561,11 @@ $fullApiUrl = $protocol . $host . $apiPath;
         return isValid;
     }
 
+    //Address Selection Logic
     function selectAddress(id, name, phone, address) {
         currentSelectedAddressId = id;
 
+        // Update UI Card
         const cardName = document.getElementById('cardName');
         const cardPhone = document.getElementById('cardPhone');
         const cardAddress = document.getElementById('cardAddress');
@@ -560,6 +574,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         if (cardPhone) cardPhone.innerText = `(${phone})`;
         if (cardAddress) cardAddress.innerHTML = address.replace(/\n/g, '<br>');
 
+        // Update Hidden Inputs
         const inputId = document.getElementById('address_id');
         const inputName = document.getElementById('receiver_name');
         const inputPhone = document.getElementById('receiver_phone');
@@ -581,6 +596,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         });
     }
 
+    // --- Address Actions ---
     function editAddress(id) {
         fetchAndParseJSON(BASE_ADDRESS_API_URL + '?action=get&id=' + id)
             .then(res => {
@@ -632,6 +648,8 @@ $fullApiUrl = $protocol . $host . $apiPath;
                 if (res.success && res.data.addresses.length > 0) {
                     const addresses = res.data.addresses;
                     let html = '';
+
+                    // auto-select Default if current selection is invalid
                     const stillExists = addresses.some(a => a.id == currentSelectedAddressId);
 
                     if (!stillExists || !currentSelectedAddressId) {
@@ -662,7 +680,6 @@ $fullApiUrl = $protocol . $host . $apiPath;
                     container.innerHTML = html;
                 } else {
                     container.innerHTML = '<p style="text-align: center;">No addresses found.</p>';
-                    // Reset if empty
                     selectAddress('', 'No Address Selected', '', 'Please add a new address.');
                 }
             }).catch(err => {
@@ -671,9 +688,10 @@ $fullApiUrl = $protocol . $host . $apiPath;
             });
     }
 
+    // --- Save Address Handler ---
     document.getElementById('btnSaveAddress').addEventListener('click', function(e) {
-        e.preventDefault(); 
-        
+        e.preventDefault();
+
         const form = document.getElementById('addEditAddressForm');
         
         if (!validateAddressForm(form)) {
@@ -703,9 +721,9 @@ $fullApiUrl = $protocol . $host . $apiPath;
             if (res.success) {
                 const d = res.data;
                 const fullAddr = form.street_line.value + '\n' + form.postCode.value + ' ' + form.City.value + '\n' + form.State.value;
-                
+
                 selectAddress(d.address_id, form.ReceiverName.value, form.phoneNumber.value, fullAddr);
-                
+
                 document.getElementById('addEditAddressModalOverlay').style.display = 'none';
                 showSuccess("Address has been saved successfully!");
             } else {
@@ -724,6 +742,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
         });
     });
 
+    // Payment Selection
     window.onload = function() {
         const cards = document.querySelectorAll('.payment-card');
         const radios = document.querySelectorAll('.payment-radio');

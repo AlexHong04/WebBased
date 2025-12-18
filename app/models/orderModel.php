@@ -10,6 +10,7 @@ class OrderModel
     $this->db = new Database();
   }
 
+  //create new order
   public function createOrder($customerId, $addressId, $items, $totalAmount, $shippingFee, $taxFee, $totalOrderQty, $pointsRedeemed, $paymentMethod)
   {
 
@@ -17,9 +18,9 @@ class OrderModel
     $this->db->execute();
 
     try {
-      $orderId = $this->db->generateId('`order`', 'order_id', 'O');
+      $orderId = $this->db->generateId('`ordertable`', 'order_id', 'O');
 
-      $sqlOrder = "INSERT INTO `order` (order_id, customer_id, address_id, total_amount, tax_fee, total_order_qty, redeemed_point) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      $sqlOrder = "INSERT INTO `ordertable` (order_id, customer_id, address_id, total_amount, tax_fee, total_order_qty, redeemed_point) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
       $this->db->query($sqlOrder);
       $this->db->bind(1, $orderId);
@@ -31,6 +32,7 @@ class OrderModel
       $this->db->bind(7, $pointsRedeemed);
       $this->db->execute();
 
+      //Initial Order Status
       $orderStatusId = $this->db->generateId('orderStatus', 'order_status_id', 'OS');
 
       $sqlStatus = "INSERT INTO orderStatus (order_status_id, order_status, created_datetime, order_id) 
@@ -41,6 +43,7 @@ class OrderModel
       $this->db->bind(2, $orderId);
       $this->db->execute();
 
+      //Order Items & Stock Deduction
       foreach ($items as $item) {
         $sqlItem = "INSERT INTO order_items (order_id, product_variant_id, price, order_qty) 
                             VALUES (?, ?, ?, ?)";
@@ -51,6 +54,7 @@ class OrderModel
         $this->db->bind(4, $item['quantity']);
         $this->db->execute();
 
+        //Deduct Stock
         $sqlStock = "UPDATE product_variant SET stock_qty = stock_qty - ? WHERE product_variant_id = ?";
         $this->db->query($sqlStock);
         $this->db->bind(1, $item['quantity']);
@@ -58,8 +62,8 @@ class OrderModel
         $this->db->execute();
       }
 
+      //Create Payment Record
       $paymentId = $this->db->generateId('payment', 'payment_id', 'PM');
-
       $sqlPayment = "INSERT INTO payment (payment_id, order_id, amount, payment_method, payment_status, created_datetime) 
                            VALUES (?, ?, ?, ?, 'Unpaid', NOW())";
 
@@ -70,6 +74,7 @@ class OrderModel
       $this->db->bind(4, $paymentMethod);
       $this->db->execute();
 
+      //Remove Purchased Items from Cart
       $this->db->query("SELECT cart_id FROM cart WHERE customer_id = ?");
       $this->db->bind(1, $customerId);
       $cartRow = $this->db->result();
@@ -84,6 +89,7 @@ class OrderModel
         }
       }
 
+      //Deduct Customer Points
       if ($pointsRedeemed > 0) {
         $this->db->query("SELECT rewardPoint FROM customer WHERE customer_id = ?");
         $this->db->bind(1, $customerId);
@@ -158,7 +164,7 @@ class OrderModel
                        p.payment_id,
                        p.updated_datetime as payment_updated_at,
                        p.created_datetime as payment_created_at
-                FROM `order` o
+                FROM `ordertable` o
                 JOIN address a ON o.address_id = a.address_id
                 JOIN payment p ON o.order_id = p.order_id
                 WHERE o.order_id = ? LIMIT 1";
@@ -184,7 +190,7 @@ class OrderModel
   // Get Order by ID
   public function getOrderById($orderId)
   {
-    $sql = "SELECT * FROM `order` WHERE order_id = ? LIMIT 1";
+    $sql = "SELECT * FROM `ordertable` WHERE order_id = ? LIMIT 1";
     $this->db->query($sql);
     $this->db->bind(1, $orderId);
     return $this->db->result();
@@ -207,7 +213,7 @@ class OrderModel
   public function getCustomerInfoByOrder($orderId)
   {
     $sql = "SELECT c.email, c.firstname, c.lastname 
-                FROM `order` o 
+                FROM `ordertable` o 
                 JOIN customer c ON o.customer_id = c.customer_id 
                 WHERE o.order_id = ?";
     $this->db->query($sql);

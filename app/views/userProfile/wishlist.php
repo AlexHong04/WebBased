@@ -88,7 +88,7 @@ include '../header.php';
                     <div class="empty-wishlist">
                         <i class="far fa-heart"></i>
                         <p>Your wishlist is empty.</p>
-                        <a href="/index.php" class="btn-shop">Start Shopping</a>
+                        <a href="/app/views/category/categoryHomePage.php" class="btn-shop">Start Shopping</a>
                     </div>
                 <?php else: ?>
 

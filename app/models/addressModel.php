@@ -10,6 +10,7 @@ class addressModel
         $this->db = new Database();
     }
 
+    //Combines address fields into a single string for display
     private function formatAddressRow($row)
     {
         if (!$row) return null;
@@ -20,6 +21,7 @@ class addressModel
         return $row;
     }
 
+    //Fetch specific address by ID belonging to a customer
     public function getAddressById($customerId, $id)
     {
         $sql = "SELECT * FROM address 
@@ -31,6 +33,7 @@ class addressModel
         return $this->formatAddressRow($this->db->result());
     }
 
+    //Fetch all non-deleted addresses for a customer
     public function getCustomerAddresses($customerId)
     {
         $sql = "SELECT address_id, recipient_name, recipient_phone, street_line, city, state, postcode, is_default 
@@ -43,6 +46,7 @@ class addressModel
         return array_map([$this, 'formatAddressRow'], $results);
     }
 
+    //Fetch the user's default shipping address
     public function getDefaultAddress($customerId) {
         $sql = "SELECT * FROM address 
                 WHERE customer_id = ? AND is_default = 1 AND is_deleted = 0 
@@ -59,6 +63,8 @@ class addressModel
         return $row;
     }
 
+    //If ID exists -> Update
+    //If not -> Insert
     public function saveAddress($customerId, $id, $name, $phone, $street, $city, $state, $postcode)
     {
         if ($id) {
@@ -100,6 +106,7 @@ class addressModel
         return false;
     }
 
+    //Soft Delete Address
     public function deleteAddress($customerId, $id)
     {
         $sql = "UPDATE address SET is_deleted = TRUE WHERE address_id = ? AND customer_id = ?";
@@ -109,6 +116,7 @@ class addressModel
         return $this->db->execute();
     }
 
+    //Count active addresses for a customer
     public function countAddresses($customerId)
     {
         $this->db->query("SELECT COUNT(*) FROM address WHERE customer_id = ? AND is_deleted = 0");

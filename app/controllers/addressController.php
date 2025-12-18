@@ -16,6 +16,7 @@ class AddressController {
             $this->sendResponse(false, "Authentication required.");
         }
 
+        // Initialize Address Model
         try {
             $this->addressModel = new addressModel();
         } catch (Exception $e) {
@@ -23,6 +24,7 @@ class AddressController {
         }
     }
 
+    //list all addresses for the current user
     public function listAddresses() {
         try {
             $addresses = $this->addressModel->getCustomerAddresses($this->customerId);
@@ -32,6 +34,7 @@ class AddressController {
         }
     }
 
+    //Get a single address by ID
     public function getAddress() {
         $id = get('id');
         if (!$id) $this->sendResponse(false, "Missing ID.");
@@ -44,6 +47,7 @@ class AddressController {
         }
     }
 
+    //Save address (Create or Update)
     public function saveAddress() {
         if (!is_post()) $this->sendResponse(false, "Invalid Method.");
 
@@ -73,12 +77,14 @@ class AddressController {
         }
     }
 
+    //Soft Delete an address
     public function deleteAddress() {
         if (!is_post()) $this->sendResponse(false, "Invalid Method.");
         
         $id = post('address_id');
         if (!$id) $this->sendResponse(false, "Missing ID.");
 
+        //Check if trying to delete default address
         $addr = $this->addressModel->getAddressById($this->customerId, $id);
         if ($addr && $addr['is_default'] == 1) {
             $this->sendResponse(false, "Cannot delete default address.");
