@@ -10,6 +10,7 @@ class productModel
     $this->db = new Database();
   }
 
+  // fetches the product details and its associated category name --> product_details
   public function getProductById($productId)
   {
     $sql = "SELECT p.*, c.category_name 
@@ -22,6 +23,7 @@ class productModel
     return $this->db->result();
   }
 
+  //fetches all variants for a specific product --> product_details
   public function getProductVariants($productId)
   {
     $sql = "SELECT 
@@ -40,6 +42,7 @@ class productModel
     return $this->db->resultAll();
   }
 
+  //calculates review for the product --> product_details
   public function getProductGlobalStats($productId)
   {
     $sql = "SELECT 
@@ -54,6 +57,7 @@ class productModel
     return $this->db->result();
   }
 
+  //fetches detailed reviews for the product --> product_details
   public function getProductReviews($productId, $limit = 5, $offset = 0)
   {
     $sql = "SELECT 
@@ -81,6 +85,7 @@ class productModel
     return $reviews;
   }
 
+  //fetches related products (suggestions) from the same category --> product_details
   public function getRelatedProducts($categoryId, $currentProductId)
   {
     $sql = "SELECT p.product_id, p.product_name, p.sale_price, p.img_url, p.category_id, c.category_name
@@ -94,7 +99,7 @@ class productModel
     $this->db->bind(2, $currentProductId);
     return $this->db->resultAll();
   }
-  //when user doesnot pay the product, after 4hour will expired and restore stock
+  // when user doesnot pay the product, after 4hour will expired and restore stock -->payment
   public function restoreStock($variantId, $quantity)
   {
     $sql = "UPDATE product_variant SET stock_qty = stock_qty + ? WHERE product_variant_id = ?";

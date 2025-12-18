@@ -1,8 +1,10 @@
 <?php
+// Enable error display for debugging purposes
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Start the session if it hasn't been started yet
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -29,7 +31,7 @@ include '../header.php';
 // Constants
 define('DEFAULT_IMG', 'https://via.placeholder.com/600x600/text=No+Image');
 
-// --- UI Helper Functions (Render Stars) ---
+// UI Helper Functions (Render Stars)
 function renderStars($rating)
 {
     $starsHtml = '<span class="star-rating" style="color:#f0ad4e; font-size:0.9rem;">';
@@ -61,7 +63,7 @@ function findVariantImage($vid, $gallery)
 // Get default main photo 
 $mainImageUrl = !empty($product['img_url']) ? $product['img_url'] : DEFAULT_IMG;
 
-// --- Toast Message ---
+// Toast Message
 $toastMsg = '';
 $toastType = '';
 $toastIcon = '';
@@ -80,10 +82,10 @@ if ($msg = temp('flash_error')) {
     $toastIcon = 'fa-check-circle';
 }
 
-// --- Check Login Required Flash ---
+// Check Login Required Flash
 $loginRequiredMsg = temp('flash_login_required');
 
-// --- Variant Logic ---
+// Variant 
 $selectedVid = temp('keep_variant_id');
 
 $currentVariant = !empty($product['variants']) ? $product['variants'][0] : null;
@@ -117,119 +119,145 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
 
 <?php if (isset($product) && $product): ?>
     <div class="product-container">
-        <div class="product-images">
-            <div class="main-image-wrapper">
-                <button class="main-arrow prev-arrow" onclick="navigateImage(-1)"><i class="fas fa-chevron-left"></i></button>
-                <img src="<?= encode($currImg) ?>" id="mainImage" class="main-image" alt="Product Image">
-                <button class="main-arrow next-arrow" onclick="navigateImage(1)"><i class="fas fa-chevron-right"></i></button>
-            </div>
-
-            <div class="thumbnail-slider-container">
-                <?php
-                if (empty($galleryImages) && !empty($product['img_url'])) {
-                    $singleUrl = $product['img_url'];
-                    echo '<img src="' . encode($singleUrl) . '" class="thumbnail active" onclick="changeMainImage(\'' . encode($singleUrl) . '\', this)">';
-                }
-
-                foreach ($galleryImages as $index => $photo):
-                    $pUrl = is_object($photo) ? $photo->img_url : $photo['img_url'];
-                ?>
-                    <img src="<?= encode($pUrl) ?>"
-                        class="thumbnail <?= ($pUrl === $currImg) ? 'active' : '' ?>"
-                        onclick="changeMainImage('<?= encode($pUrl) ?>', this)"
-                        alt="Thumbnail">
-                <?php endforeach; ?>
-            </div>
+        <div class="product-header-nav">
+            <a href="javascript:history.back();" class="back-link-header">
+                &#x293A;
+            </a>
         </div>
 
-        <div class="product-details">
-            <span class="category"><?= encode($product['category_name'] ?? 'Category') ?></span>
-            <h1><?= encode($product['product_name']) ?></h1>
+        <div class="product-content-row">
+            <div class="product-images">
+                <div class="main-image-wrapper">
+                    <button class="main-arrow prev-arrow" onclick="navigateImage(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <img src="<?= encode($currImg) ?>" id="mainImage" class="main-image" alt="Product Image">
+                    <button class="main-arrow next-arrow" onclick="navigateImage(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
 
-            <div class="price-section">
-                <span class="price">RM<?= number_format($product['sale_price'], 2) ?></span>
+                <div class="thumbnail-slider-container">
+                    <?php
+                    // Logic to remove duplicate images
+                    $displayedUrls = [];
+                    $finalImages = [];
+
+                    // Add Main Image
+                    if (!empty($product['img_url'])) {
+                        $finalImages[] = $product['img_url'];
+                        $displayedUrls[] = $product['img_url'];
+                    }
+
+                    // Add Gallery Images 
+                    foreach ($galleryImages as $photo) {
+                        $pUrl = is_object($photo) ? $photo->img_url : $photo['img_url'];
+                        if (!empty($pUrl) && !in_array($pUrl, $displayedUrls)) {
+                            $finalImages[] = $pUrl;
+                            $displayedUrls[] = $pUrl;
+                        }
+                    }
+
+                    // Render Unique Images
+                    foreach ($finalImages as $index => $imgUrl):
+                    ?>
+                        <img src="<?= encode($imgUrl) ?>"
+                            class="thumbnail <?= ($imgUrl === $currImg) ? 'active' : '' ?>"
+                            onclick="changeMainImage('<?= encode($imgUrl) ?>', this)"
+                            alt="Thumbnail">
+                    <?php endforeach; ?>
+                </div>
             </div>
 
-            <p><?= nl2br(encode($product['description'])) ?></p>
+            <div class="product-details">
+                <span class="category"><?= encode($product['category_name'] ?? 'Category') ?></span>
+                <h1><?= encode($product['product_name']) ?></h1>
 
-            <div class="options-section">
-                <strong>Variant:</strong>
-                <div class="variant-list">
-                    <?php if (!empty($product['variants'])): ?>
-                        <?php foreach ($product['variants'] as $variant): ?>
+                <div class="price-section">
+                    <span class="price">RM<?= number_format($product['sale_price'], 2) ?></span>
+                </div>
+
+                <!-- nl2br = New Link To Break -->
+                <p><?= nl2br(encode($product['description'])) ?></p>
+
+                <div class="options-section">
+                    <strong>Variant:</strong>
+                    <div class="variant-list">
+                        <?php if (!empty($product['variants'])): ?>
+                            <?php foreach ($product['variants'] as $variant): ?>
+                                <?php
+                                $isOOS = $variant['stock_qty'] <= 0;
+                                $isActive = ($variant['product_variant_id'] == $currVid);
+                                $badgeClass = ($isActive ? 'active-variant ' : '') . ($isOOS ? 'out-of-stock-variant' : '');
+
+                                $vImgUrl = findVariantImage($variant['product_variant_id'], $galleryImages);
+                                $vImgUrlStr = $vImgUrl ? encode($vImgUrl) : '';
+                                ?>
+
+                                <span class="option-badge <?= $badgeClass ?>"
+                                    onclick="selectVariant(this, 
+                                        '<?= $variant['stock_qty'] ?>', 
+                                        '<?= $variant['stock_status'] ?>', 
+                                        '<?= $variant['product_variant_id'] ?>', 
+                                        '<?= $vImgUrlStr ?>')">
+
+                                    <?= encode($variant['variant_name']) ?>
+                                </span>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <span style="color:red;">No variants found.</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <form class="purchase-form" action="../../controllers/cart_router.php?action=add" method="POST">
+                    <?php
+                    $GLOBALS['product_variant_id'] = $currVid;
+                    html_hidden('product_variant_id');
+                    ?>
+
+                    <div class="stock-status" id="stockDisplay">
+                        <?php
+                        if ($realAvailable > 0) {
+                            echo '<span class="status-in-stock">' . encode($currStatus) . ' (' . $realAvailable . ' available)</span>';
+                        } else {
+                            echo '<span class="status-out-of-stock">Out of Stock (0 available)</span>';
+                        }
+                        ?>
+                    </div>
+
+                    <div class="action-buttons-container">
+                        <div class="quantity-selector-fancy">
+                            <button type="button" onclick="decreaseQuantity()">-</button>
+
                             <?php
-                            $isOOS = $variant['stock_qty'] <= 0;
-                            $isActive = ($variant['product_variant_id'] == $currVid);
-                            $badgeClass = ($isActive ? 'active-variant ' : '') . ($isOOS ? 'out-of-stock-variant' : '');
+                            $maxQty = ($realAvailable > 0) ? $realAvailable : 0;
+                            $isDisabledStr = ($realAvailable <= 0) ? 'disabled' : '';
 
-                            $vImgUrl = findVariantImage($variant['product_variant_id'], $galleryImages);
-                            $vImgUrlStr = $vImgUrl ? encode($vImgUrl) : '';
+                            $GLOBALS['quantity'] = ($realAvailable > 0) ? 1 : 0;
+
+                            $qtyAttrs = "onchange='validateQuantity()' 
+                                         onkeydown=\"if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }\" 
+                                         $isDisabledStr";
+
+                            html_number('quantity', '0', $maxQty, '1', $qtyAttrs);
                             ?>
 
-                            <span class="option-badge <?= $badgeClass ?>"
-                                onclick="selectVariant(this, 
-                                    '<?= $variant['stock_qty'] ?>', 
-                                    '<?= $variant['stock_status'] ?>', 
-                                    '<?= $variant['product_variant_id'] ?>', 
-                                    '<?= $vImgUrlStr ?>')">
+                            <button type="button" onclick="increaseQuantity()">+</button>
+                        </div>
+                        <?php $isOutOfStock = $realAvailable <= 0; ?>
+                        <button type="submit" class="add-to-cart-btn <?= $isOutOfStock ? 'disabled' : '' ?>" <?= $isOutOfStock ? 'disabled' : '' ?>>
+                            <i class="fas fa-shopping-bag"></i> ADD TO CART
+                        </button>
 
-                                <?= encode($variant['variant_name']) ?>
-                            </span>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <span style="color:red;">No variants found.</span>
-                    <?php endif; ?>
-                </div>
-            </div>
+                        <button type="button" class="wishlist-btn <?= $isWishlisted ? 'active' : '' ?>" onclick="toggleWishlist(this)">
+                            <i class="<?= $isWishlisted ? 'fas' : 'far' ?> fa-heart"></i>
+                        </button>
 
-            <form class="purchase-form" action="../../controllers/cart_router.php?action=add" method="POST">
-                <?php
-                $GLOBALS['product_variant_id'] = $currVid;
-                html_hidden('product_variant_id');
-                ?>
-
-                <div class="stock-status" id="stockDisplay">
-                    <?php
-                    if ($realAvailable > 0) {
-                        echo '<span class="status-in-stock">' . encode($currStatus) . ' (' . $realAvailable . ' available)</span>';
-                    } else {
-                        echo '<span class="status-out-of-stock">Out of Stock (0 available)</span>';
-                    }
-                    ?>
-                </div>
-
-                <div class="action-buttons-container">
-                    <div class="quantity-selector-fancy">
-                        <button type="button" onclick="decreaseQuantity()">-</button>
-
-                        <?php
-                        $maxQty = ($realAvailable > 0) ? $realAvailable : 0;
-                        $isDisabledStr = ($realAvailable <= 0) ? 'disabled' : '';
-
-                        $GLOBALS['quantity'] = ($realAvailable > 0) ? 1 : 0;
-
-                        $qtyAttrs = "onchange='validateQuantity()' 
-                                     onkeydown=\"if(event.key === 'Enter'){ event.preventDefault(); this.blur(); }\" 
-                                     $isDisabledStr";
-
-                        html_number('quantity', '0', $maxQty, '1', $qtyAttrs);
-                        ?>
-
-                        <button type="button" onclick="increaseQuantity()">+</button>
+                        <button type="button" class="share-btn" onclick="copyProductLink(this)" title="Share Product">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
                     </div>
-                    <?php $isOutOfStock = $realAvailable <= 0; ?>
-                    <button type="submit" class="add-to-cart-btn <?= $isOutOfStock ? 'disabled' : '' ?>" <?= $isOutOfStock ? 'disabled' : '' ?>>
-                        <i class="fas fa-shopping-bag"></i> ADD TO CART
-                    </button>
-
-                    <button type="button" class="wishlist-btn <?= $isWishlisted ? 'active' : '' ?>" onclick="toggleWishlist(this)">
-                        <i class="<?= $isWishlisted ? 'fas' : 'far' ?> fa-heart"></i>
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-
     <div class="review-section" id="reviews-anchor">
         <h2>Customer Reviews</h2>
         <?php
@@ -249,7 +277,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
                 <span class="score-total">(Based on <?= $totalReviews ?> reviews)</span>
             </div>
 
-            <div class="review-list">
+            <div class="review-list" id="reviewList">
                 <?php foreach ($product['reviews'] as $review):
                     $review = is_object($review) ? (array)$review : $review;
                     $r_name = $review['customer_name'] ?? 'Anonymous';
@@ -291,6 +319,9 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
                     </div>
                 <?php endforeach; ?>
             </div>
+
+            <div class="pagination-container" id="reviewPagination" style="margin-top: 20px; display: flex; justify-content: center; gap: 5px;"></div>
+
         <?php else: ?>
             <div style="text-align:center; padding:40px; color:#999;">
                 <i class="far fa-comment-dots" style="font-size:2rem; margin-bottom:10px;"></i>
@@ -381,6 +412,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
     const WISHLIST_API_URL = '/app/controllers/wishlist_router.php';
 
     // Toast Auto Hide
+    // Automatically hide toast messages after 4 seconds
     document.addEventListener("DOMContentLoaded", function() {
         const toast = document.getElementById('toast-notification');
         if (toast) {
@@ -442,7 +474,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         const prevBtn = document.querySelector('.lightbox-prev');
         const nextBtn = document.querySelector('.lightbox-next');
         const counter = document.getElementById('lightboxCounter');
-
+        // Show arrows only if multiple images
         if (currentReviewPhotos.length > 1) {
             prevBtn.style.display = 'flex';
             nextBtn.style.display = 'flex';
@@ -454,6 +486,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         }
     }
 
+    //keyboard action
     document.addEventListener('keydown', function(event) {
         if (event.key === "Escape") closeReviewGallery();
         if (document.getElementById('reviewLightbox').style.display === 'flex') {
@@ -506,6 +539,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         changeMainImage(thumbnails[currentIndex].src, thumbnails[currentIndex], true);
     }
 
+    // Change main image when clicking thumbnails
     function changeMainImage(src, element, fromNav = false) {
         document.getElementById('mainImage').src = src;
 
@@ -530,9 +564,11 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         }
     }
 
+    // Variant Selection 
     function selectVariant(element, qty, status, id, img) {
         stopAutoSlide();
 
+        // Update active badge
         document.querySelectorAll('.option-badge').forEach(el => el.classList.remove('active-variant'));
         element.classList.add('active-variant');
 
@@ -540,7 +576,8 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         const stockDisplay = document.getElementById('stockDisplay');
         const qtyInput = document.getElementById('quantity');
         const addToCartBtn = document.querySelector('.add-to-cart-btn');
-
+        
+        // Update Stock Display & Button State
         if (stockQty > 0) {
             stockDisplay.innerHTML = `<span class="status-in-stock">${status} (${stockQty} available)</span>`;
             if (qtyInput) {
@@ -571,11 +608,13 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
             variantInput.value = id;
         }
 
+        // Change image to variant image if available
         if (img && img.trim() !== '') {
             changeMainImage(img, null, false);
         }
     }
 
+    //Quantity Controls
     function increaseQuantity() {
         var qty = document.getElementById('quantity');
         if (qty.disabled) return;
@@ -699,6 +738,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
             });
     }
 
+    // Related Products
     function scrollRelated(direction) {
         const container = document.getElementById('relatedGrid');
         const scrollAmount = 300;
@@ -708,6 +748,120 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         } else {
             container.scrollLeft -= scrollAmount;
         }
+    }
+
+    // Review Pagination 
+    const reviewItemsPerPage = 4;
+    let currentReviewPage = 1;
+    let allReviewCards = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const list = document.getElementById('reviewList');
+        if (list) {
+            allReviewCards = Array.from(list.getElementsByClassName('review-item'));
+            if (allReviewCards.length > 0) {
+                renderReviewPage();
+            }
+        }
+    });
+
+    function renderReviewPage() {
+        const totalItems = allReviewCards.length;
+        const totalPages = Math.ceil(totalItems / reviewItemsPerPage);
+
+        allReviewCards.forEach(card => card.style.display = 'none');
+
+        // Calculate range
+        const start = (currentReviewPage - 1) * reviewItemsPerPage;
+        const end = start + reviewItemsPerPage;
+        const itemsToShow = allReviewCards.slice(start, end);
+
+        // Show items for current page
+        itemsToShow.forEach(card => {
+            card.style.display = 'flex';
+        });
+
+        renderReviewPaginationHTML(totalPages);
+    }
+
+    function renderReviewPaginationHTML(totalPages) {
+        const container = document.getElementById('reviewPagination');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        const firstBtn = createPageBtn("&laquo;", "Go to First Page", currentReviewPage === 1, () => changePage(1));
+        container.appendChild(firstBtn);
+
+        const range = 2;
+
+        // Generate Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentReviewPage - range && i <= currentReviewPage + range)) {
+                const isActive = (i === currentReviewPage);
+                const pageBtn = createPageBtn(i, `Go to Page ${i}`, false, () => changePage(i));
+                if (isActive) pageBtn.classList.add('active');
+                container.appendChild(pageBtn);
+            } else if (i === currentReviewPage - range - 1 || i === currentReviewPage + range + 1) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'page-ellipsis';
+                ellipsis.innerText = '...';
+                container.appendChild(ellipsis);
+            }
+        }
+
+        const lastBtn = createPageBtn("&raquo;", "Go to Last Page", currentReviewPage === totalPages, () => changePage(totalPages));
+        container.appendChild(lastBtn);
+    }
+
+    function createPageBtn(html, title, isDisabled, onClick) {
+        const a = document.createElement('a');
+        a.className = `page-link ${isDisabled ? 'disabled' : ''}`;
+        a.innerHTML = html;
+        a.title = title;
+        if (!isDisabled) {
+            a.onclick = onClick;
+        }
+        return a;
+    }
+
+    function changePage(newPage) {
+        if (newPage === currentReviewPage) return;
+
+        currentReviewPage = newPage;
+        renderReviewPage();
+
+        const anchor = document.getElementById('reviews-anchor');
+        if (anchor) {
+            const headerOffset = 100;
+            const elementPosition = anchor.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+        }
+    }
+
+    // Share Product Functionality
+    function copyProductLink(btn) {
+        const url = window.location.href;
+        
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Link copied to clipboard!', 'success');
+            
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+                btn.innerHTML = originalIcon;
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            showToast('Failed to copy link.', 'error');
+        });
     }
 </script>
 

@@ -6,13 +6,15 @@ require_once __DIR__ . '/../helpers/request.php';
 class productController
 {
   private $productModel;
-  public function __construct(){
+  public function __construct()
+  {
     $this->productModel = new productModel();
   }
 
   const IMG_BASE_URL = '/public/';
   const REVIEW_IMG_BASE_PATH = '/public/images/review/';
 
+  // resolve the full URL of an image
   private function resolveImagePath($path, $categoryName = '')
   {
     if (empty($path)) return 'https://via.placeholder.com/300';
@@ -21,7 +23,7 @@ class productController
 
     $filenameOnly = basename($path);
     $categoryFolder = '';
-
+    // append category folder if provided to organize images
     if (!empty($categoryName)) {
       $categoryFolder = trim($categoryName) . '/';
     }
@@ -29,6 +31,7 @@ class productController
     return self::IMG_BASE_URL . 'images/' . $categoryFolder . $filenameOnly;
   }
 
+  //fetch data --> Product Details
   public function getProductDetails($productId)
   {
 
@@ -52,6 +55,7 @@ class productController
 
     $firstMainImg = trim($mainImgParts[0]);
 
+    // primary display image
     $product['img_url'] = empty($firstMainImg) ? '' : $this->resolveImagePath($firstMainImg, $categoryName);
     $product['display_img_url'] = $product['img_url'];
 
@@ -72,6 +76,7 @@ class productController
       }
     }
 
+    // add images from variants to the gallery
     if (!empty($photos)) {
       foreach ($photos as $photo) {
         $pUrl = is_object($photo) ? ($photo->img_url ?? $photo->photo ?? '') : ($photo['img_url'] ?? $photo['photo'] ?? '');
@@ -170,6 +175,7 @@ class productController
     }
 
     // Wishlist Status
+    // checks if the current user has already liked this product
     $isWishlisted = false;
     if (session_status() === PHP_SESSION_NONE) session_start();
     if (isset($_SESSION['customerId'])) {

@@ -80,7 +80,9 @@ class WishlistModel {
                 JOIN product p ON pv.product_id = p.product_id
                 LEFT JOIN category c ON p.category_id = c.category_id
                 WHERE w.customer_id = ?
-                ORDER BY wi.wishlist_item_id DESC";
+                ORDER BY
+                    CASE WHEN pv.stock_qty > 0 THEN 0 ELSE 1 END ASC,
+                    wi.wishlist_item_id DESC";
 
         $this->db->query($sql);
         $this->db->bind(1, $customerId);
