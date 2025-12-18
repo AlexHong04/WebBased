@@ -334,7 +334,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
     <div class="not-found-container">
         <h1>Product Not Found</h1>
         <p>We couldn't find the product you were looking for.</p>
-        <a href="index.php" style="color: #fc84a3;">Go Home</a>
+        <a href="/app/views/home.php" style="color: #fc84a3;">Go Home</a>
     </div>
 <?php endif; ?>
 
