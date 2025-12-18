@@ -10,7 +10,7 @@ class cartModel
         $this->db = new Database();
     }
 
-    // Get or Create Cart ID
+    // Get or Create Cart ID (ensures every customer has a valid active cart)
     public function getOrCreateCart($customerId)
     {
         $sql = "SELECT cart_id FROM cart WHERE customer_id = ?";
@@ -21,6 +21,7 @@ class cartModel
         if ($row) {
             return $row['cart_id'];
         } else {
+            // create new cart if not found
             $newId = $this->db->generateId('cart', 'cart_id', 'CA');
 
             $sql = "INSERT INTO cart (cart_id, customer_id, created_datetime, updated_datetime) VALUES (?, ?, NOW(), NOW())";
@@ -44,6 +45,7 @@ class cartModel
         $item = $this->db->result();
 
         if ($item) {
+            // update existing item quantity
             $newQty = $item['quantity'] + $qty;
             $sql = "UPDATE cart_items SET quantity = ? WHERE cart_item_id = ?";
             $this->db->query($sql);
@@ -51,6 +53,7 @@ class cartModel
             $this->db->bind(2, $item['cart_item_id']);
             return $this->db->execute();
         } else {
+            //insert new item
             $newItemId = $this->db->generateId('cart_items', 'cart_item_id', 'CI');
 
             $sql = "INSERT INTO cart_items (cart_item_id, cart_id, product_variant_id, quantity, cart_status) VALUES (?, ?, ?, ?, 0)";
@@ -152,7 +155,7 @@ class cartModel
         return $this->db->execute();
     }
     
-    //Get Product Stock
+    //to check available stock for a variant.
     public function getProductStock($variantId)
     {
         $sql = "SELECT stock_qty FROM product_variant WHERE product_variant_id = ?";
@@ -162,7 +165,7 @@ class cartModel
         return $row ? (int)$row['stock_qty'] : 0;
     }
 
-    //Get Product Stock
+    //check current quantity of an item already in the user's cart
     public function getCartItemQty($cartId, $variantId)
     {
         $sql = "SELECT quantity FROM cart_items WHERE cart_id = ? AND product_variant_id = ? AND cart_status = 0";

@@ -53,7 +53,7 @@ class PaymentController
         }
         if ($order['customer_id'] !== $_SESSION['customerId']) {
             temp('flash_error', 'Unauthorized access to this payment page.');
-            redirect('/app/views/index.php');
+            redirect('/app/views/home.php');
             return;
         }
 
@@ -106,7 +106,7 @@ class PaymentController
         $order = $this->orderModel->getOrderById($orderId);
         if ($order['customer_id'] !== $_SESSION['customerId']) {
             temp('flash_error', 'Unauthorized action.');
-            redirect('/app/views/index.php');
+            redirect('/app/views/home.php');
             return;
         }
 

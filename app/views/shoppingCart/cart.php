@@ -22,7 +22,7 @@ if ($msg = temp('flash_error')) {
     $toastMsg = $msg;
     $toastType = 'success';
 }
-
+// payment cancellation status from checkout
 if (isset($_GET['status']) && $_GET['status'] === 'pending_payment') {
     $toastMsg = "Pending Payment: Your transaction was not completed.";
     $toastType = "warning";
@@ -35,7 +35,7 @@ include '../header.php';
 
 <div class="main-cart-wrapper">
 
-    <a href="index.php" class="back-to-shop">
+    <a href="/app/views/category/categoryHomePage.php" class="back-to-shop">
         <i class="fa fa-store"></i> Back to Shop
     </a>
 
@@ -77,6 +77,7 @@ include '../header.php';
                     <tbody id="cartTableBody">
                         <?php foreach ($cartItems as $item): ?>
                             <?php
+                            // Determine if item is Out of Stock (OOS)
                             $isOOS = $item['stock_qty'] <= 0;
                             $rowClass = $isOOS ? 'cart-row out-of-stock' : 'cart-row';
                             $pid = encode($item['product_id']);
@@ -218,7 +219,7 @@ include '../header.php';
         if (document.getElementById('cartTableBody').children.length > 0) {
             calculateTotal();
         }
-        refreshCartCount();
+        refreshCartCount();// Update global cart count in header
 
         const phpToast = document.getElementById('toast-notification');
         if (phpToast) {
@@ -230,6 +231,7 @@ include '../header.php';
         }
     };
 
+    //Refresh Global Cart Count
     function refreshCartCount() {
         fetch(BASE_API_URL + '?action=count')
             .then(response => response.text())
@@ -243,6 +245,7 @@ include '../header.php';
             .catch(err => console.error('Failed to update cart count', err));
     }
 
+    //Update Item Quantity
     function updateQty(btn, change, variantId) {
         const row = btn.closest('tr');
         const input = row.querySelector('.qty-input');
@@ -250,18 +253,20 @@ include '../header.php';
         let maxStock = parseInt(input.getAttribute('max'));
         let newVal = currentVal + change;
 
+        // Validation limits
         if (newVal < 1) newVal = 1;
         if (newVal > maxStock) {
             showToast("Sorry, maximum stock available is " + maxStock, 'warning');
             newVal = maxStock;
         }
 
+        // only proceed if value actually changed
         if (newVal !== currentVal) {
             input.value = newVal;
             const price = parseFloat(row.dataset.price);
             row.querySelector('.row-total').innerText = (price * newVal).toFixed(2);
 
-            calculateTotal();
+            calculateTotal();// recalculate summary
 
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
@@ -270,6 +275,7 @@ include '../header.php';
         }
     }
 
+    // Send Quantity Update
     function sendUpdateToDatabase(variantId, quantity) {
         const url = BASE_API_URL + '?action=update';
         fetch(url, {
@@ -288,14 +294,17 @@ include '../header.php';
             .catch(error => console.error(error));
     }
 
+    //Filter Cart Items (Search)
     function filterCart() {
         const input = document.getElementById('cartSearchInput');
         const rawFilter = input.value.toLowerCase();
+        // Allow multiple keywords separated by commas
         const searchGroups = rawFilter.split(',').map(s => s.trim()).filter(s => s !== '');
         const rows = document.querySelectorAll('.cart-row');
         let hasVisibleItems = false;
 
         if (searchGroups.length === 0) {
+            // No search term -> Show all rows
             rows.forEach(row => row.style.display = "");
             hasVisibleItems = true;
         } else {
@@ -304,6 +313,7 @@ include '../header.php';
                 if (nameElement) {
                     const txtValue = (nameElement.textContent || nameElement.innerText).toLowerCase();
                     let isMatch = false;
+                    // Check if row text contains any of the search groups
                     for (let group of searchGroups) {
                         const keywords = group.split(/\s+/).filter(k => k !== '');
                         if (keywords.every(keyword => txtValue.includes(keyword))) {
@@ -321,6 +331,7 @@ include '../header.php';
             });
         }
 
+        // "No Search Result" Message
         const noResultMsg = document.getElementById('noSearchResult');
         if (!noResultMsg && !hasVisibleItems) {
             const itemsSection = document.querySelector('.cart-items-section');
@@ -336,6 +347,7 @@ include '../header.php';
         calculateTotal();
     }
 
+    // Calculate Totals & Update UI
     function calculateTotal() {
         let subtotal = 0;
         let count = 0;
@@ -354,6 +366,7 @@ include '../header.php';
                 if (qty > 0) {
                     subtotal += price * qty;
                     count++;
+                    // Add item to summary list sidebar
                     summaryList.innerHTML += `
                     <div class="summary-item-row" style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.9rem;">
                         <span class="summary-item-name">${name} <span class="summary-item-qty" style="color:#999;">x${qty}</span></span>
@@ -363,24 +376,28 @@ include '../header.php';
             }
         });
 
+        // update summary elements
         document.getElementById('cartSubtotal').innerText = subtotal.toFixed(2);
         document.getElementById('selectedCount').innerText = count;
         let finalShipping = (count > 0) ? deliveryFee : 0;
         document.getElementById('shippingFee').innerText = finalShipping.toFixed(2);
         document.getElementById('grandTotal').innerText = (subtotal + finalShipping).toFixed(2);
 
+        //"Select All" Checkbox State
         const activeCheckboxes = Array.from(document.querySelectorAll('.item-checkbox')).filter(cb => !cb.disabled && cb.closest('tr').style.display !== 'none');
         const checkedActiveCheckboxes = activeCheckboxes.filter(cb => cb.checked);
         const allChecked = activeCheckboxes.length > 0 && activeCheckboxes.length === checkedActiveCheckboxes.length;
         const selectAllCb = document.getElementById('selectAll');
         if (selectAllCb) selectAllCb.checked = (activeCheckboxes.length > 0) && allChecked;
 
+        // Toggle Checkout Button
         const btn = document.getElementById('checkoutBtn');
         if (btn) {
             btn.disabled = count === 0;
             btn.style.opacity = (count === 0) ? '0.6' : '1';
         }
 
+        // Toggle Batch Delete Bar
         const checkedCount = checkedActiveCheckboxes.length;
         const batchBar = document.getElementById('batchActionBar');
         const batchCountSpan = document.getElementById('batchCount');
@@ -391,9 +408,11 @@ include '../header.php';
         }
     }
 
+    //Select/Deselect All
     function toggleSelectAll() {
         const mainCb = document.getElementById('selectAll');
         document.querySelectorAll('.item-checkbox').forEach(cb => {
+            // Only toggle visible and enabled checkboxes
             if (!cb.disabled && cb.closest('tr').style.display !== 'none') {
                 cb.checked = mainCb.checked;
             }
@@ -428,6 +447,7 @@ include '../header.php';
         }, 4000);
     }
 
+    //Delete Single Item
     function removeItem(btn, variantId) {
         const confirmBtn = document.querySelector('.confirm-delete-btn');
         confirmBtn.dataset.targetId = variantId;
@@ -438,6 +458,7 @@ include '../header.php';
         document.getElementById('deleteModalOverlay').style.display = 'flex';
     }
 
+    //Delete Batch
     function confirmBatchDelete() {
         const confirmBtn = document.querySelector('.confirm-delete-btn');
         confirmBtn.dataset.mode = 'batch';
@@ -450,6 +471,7 @@ include '../header.php';
         document.getElementById('deleteModalOverlay').style.display = 'none';
     }
 
+    //Execute Delete (Single or Batch)
     function executeDelete() {
         const confirmBtn = document.querySelector('.confirm-delete-btn');
         const mode = confirmBtn.dataset.mode;
@@ -515,6 +537,7 @@ include '../header.php';
         }
     }
 
+    // Execute Batch Delete
     function executeBatchDeleteAction() {
         const checkboxes = document.querySelectorAll('.item-checkbox:checked');
         const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
@@ -557,6 +580,7 @@ include '../header.php';
             });
     }
     
+    //Show Empty State
     function showEmptyState() {
         document.getElementById('mainCartWrapper').style.display = 'none';
         document.getElementById('emptyCartState').style.display = 'block';

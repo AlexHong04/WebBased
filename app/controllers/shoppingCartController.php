@@ -12,6 +12,7 @@ class shoppingCartController {
         $this->cartModel = new CartModel();
     }
 
+    //orepares data for the main Cart View page
     public function getCartData() {
         if (!defined('IMG_BASE_PATH')) define('IMG_BASE_PATH', '/public/');
         
@@ -26,6 +27,7 @@ class shoppingCartController {
 
         if (!empty($dbItems)) {
             foreach ($dbItems as $item) {
+                // Determine which image to use (Variant specific or Main)
                 $rawImg = !empty($item['variant_img']) ? $item['variant_img'] : $item['main_img'];
                 $catName = $item['category_name'] ?? '';
                 $finalImg = $this->resolveCartImage($rawImg, $catName);
@@ -41,6 +43,7 @@ class shoppingCartController {
             }
         }
 
+        // Sort: Out of Stock items go to the bottom
         usort($cartItems, function ($a, $b) {
             $stockA = $a['stock_qty'] > 0 ? 1 : 0;
             $stockB = $b['stock_qty'] > 0 ? 1 : 0;
@@ -57,6 +60,7 @@ class shoppingCartController {
         ];
     }
 
+    //format image paths correctly
     private function resolveCartImage($dbPath, $categoryName = '') {
         if (empty($dbPath)) return 'https://via.placeholder.com/150';
         if (str_starts_with($dbPath, 'http')) return $dbPath;
@@ -71,6 +75,7 @@ class shoppingCartController {
         return IMG_BASE_PATH . 'images/' . $categoryFolder . $dbPath;
     }
 
+    //Add item to cart
     public function add() {
         if (is_post()) {
             if (!isset($_SESSION['customerId'])) {
@@ -86,8 +91,8 @@ class shoppingCartController {
                 $this->redirectBack();
             }
 
+            // Stock Validation
             $stockQty = $this->cartModel->getProductStock($variantId);
-            
             $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
             $currentInCart = $this->cartModel->getCartItemQty($cartId, $variantId);
 
@@ -99,6 +104,7 @@ class shoppingCartController {
                 return;
             }
 
+            // adjust quantity if requested exceeds available
             $finalAddQty = $quantity;
             if ($quantity > $allowedQty) {
                 $finalAddQty = $allowedQty;
@@ -114,8 +120,9 @@ class shoppingCartController {
         }
     }
 
+    //when user changes quantity input in cart
     public function update() {
-        while (ob_get_level()) ob_end_clean(); 
+        while (ob_get_level()) ob_end_clean(); // Clear buffer
 
         if (is_post()) {
             $variantId = post('product_variant_id');
@@ -138,6 +145,7 @@ class shoppingCartController {
         }
     }
 
+    //Delete Single Item
     public function delete() {
         while (ob_get_level()) ob_end_clean();
 
@@ -164,6 +172,7 @@ class shoppingCartController {
         }
     }
 
+    //Batch Delete Items
     public function deleteBatch() {
         while (ob_get_level()) ob_end_clean();
 
@@ -190,6 +199,7 @@ class shoppingCartController {
         }
     }
 
+    //Get Cart Count(updating the cart badge in the header dynamically)
     public function count() {
         while (ob_get_level()) ob_end_clean();
 
@@ -203,7 +213,7 @@ class shoppingCartController {
     }
     
     private function redirectBack() {
-        $referer = $_SERVER['HTTP_REFERER'] ?? '/index.php';
+        $referer = $_SERVER['HTTP_REFERER'] ?? '/app/views/home.php';
         redirect($referer);
     }
 }
