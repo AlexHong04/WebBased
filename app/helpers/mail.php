@@ -153,4 +153,21 @@ function _sendEmailWithAttachment($toEmail, $toName, $subject, $body, $altBody =
         error_log("Mail Error: {$mail->ErrorInfo}");
         return false;
     }
+function sendOtpEmail($toEmail, $toName, $otp)
+{
+    $subject = "Reset Password OTP - Lovine";
+    
+    $body = "
+        <div style='font-family: Arial, sans-serif; padding: 20px;'>
+            <h2>Password Reset Request</h2>
+            <p>Hi $toName,</p>
+            <p>Your One-Time Password (OTP) to reset your password is:</p>
+            <h1 style='color: #e91e63; letter-spacing: 5px;'>$otp</h1>
+            <p>This code will expire in 5 minutes. Do not share this code with anyone.</p>
+        </div>
+    ";
+
+    $altBody = "Your OTP is $otp. Do not share it.";
+
+    return _sendEmail($toEmail, $toName, $subject, $body, $altBody);
 }

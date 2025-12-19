@@ -316,6 +316,7 @@ class ProductModel
         return $this->db->resultAll();
     }
 
+
     public function restockVariant($productVariantId, $qty)
     {
         $this->db->query("UPDATE product_variant 
@@ -334,5 +335,31 @@ class ProductModel
                       WHERE product_id = :product_id");
         $this->db->bind(':product_id', $productId);
         return $this->db->execute();
+    }
+    public function getNewArrivalsProducts($limit)
+    {
+        $limit = (int)$limit;
+        $this->db->query("
+            SELECT p.product_id, p.product_name, p.created_at, p.rate, p.img_url, p.sale_price, c.category_name
+            FROM product AS p JOIN category AS c ON p.category_id = c.category_id
+            GROUP BY p.product_id, p.product_name, p.created_at, p.rate, p.img_url, p.sale_price, c.category_name
+            ORDER BY p.created_at DESC
+            LIMIT $limit
+        ");
+        $this->db->execute();
+        return $this->db->resultAll();
+    }
+    public function getTopSellingProducts($limit)
+    {
+        $limit = (int)$limit;
+        $this->db->query("
+            SELECT p.product_id, p.product_name, p.total_sold, p.rate, p.img_url, p.sale_price, c.category_name
+            FROM product AS p JOIN category AS c ON p.category_id = c.category_id
+            GROUP BY p.product_id, p.product_name, p.total_sold, p.rate, p.img_url, p.sale_price, c.category_name
+            ORDER BY p.total_sold DESC
+            LIMIT $limit
+        ");
+        $this->db->execute();
+        return $this->db->resultAll();
     }
 }

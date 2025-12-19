@@ -683,4 +683,17 @@ class ProductController
 
         return $successVariant && $successProduct;
     }
+
+    function displayProducts()
+    {
+        if (is_get()) {
+            $topSelling = $this->productModel->getTopSellingProducts(3);
+            $newArrivals = $this->productModel->getNewArrivalsProducts(3);
+
+            return [
+                'topSelling' => $topSelling,
+                'newArrivals' => $newArrivals
+            ];
+        }
+    }
 }
