@@ -27,7 +27,6 @@ class Database
 
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->password, $options);
-            echo "<script>console.log('Connect database successful')</script>";
         } catch (PDOException $e) {
             die("Connection failed: " . $e->getMessage());
         }
@@ -68,6 +67,11 @@ class Database
     public function bind($param, $value)
     {
         $this->stmt->bindValue($param, $value);
+    }
+
+    public function rowCount()
+    {
+        return $this->stmt->rowCount();
     }
 
     // // Is unique?
