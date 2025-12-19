@@ -1,7 +1,62 @@
 <?php
+session_start();
+require_once __DIR__ . '/../../controllers/userController.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+
+    header('Content-Type: application/json');
+    $controller = new userController();
+
+    if ($_POST['action'] === 'sendOtp') {
+        $email = trim($_POST['email'] ?? '');
+
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['success' => false, 'message' => 'Valid email required']);
+            exit;
+        }
+        $otp = $controller->forgetPasswordSendOTP($email);
+        if ($otp !== false) {
+            $_SESSION['otp'] = $otp;
+            $_SESSION['otp_expire'] = time() + 300; // 5 minutes expiry
+            $_SESSION['reset_email'] = $email;
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Email not found or send failed']);
+        }
+        exit;
+    }
+
+    if ($_POST['action'] === 'checkOtp') {
+        $otpInput = trim($_POST['otp'] ?? '');
+
+        if (empty($otpInput)) {
+            echo json_encode(['success' => false, 'message' => 'OTP is required']);
+            exit;
+        }
+
+        $result = $controller->checkOTP($otpInput);
+
+        echo json_encode($result);
+        exit;
+    }
+
+    if ($_POST['action'] === 'resetPassword') {
+        $newPass = $_POST['newPassword'] ?? '';
+        $confirmPass = $_POST['confirmPassword'] ?? '';
+
+        if (empty($newPass) || empty($confirmPass)) {
+            echo json_encode(['success' => false, 'message' => 'Both fields are required']);
+            exit;
+        }
+        $result = $controller->resetNewPassword($newPass, $confirmPass);
+        echo json_encode($result);
+        exit;
+    }
+}
 $title = "Forgot Password";
 $pageCSS = "forgetPassword.css";
 require_once __DIR__ . '/../header.php';
+
 ?>
 <div class="wrapper">
     <div class="form-box">
@@ -15,7 +70,7 @@ require_once __DIR__ . '/../header.php';
             </div>
             <form id="form-step-1">
                 <div class="input-box">
-                    <input type="tel" id="phone" class="input-field" placeholder="Phone Number">
+                    <input type="email" id="email" class="input-field" placeholder="Email Address">
                     <svg xmlns="http://www.w3.org/2000/svg" class="input-icon" viewBox="0 0 512 512" width="20" height="20" fill="currentColor">
                         <path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z" />
                     </svg>
@@ -82,155 +137,5 @@ require_once __DIR__ . '/../header.php';
 </div>
 
 <script src="/public/js/validation.js"></script>
-
-<script>
-    const step1 = document.getElementById("step-1");
-    const step2 = document.getElementById("step-2");
-    const step3 = document.getElementById("step-3");
-
-    // ========================
-    // 验证逻辑 (调用 validation.js 的 helper)
-    // ========================
-
-    // 验证第一步：邮箱
-    function validateStep1Form() {
-        const form = document.getElementById('form-step-1');
-        clearErrors(form); // 来自 validation.js
-
-        const email = document.getElementById('email');
-        let isValid = true;
-
-        if (isEmpty(email.value)) {
-            showError('email', 'Email Address is required');
-            isValid = false;
-        } else if (!isValidEmail(email.value)) {
-            showError('email', 'Please enter a valid email address');
-            isValid = false;
-        }
-        return isValid;
-    }
-
-    // 验证第二步：OTP
-    function validateStep2Form() {
-        const form = document.getElementById('form-step-2');
-        clearErrors(form);
-
-        const otp = document.getElementById('otp');
-        let isValid = true;
-
-        if (isEmpty(otp.value)) {
-            showError('otp', 'OTP is required');
-            isValid = false;
-        } else if (!/^\d{6}$/.test(otp.value)) {
-            showError('otp', 'OTP must be exactly 6 digits');
-            isValid = false;
-        }
-        return isValid;
-    }
-
-    // 验证第三步：重置密码
-    function validateStep3Form() {
-        const form = document.getElementById('form-step-3');
-        clearErrors(form);
-
-        const newPass = document.getElementById('newPassword');
-        const confirmPass = document.getElementById('confirmPassword');
-        let isValid = true;
-
-        // 新密码验证
-        if (isEmpty(newPass.value)) {
-            showError('newPassword', 'New password is required');
-            isValid = false;
-        } else if (newPass.value.length < 8) {
-            showError('newPassword', 'Password must be at least 8 characters');
-            isValid = false;
-        }
-
-        // 确认密码验证
-        if (isEmpty(confirmPass.value)) {
-            showError('confirmPassword', 'Please confirm your password');
-            isValid = false;
-        } else if (newPass.value !== confirmPass.value) {
-            showError('confirmPassword', 'Passwords do not match');
-            isValid = false;
-        }
-
-        return isValid;
-    }
-
-    function animateToStep2() {
-        step1.style.left = "-510px";
-        step1.style.opacity = "0";
-        step1.style.visibility = "hidden";
-        step2.style.right = "5px";
-        step2.style.left = "auto";
-        step2.style.opacity = "1";
-        step2.style.visibility = "visible";
-    }
-
-    function animateToStep3() {
-        step2.style.right = "520px";
-        step2.style.opacity = "0";
-        step2.style.visibility = "hidden";
-        step3.style.right = "5px";
-        step3.style.left = "auto";
-        step3.style.opacity = "1";
-        step3.style.visibility = "visible";
-    }
-
-    function backToStep1(e) {
-        if (e) e.preventDefault();
-        step1.style.left = "4px";
-        step1.style.opacity = "1";
-        step1.style.visibility = "visible";
-        step2.style.right = "-520px";
-        step2.style.opacity = "0";
-        step2.style.visibility = "hidden";
-        clearErrors(document.getElementById('form-step-2'));
-    }
-
-    document.getElementById('form-step-1').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (!validateStep1Form()) return;
-
-        const btn = this.querySelector('.submit');
-        const oldText = btn.value;
-
-        btn.value = "Sending...";
-        btn.disabled = true;
-
-        setTimeout(() => {
-            animateToStep2();
-            btn.value = oldText;
-            btn.disabled = false;
-        }, 1000);
-    });
-
-    document.getElementById('form-step-2').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        if (!validateStep2Form()) return;
-
-        const btn = this.querySelector('.submit');
-        btn.value = "Verifying...";
-        btn.disabled = true;
-
-        setTimeout(() => {
-            animateToStep3();
-            btn.value = "Verify";
-            btn.disabled = false;
-        }, 1000);
-    });
-
-    document.getElementById('form-step-3').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        if (!validateStep3Form()) return;
-
-        alert("Success! Redirecting...");
-        window.location.href = "/app/views/security/signIn.php";
-    });
-</script>
-
+<script src="/public/js/forgetPassword.js"></script>
 <?php require_once __DIR__ . '/../footer.php'; ?>
