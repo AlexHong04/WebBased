@@ -71,14 +71,14 @@ class userModel
 
     public function getUser($email)
     {
-        $this->db->query("SELECT customer_id,email,password,isActive FROM customer WHERE email = :email");
+        $this->db->query("SELECT customer_id,firstName,lastName,email,password,isActive,isBlocked FROM customer WHERE email = :email");
         $this->db->bind(':email', $email);
         return $this->db->result();
     }
 
     public function getStaff($email)
     {
-        $this->db->query("SELECT admin_id,email,password,position FROM admin WHERE email = :email");
+        $this->db->query("SELECT admin_id,firstName,lastName,email,password,position FROM admin WHERE email = :email");
         $this->db->bind(':email', $email);
         return $this->db->result();
     }
@@ -150,23 +150,66 @@ class userModel
         return $this->db->result();
     }
 
-    // home
-    public function getTopSalesData()
+    public function isEmailExists($email)
     {
-        $this->db->query("SELECT 
-    p.product_id,
-    p.product_name,
-    p.sale_price,
-    p.rate,
-    SUM(oi.order_qty) AS total_units_sold,
-    SUM(oi.order_qty * oi.price) AS total_revenue
-    FROM Product p JOIN Product_Variant pv ON p.product_id = pv.product_id
-    JOIN order_Items oi ON pv.product_variant_id = oi.product_variant_id
-    JOIN `ordertable` o ON oi.order_id = o.order_id
-    WHERE o.order_status = 'Completed'
-    GROUP BY p.product_id, p.product_name, p.sale_price, p.rate
-    ORDER BY total_units_sold DESC
-    LIMIT 3; ");
-        return $this->db->resultAll();
+        $this->db->query("SELECT email FROM customer WHERE email = :email");
+        $this->db->bind(':email', $email);
+        $this->db->execute();
+        return $this->db->rowCount() > 0;
     }
+
+    public function isStaffEmailExists($email)
+    {
+        $this->db->query("SELECT email FROM admin WHERE email = :email");
+        $this->db->bind(':email', $email);
+        $this->db->execute();
+        return $this->db->rowCount() > 0;
+    }  
+    
+    public function updateUserIsBlocked($email, $isBlocked)
+    {
+        $this->db->query("UPDATE customer SET isBlocked = :isBlocked WHERE email = :email");
+        $this->db->bind(':isBlocked', $isBlocked);
+        $this->db->bind(':email', $email);
+        return $this->db->execute();
+    }
+
+
+    public function updatePasswordByEmail($email, $newHashedPassword)
+    {
+
+        $this->db->query("UPDATE customer SET password = :pass WHERE email = :email");
+        $this->db->bind(':pass', $newHashedPassword);
+        $this->db->bind(':email', $email);
+        
+        if ($this->db->execute()) {
+            if ($this->db->rowCount() > 0) return true;
+        }
+
+        $this->db->query("UPDATE admin SET password = :pass WHERE email = :email");
+        $this->db->bind(':pass', $newHashedPassword);
+        $this->db->bind(':email', $email);
+        
+        return $this->db->execute();
+    }
+
+    // // home
+    // public function getTopSalesData()
+    // {
+    //     $this->db->query("SELECT 
+    // p.product_id,
+    // p.product_name,
+    // p.sale_price,
+    // p.rate,
+    // SUM(oi.order_qty) AS total_units_sold,
+    // SUM(oi.order_qty * oi.price) AS total_revenue
+    // FROM Product p JOIN Product_Variant pv ON p.product_id = pv.product_id
+    // JOIN order_Items oi ON pv.product_variant_id = oi.product_variant_id
+    // JOIN `ordertable` o ON oi.order_id = o.order_id
+    // WHERE o.order_status = 'Completed'
+    // GROUP BY p.product_id, p.product_name, p.sale_price, p.rate
+    // ORDER BY total_units_sold DESC
+    // LIMIT 3; ");
+    //     return $this->db->resultAll();
+    // }
 }

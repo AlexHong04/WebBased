@@ -1,4 +1,3 @@
-<!-- connect models -->
 <?php
 require_once __DIR__ . '/../models/userModel.php';
 require_once __DIR__ . '/../helpers/request.php';
@@ -77,81 +76,6 @@ class userController
         redirect('../views/home.php');
     }
 
-    // handle user sign in
-    // public function signIn()
-    // {
-    //     if (is_post() && post('action') === 'login') {
-    //         $email = $_POST['email'];
-    //         $password = $_POST['password'];
-    //         $remember = isset($_POST['remember']); // checkbox
-
-    //         if (isset($_SESSION['flash_error'])) {
-    //             unset($_SESSION['flash_error']);
-    //         }
-
-    //         // fetch user by email only
-    //         $user = $this->userModel->getUser($email);
-    //         $staff = $this->userModel->getStaff($email);
-
-    //         if ($user['isActive'] != 1) {
-    //             $_SESSION['flash_error']['login'] = "Account is not activated. Please check your email for the activation link.";
-    //             redirect('signIn.php');
-    //             return;
-    //         }
-
-    //         // verify password
-    //         if ((!$user || !password_verify($password, $user['password'])) && (!$staff || !password_verify($password, $staff['password']))) {
-    //             $_SESSION['flash_error']['login'] = "Invalid email or password.";
-    //             redirect('signIn.php');
-    //             return;
-    //         }
-
-    //         // Create JWT
-    //         $secret = 'Lovine';
-    //         $payload = [
-    //             'customerId' => $user['customer_id'],
-    //             'email' => $user['email'],
-    //             'exp' => time() + (60 * 60) // 1 hour
-    //         ];
-    //         $token = createJWT($payload, $secret);
-
-    //         // save in session
-    //         $_SESSION['token'] = $token;
-
-    //         // ---- Remember Me ----
-    //         if ($remember) {
-    //             setcookie(
-    //                 "remember_token",
-    //                 $token,
-    //                 time() + (60 * 60 * 24 * 30), // 30 days
-    //                 "/",
-    //                 "",
-    //                 false,
-    //                 true
-    //             );
-    //         }
-
-    //         // check staff id == AD direct to admin dashboard else direct to user home
-            
-    //         if ($staff) {
-    //             // store staff id in session
-    //             $_SESSION['adminId'] = $staff['admin_id'];
-    //             $_SESSION['email'] = $staff['email'];
-    //             $_SESSION['flash_success']['login'] = "Login successful.";
-    //             redirect('');
-    //             return;
-    //         } else {
-    //             // proceed with user login
-    //             // store user id in session
-    //             $_SESSION['customerId'] = $user['customer_id'];
-    //             $_SESSION['email'] = $user['email'];
-    //             $_SESSION['flash_success']['login'] = "Login successful.";
-    //             redirect('../home.php');
-    //         }
-    //     }
-    // }
-
-    // handle user sign in
     public function signIn()
     {
         if (is_post() && post('action') === 'login') {
@@ -170,34 +94,65 @@ class userController
             $loggedInEmail = null;
             $isStaffLogin = false;
 
-            if ($staff && password_verify($password, $staff['password'])) {
-                $loggedInId = $staff['admin_id'];
-                $loggedInEmail = $staff['email'];
-                $isStaffLogin = true;
-            } 
-            elseif ($user && password_verify($password, $user['password'])) {
-                if ($user['isActive'] != 1) {
-                    $_SESSION['flash_error']['login'] = "Account is not activated. Please check your email for the activation link.";
-                    redirect('signIn.php');
-                    return;
-                }
-                $loggedInId = $user['customer_id'];
-                $loggedInEmail = $user['email'];
-                $isStaffLogin = false;
-            } 
-            else {
-                $_SESSION['flash_error']['login'] = "Invalid email or password.";
+            if ($user && $user['isBlocked'] == 1) {
+                $_SESSION['flash_error']['login'] = "Your account has been blocked. Please contact support.";
                 redirect('signIn.php');
                 return;
             }
 
+            if ($staff && password_verify($password, $staff['password'])) {
+                $loggedInId = $staff['admin_id'];
+                $loggedInEmail = $staff['email'];
+                $isStaffLogin = true;
+            } elseif ($user) {
+
+                if (!isset($_SESSION['login_attempts_' . $email])) {
+                    $_SESSION['login_attempts_' . $email] = 0;
+                }
+
+                if (password_verify($password, $user['password'])) {
+
+                    if ($user['isActive'] != 1) {
+                        $_SESSION['flash_error']['login'] = "Account is not activated.";
+                        redirect('signIn.php');
+                        return;
+                    }
+
+                    unset($_SESSION['login_attempts_' . $email]);
+
+                    $loggedInId = $user['customer_id'];
+                    $loggedInEmail = $user['email'];
+                    $isStaffLogin = false;
+                } else {
+                    $_SESSION['login_attempts_' . $email] += 1;
+                    $attempts = $_SESSION['login_attempts_' . $email];
+
+                    if ($attempts > 5) {
+                        $this->userModel->updateUserIsBlocked($email, 1);
+
+                        unset($_SESSION['login_attempts_' . $email]);
+
+                        $_SESSION['flash_error']['login'] = "Account blocked! You have entered the wrong password 5 times.";
+                    } else {
+                        $remaining = 5 - $attempts;
+                        $_SESSION['flash_error']['login'] = "Invalid password. You have $remaining attempts left.";
+                    }
+
+                    redirect('signIn.php');
+                    return;
+                }
+            } else {
+                $_SESSION['flash_error']['login'] = "Invalid email or password.";
+                redirect('signIn.php');
+                return;
+            }
             // Create JWT (Use the correct ID and Email based on who logged in)
             $secret = 'Lovine';
             $payload = [
-                'id' => $loggedInId,       
+                'id' => $loggedInId,
                 'email' => $loggedInEmail,
                 'role' => $isStaffLogin ? 'admin' : 'customer',
-                'exp' => time() + (60 * 60) 
+                'exp' => time() + (60 * 60)
             ];
             $token = createJWT($payload, $secret);
 
@@ -209,22 +164,20 @@ class userController
             if ($remember) {
                 setcookie("remember_token", $token, time() + (60 * 60 * 24 * 30), "/", "", false, true);
             }
-            $prefix = strtoupper(substr($loggedInId, 0, 2)); 
+            $prefix = strtoupper(substr($loggedInId, 0, 2));
 
             if ($prefix === 'AD') {
                 $_SESSION['adminId'] = $loggedInId;
                 $_SESSION['flash_success']['login'] = "Welcome Admin.";
-                
-                redirect('../header.php'); 
-                return;
 
+                redirect('../adminDashboard.php');
+                return;
             } elseif ($prefix === 'CU') {
                 $_SESSION['customerId'] = $loggedInId;
                 $_SESSION['flash_success']['login'] = "Login successful.";
-                
+
                 redirect('../home.php');
                 return;
-
             } else {
                 $_SESSION['flash_error']['login'] = "Unknown account type.";
                 redirect('signIn.php');
@@ -232,6 +185,8 @@ class userController
             }
         }
     }
+
+    public function checkUserMultipleLogin() {}
 
     public function getProfile()
     {
@@ -304,9 +259,92 @@ class userController
     }
 
 
-    public function getTopSalesData()
+    // public function getTopSalesData()
+    // {
+    //     return $this->userModel->getTopSalesData();
+    // }
+
+
+    public function forgetPasswordSendOTP($email)
     {
-        return $this->userModel->getTopSalesData();
+        $user = $this->userModel->getUser($email);
+        $staff = null;
+
+        if (!$user) {
+            $staff = $this->userModel->getStaff($email);
+        }
+        if (!$user && !$staff) {
+            return false;
+        }
+        $name = "User";
+        if ($user) {
+            $name = $user['firstName'] . ' ' . $user['lastName'];
+        } elseif ($staff) {
+            $name = $staff['firstName'] . ' ' . $staff['lastName'];
+        }
+
+        // crate OTP and send email
+        $otp = rand(100000, 999999);
+
+        // send email
+        $isSent = sendOtpEmail($email, $name, $otp);
+
+        if ($isSent) {
+            return $otp;
+        } else {
+            return false;
+        }
+    }
+
+    public function checkOTP($userInputOtp)
+    {
+        // check OPT
+        if (!isset($_SESSION['otp']) || !isset($_SESSION['otp_expire'])) {
+            return ['success' => false, 'message' => 'Session expired. Please request a new OTP.'];
+        }
+
+        // check OPT expiry (5 minutes)
+        if (time() > $_SESSION['otp_expire']) {
+            unset($_SESSION['otp']);
+            unset($_SESSION['otp_expire']);
+            return ['success' => false, 'message' => 'OTP has expired. Please request again.'];
+        }
+
+        // compare OTP
+        if ($userInputOtp == $_SESSION['otp']) {
+            return ['success' => true];
+        } else {
+            return ['success' => false, 'message' => 'Invalid OTP. Please try again.'];
+        }
+    }
+    public function resetNewPassword($newPassword, $confirmPassword)
+    {
+        if (!isset($_SESSION['reset_email'])) {
+            return ['success' => false, 'message' => 'Session expired. Please start over.'];
+        }
+
+        $email = $_SESSION['reset_email'];
+
+        if (strlen($newPassword) < 8) {
+            return ['success' => false, 'message' => 'Password must be at least 8 characters.'];
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            return ['success' => false, 'message' => 'Passwords do not match.'];
+        }
+
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+        $result = $this->userModel->updatePasswordByEmail($email, $hashedPassword);
+
+        if ($result) {
+            unset($_SESSION['otp']);
+            unset($_SESSION['otp_expire']);
+            unset($_SESSION['reset_email']);
+
+            return ['success' => true];
+        } else {
+            return ['success' => false, 'message' => 'Failed to update password. Database error.'];
+        }
     }
 }
-?>
