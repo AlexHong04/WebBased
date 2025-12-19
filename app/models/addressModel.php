@@ -65,29 +65,48 @@ class addressModel
 
     //If ID exists -> Update
     //If not -> Insert
-    public function saveAddress($customerId, $id, $name, $phone, $street, $city, $state, $postcode)
+    public function saveAddress($customerId, $id, $name, $phone, $street, $city, $state, $postcode, $isDefault = 0)
     {
+        if ($isDefault == 1) {
+            $this->db->query("UPDATE address SET is_default = 0 WHERE customer_id = ?");
+            $this->db->bind(1, $customerId);
+            $this->db->execute();
+        }
+
         if ($id) {
-            // Update
-            $this->db->query("UPDATE address 
-                              SET recipient_name = ?, recipient_phone = ?, street_line = ?, city = ?, state = ?, postcode = ?
-                              WHERE address_id = ? AND customer_id = ?");
+            $sql = "UPDATE address 
+                    SET recipient_name = ?, 
+                        recipient_phone = ?, 
+                        street_line = ?, 
+                        city = ?, 
+                        state = ?, 
+                        postcode = ?,
+                        is_default = ? 
+                    WHERE address_id = ? AND customer_id = ?";
+            
+            $this->db->query($sql);
             $this->db->bind(1, $name);
             $this->db->bind(2, $phone);
             $this->db->bind(3, $street);
             $this->db->bind(4, $city);
             $this->db->bind(5, $state);
             $this->db->bind(6, $postcode);
-            $this->db->bind(7, $id);
-            $this->db->bind(8, $customerId);
+            $this->db->bind(7, $isDefault);
+            $this->db->bind(8, $id);
+            $this->db->bind(9, $customerId);
             $newId = $id;
-        } else {
-            // Insert
-            $newId = $this->db->generateId('address', 'address_id', 'AD');
-            $isDefault = $this->countAddresses($customerId) == 0 ? 1 : 0;
 
-            $sql = "INSERT INTO address (address_id, customer_id, recipient_name, recipient_phone, street_line, city, state, postcode, is_default, is_deleted) 
+        } else {
+            $newId = $this->db->generateId('address', 'address_id', 'AD');
+            
+            if ($this->countAddresses($customerId) == 0) {
+                $isDefault = 1;
+            }
+
+            $sql = "INSERT INTO address 
+                    (address_id, customer_id, recipient_name, recipient_phone, street_line, city, state, postcode, is_default, is_deleted) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
+            
             $this->db->query($sql);
             $this->db->bind(1, $newId);
             $this->db->bind(2, $customerId);
@@ -97,13 +116,26 @@ class addressModel
             $this->db->bind(6, $city);
             $this->db->bind(7, $state);
             $this->db->bind(8, $postcode);
-            $this->db->bind(9, $isDefault);
+            $this->db->bind(9, $isDefault); 
         }
 
         if ($this->db->execute()) {
             return $newId;
         }
         return false;
+    }
+    
+    public function setDefaultAddress($customerId, $addressId)
+    {
+        $this->db->query("UPDATE address SET is_default = 0 WHERE customer_id = ?");
+        $this->db->bind(1, $customerId);
+        $this->db->execute(); 
+
+        $this->db->query("UPDATE address SET is_default = 1 WHERE address_id = ? AND customer_id = ?");
+        $this->db->bind(1, $addressId);
+        $this->db->bind(2, $customerId);
+        
+        return $this->db->execute();
     }
 
     //Soft Delete Address

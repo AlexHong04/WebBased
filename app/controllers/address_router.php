@@ -24,6 +24,9 @@ switch ($action) {
     case 'delete':
         $controller->deleteAddress();
         break;
+    case 'set_default':
+        $controller->setDefault();
+        break;
     default:
         header('Content-Type: application/json');
         echo json_encode(['success' => false, 'message' => 'Invalid Action']);

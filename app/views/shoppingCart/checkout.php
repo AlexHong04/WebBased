@@ -244,7 +244,6 @@ $fullApiUrl = $protocol . $host . $apiPath;
                     <small class="error-message" id="stateError"></small>
                 </div>
             </div>
-            <input type="hidden" name="address" id="addressInput" value="">
 
             <button type="button" id="btnSaveAddress" class="place-order-btn">Save Address</button>
         </form>

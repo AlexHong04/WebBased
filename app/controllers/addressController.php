@@ -23,6 +23,11 @@ class AddressController {
             $this->sendResponse(false, "DB Init Error: " . $e->getMessage());
         }
     }
+    public function index()
+    {
+        if (!$this->customerId) return [];
+        return $this->addressModel->getCustomerAddresses($this->customerId);
+    }
 
     //list all addresses for the current user
     public function listAddresses() {
@@ -59,12 +64,19 @@ class AddressController {
         $state = post('State');
         $postcode = post('postCode');
 
+        if ($id) {
+            $existingAddr = $this->addressModel->getAddressById($this->customerId, $id);
+            $isDefault = $existingAddr['is_default'] ?? 0;
+        } else {
+            $isDefault = 0;
+        }
+
         if (empty($name) || empty($phone) || empty($street) || empty($city) || empty($state) || empty($postcode)) {
             $this->sendResponse(false, "All fields are required.");
         }
 
         try {
-            $resultId = $this->addressModel->saveAddress($this->customerId, $id, $name, $phone, $street, $city, $state, $postcode);
+            $resultId = $this->addressModel->saveAddress($this->customerId, $id, $name, $phone, $street, $city, $state, $postcode, $isDefault);
 
             if ($resultId) {
                 $savedAddr = $this->addressModel->getAddressById($this->customerId, $resultId);
@@ -74,6 +86,24 @@ class AddressController {
             }
         } catch (Exception $e) {
             $this->sendResponse(false, "Error: " . $e->getMessage());
+        }
+    }
+
+    public function setDefault()
+    {
+        if (ob_get_length()) ob_clean();
+
+        if (!is_post()) $this->sendResponse(false, "Invalid Method.");
+
+        $id = isset($_POST['address_id']) ? trim($_POST['address_id']) : '';
+        if (empty($id) || $id === 'null') {
+            $this->sendResponse(false, "Error: Missing Address ID.");
+        }
+
+        if ($this->addressModel->setDefaultAddress($this->customerId, $id)) {
+            $this->sendResponse(true, "Default address updated successfully.");
+        } else {
+            $this->sendResponse(false, "Database update failed.");
         }
     }
 
