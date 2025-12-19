@@ -382,6 +382,8 @@ extract($data);
 
             if (!isValid) {
                 e.preventDefault();
+            } else {
+                isSubmitting = true;
             }
         });
     </script>

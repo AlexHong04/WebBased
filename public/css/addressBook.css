@@ -1,0 +1,368 @@
+:root {
+  --primary-pink: #fc84a3;
+  --primary-pink-hover: #f06b90;
+  --bg-pink-light: #fff0f5;
+  --bg-default-card: #fffbfc;
+  --text-dark: #333;
+  --text-gray: #888;
+  --border-color: #eee;
+}
+
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+/* Add New Button */
+.btn-add-new {
+  background: linear-gradient(135deg, #fc84a3 0%, #f55783 100%);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(252, 132, 163, 0.3);
+}
+
+.btn-add-new:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(252, 132, 163, 0.4);
+}
+
+/* Address List Layout */
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.address-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 25px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.address-card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.address-card.is-default {
+  background-color: var(--bg-default-card);
+  border: 1px solid #ffebf0;
+  border-left: 6px solid var(--primary-pink);
+}
+
+/* Icon Styling */
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--bg-pink-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.card-icon i {
+  font-size: 1.2rem;
+  color: var(--primary-pink);
+}
+
+.address-card.is-default .card-icon i {
+  color: #ff5e87;
+}
+
+/* Content Styling */
+.card-content {
+  flex-grow: 1;
+  padding-right: 60px;
+}
+
+.card-header-row {
+  margin-bottom: 5px;
+}
+
+.card-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-right: 5px;
+}
+
+.card-phone {
+  color: var(--text-gray);
+  font-size: 0.95rem;
+}
+
+.default-tag {
+  color: var(--primary-pink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #ffeef5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.card-address {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+
+/* --- Set Default Button --- */
+.btn-set-default {
+  margin-top: 12px;
+  background: transparent;
+  border: 1px solid var(--primary-pink);
+  color: var(--primary-pink);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-set-default:hover {
+  background-color: var(--primary-pink);
+  color: white;
+  box-shadow: 0 4px 10px rgba(252, 132, 163, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Action Buttons (Edit/Delete) */
+.card-actions {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  display: flex;
+  gap: 15px;
+}
+
+.action-icon {
+  color: #ccc;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 5px;
+}
+
+.action-icon:hover {
+  color: var(--primary-pink);
+  background: #ffeef5;
+  border-radius: 50%;
+}
+
+.action-icon.delete:hover {
+  color: #dc3545;
+  background: #fff5f5;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  animation: scaleUp 0.2s ease-out;
+}
+
+.modal-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-pink);
+  box-shadow: 0 0 0 3px rgba(252, 132, 163, 0.1);
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: none;
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.general-error {
+  color: #dc3545;
+  display: none;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #fc84a3 0%, #f55783 100%);
+  color: #fff;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-cancel {
+  background: #f0f0f0;
+  color: #333;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn-cancel:hover {
+  background: #e0e0e0;
+}
+
+/* Feedback & Confirmation Modal Styles */
+.modal-content.feedback-modal {
+  text-align: center;
+  max-width: 400px;
+  padding: 40px 30px;
+}
+
+.modal-icon {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+}
+.modal-icon.success {
+  color: #2ecc71;
+}
+.modal-icon.warning {
+  color: #f1c40f;
+}
+.modal-icon.danger {
+  color: #e74c3c;
+}
+
+.modal-title.centered {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.modal-message {
+  color: #666;
+  margin: 0 0 25px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  opacity: 0.3;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scaleUp {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

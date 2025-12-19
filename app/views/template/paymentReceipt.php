@@ -262,8 +262,8 @@ require_once __DIR__ . '/../../helpers/html.php';
                         <thead>
                             <tr>
                                 <th width="60%">Item</th>
-                                <th width="15%" style="text-align:center;">Qty</th>
-                                <th width="25%" style="text-align:right;">Price</th>
+                                <th width="10%" style="text-align:center;">Qty</th>
+                                <th width="30%" style="text-align:right;">Price</th>
                             </tr>
                         </thead>
                         <tbody>
