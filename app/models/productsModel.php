@@ -137,7 +137,7 @@ class ProductModel
         $sql = "SELECT category_name FROM category WHERE category_id = :category_id LIMIT 1";
 
         try {
-            $this->db->query($sql); 
+            $this->db->query($sql);
             $this->db->bind(':category_id', $categoryId);
 
             $result = $this->db->result();
@@ -145,7 +145,7 @@ class ProductModel
             if ($result && isset($result['category_name'])) {
                 return $result['category_name'];
             } else {
-                return null; 
+                return null;
             }
         } catch (Exception $e) {
             error_log("Error fetching category name: " . $e->getMessage());
@@ -260,5 +260,79 @@ class ProductModel
             $this->db->execute();
             throw new Exception("Failed to update product: " . $e->getMessage());
         }
+    }
+
+    public function getWishlistBackInStockItems(
+        $sort_column = 'customer_id',
+        $sort_order = 'asc'
+    ) {
+        $safe_columns = [
+            'customer_id',
+            'firstname',
+            'lastname',
+            'phone',
+            'wishlist_id',
+            'product_variant_id',
+            'product_name',
+            'stock_qty',
+            'stock_status'
+        ];
+
+        $sort = in_array($sort_column, $safe_columns) ? $sort_column : 'customer_id';
+        $order = (strtoupper($sort_order) === 'DESC') ? 'DESC' : 'ASC';
+
+        $sql = "
+        SELECT 
+            c.customer_id,
+            c.firstname,
+            c.lastname,
+            c.phone,
+            w.wishlist_id,
+            pv.product_variant_id,
+            pv.stock_qty,
+            pv.stock_status,
+            pv.img_url,
+            p.product_name,
+            p.category_id,
+            cat.category_name
+        FROM wishlist_items wi
+        INNER JOIN wishlist w 
+            ON wi.wishlist_id = w.wishlist_id
+        INNER JOIN customer c 
+            ON w.customer_id = c.customer_id
+        INNER JOIN product_variant pv 
+            ON wi.product_variant_id = pv.product_variant_id
+        INNER JOIN product p 
+            ON pv.product_id = p.product_id
+        INNER JOIN category cat
+            ON p.category_id = cat.category_id
+        WHERE pv.stock_qty > 0
+          AND pv.stock_status = 'In Stock'
+        ORDER BY {$sort} {$order}
+    ";
+
+        $this->db->query($sql);
+        $this->db->execute();
+        return $this->db->resultAll();
+    }
+
+    public function restockVariant($productVariantId, $qty)
+    {
+        $this->db->query("UPDATE product_variant 
+                      SET stock_qty = stock_qty + :qty
+                      WHERE product_variant_id = :variant_id");
+
+        $this->db->bind(':qty', $qty);
+        $this->db->bind(':variant_id', $productVariantId); // Bind as string
+        return $this->db->execute();
+    }
+
+    public function updateProductUpdatedAt($productId)
+    {
+        $this->db->query("UPDATE product 
+                      SET updated_at = NOW()
+                      WHERE product_id = :product_id");
+        $this->db->bind(':product_id', $productId);
+        return $this->db->execute();
     }
 }

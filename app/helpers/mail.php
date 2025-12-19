@@ -81,7 +81,7 @@ function prepareReceiptContent($orderId)
         'totalPaid' => $totalPaid,
         'discountAmount' => $discountAmount,
         'subtotal' => $subtotal,
-        'formattedDate' => $formattedDate 
+        'formattedDate' => $formattedDate
     ];
     extract($viewData);
 
@@ -101,13 +101,56 @@ function  sendWelcomeEmail($toEmail, $toName, $loginLink)
     $subject = "Welcome to Lovine! Account Activation";
 
     // You can customize this HTML to look nicer
-// Ensure your base() function is available or use full URL
+    // Ensure your base() function is available or use full URL
     //clean output buffer
     ob_start();
     include __DIR__ . '/../views/template/accountActive.php';
-      
+
     $body = ob_get_clean();
     $altBody = "Welcome $toName! Thank you for signing up. Please login at: $loginLink";
 
     return _sendEmail($toEmail, $toName, $subject, $body, $altBody);
+}
+
+function sendPdf($toEmail, $toName, $filePath)
+{
+    ob_start();
+    include __DIR__ . '/../views/template/lowStockPdf.php';
+    $body = ob_get_clean();
+
+    $altBody = "Hello $toName! Please see attached PDF for low stock products.";
+    return _sendEmailWithAttachment($toEmail, $toName, "Reorder list suggestion for low stock products", $body, $altBody, $filePath);
+}
+
+function _sendEmailWithAttachment($toEmail, $toName, $subject, $body, $altBody = '', $attachmentPath = '')
+{
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'unknowsuser050@gmail.com';
+        $mail->Password   = 'dgsj nahj zsld nekl';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        $mail->setFrom('no-reply@lovine.com', 'Lovine');
+        $mail->addAddress($toEmail, $toName);
+
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
+        $mail->AltBody = !empty($altBody) ? $altBody : strip_tags($body);
+
+        // Attach PDF if provided
+        if (!empty($attachmentPath) && file_exists($attachmentPath)) {
+            $mail->addAttachment($attachmentPath, 'product_stock_report.pdf');
+        }
+
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log("Mail Error: {$mail->ErrorInfo}");
+        return false;
+    }
 }

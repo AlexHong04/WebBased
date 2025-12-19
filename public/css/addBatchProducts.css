@@ -1,0 +1,264 @@
+/* Container */
+.container {
+  max-width: 1400px; /* full-screen width */
+  margin: 20px auto;
+  padding: 20px;
+}
+
+/* Step 1 & Step 2 layout side by side */
+.files {
+  display: flex;
+  gap: 30px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* Card layout for download/upload & preview table */
+.card {
+  flex: 1 1 48%;
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+/* Card header */
+.card h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.card p {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.download-btn {
+  padding: 10px 20px;
+  background: #0076ff;
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.download-btn:hover {
+  background: #0056b3;
+}
+
+/* Upload box */
+.upload-box {
+  border: 2px dashed #0076ff;
+  padding: 40px;
+  border-radius: 10px;
+  background: #f9fbff;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.upload-box.drag {
+  border-color: #003e94;
+  background: #eef4ff;
+}
+
+/* Preview Table Container as Card */
+.previewContainer {
+  display: none;
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  margin-top: 30px;
+}
+
+/* Table styling */
+.previewContainer table {
+  width: 100%;
+  border: none;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.previewContainer th,
+.previewContainer td {
+  padding: 12px 15px;
+  text-align: left;
+  background: #fff;
+}
+
+/* Header row */
+.previewContainer thead th {
+  background-color: #0076ff;
+  color: #fff;
+}
+
+.previewContainer tbody tr {
+  display: table-row;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+}
+
+.previewContainer tbody tr:hover {
+  transform: translateY(-2px);
+}
+
+.previewContainer tbody tr.validation-success td {
+  background-color: #e6ffe6; /* light green */
+}
+
+.previewContainer tbody tr.validation-error td {
+  background-color: #ffe6e6; /* light red */
+}
+
+/* Validation badges */
+.previewContainer td .validation-ok {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.previewContainer td .validation-error {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Table header title */
+.previewContainer h4 {
+  margin-bottom: 15px;
+  color: #000000;
+  font-size: 20px;
+}
+
+#previewContainer.show-actions .table-actions {
+  display: none;
+}
+
+#previewContainer.show {
+  display: block;
+}
+
+#tableActions.show {
+  display: flex;
+}
+
+.submit-btn {
+  background-color: #0076ff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.submit-btn:hover {
+  background-color: #0056b3;
+}
+
+.cancel-btn {
+  border: 2px solid #0076ff;
+  background-color: #fff;
+  color: #0076ff;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.table-actions {
+  display: none;
+  justify-content: flex-end;
+  margin-top: 20px;
+  gap: 15px;
+}
+
+.file-preview {
+    margin-top: 15px;
+    padding: 8px 12px;
+    background: #f1f1f1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 450px;
+}
+
+.remove-file-btn {
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.remove-file-btn:hover {
+    background-color: #dc3545;
+    border-radius: 50%;
+    color: white;
+}
+
+#previewContainer table tbody tr td i {
+    margin-right: 8px;
+    cursor: pointer;
+    transition: color 0.2s;
+    color: grey;
+}
+
+/* Hover effects */
+#previewContainer .fa-pen:hover, #previewContainer .fa-trash:hover {
+    color: #535353;
+    transform: scale(1.1);
+}
+
+/* Modal styles */
+.modal {
+    display: none; 
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 800px;
+}
+
+.close-btn {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.variant-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.variant-row input[type="file"] {
+    display: inline-block;
+}
+
+.variant-row input[type="number"] {
+    width: 80px;
+}

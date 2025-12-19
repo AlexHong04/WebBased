@@ -1,0 +1,423 @@
+.main-content-wrapper {
+  margin: 20px;
+}
+
+.first_row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search_sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search_sort input[type="text"] {
+  font-size: 14px;
+  width: 500px;
+  padding: 1rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+  color: var(--text-dark);
+  background-color: #fffbfb;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.search_sort input[type="text"]:focus {
+  outline: none;
+  background-color: white;
+  border-color: var(--primary);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pagination label {
+  font-size: 14px;
+  margin-right: 5px;
+}
+
+.pagination select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.table_overview table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sortable-header a {
+  color: #000000;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-weight: bold;
+}
+
+.table_overview th,
+.table_overview td {
+  padding: 10px;
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid #dee2e6;
+}
+
+.table_overview th {
+  background-color: #f1f1f1;
+  font-weight: bold;
+}
+
+.table_overview tbody tr:hover {
+  background-color: #f2f7ff;
+}
+
+.table_overview td img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+a i {
+  color: black;
+}
+
+.delete-icon {
+  width: 16px; /* smaller size */
+  height: 16px;
+  color: black; /* black color */
+  cursor: pointer;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 5px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 100px;
+  margin-top: 20px;
+}
+
+.cancel-btn,
+.confirm-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #ccc;
+}
+
+.confirm-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.main-content-wrapper {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.filter-sidebar {
+  width: 260px;
+  background: rgb(255, 232, 237);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f1f1f1;
+  position: sticky;
+  top: 20px;
+  border: 1px solid #ffb3ba;
+}
+
+.filter-sidebar h4 {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.filter-block {
+  margin-bottom: 2px;
+  padding-bottom: 10px;
+}
+
+.filter-block p {
+  font-size: 11px;
+  color: #333;
+  margin-top: 5px;
+}
+
+.filter-block label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.filter-block input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.filter-block input[type="range"] {
+  width: 100%;
+  margin-top: 5px;
+  color: pink;
+}
+
+.price-value {
+  font-size: 10px;
+  margin-top: 5px;
+  color: #555;
+}
+
+.product-list-container {
+  flex-grow: 1;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 6px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-controls button {
+  padding: 6px 12px;
+  border: none;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pagination-controls button:hover:not(.active):not(:disabled) {
+  background: #e1e1e1;
+}
+
+.pagination-controls button.active {
+  background: #ffb3ba;
+  color: white;
+  border-color: #fbabb3;
+}
+
+.pagination-controls button:disabled {
+  background: #ddd;
+  cursor: not-allowed;
+}
+
+.table-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 8px rgba(220, 53, 69, 0.25);
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.btn-delete:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(220, 53, 69, 0.2);
+}
+
+.btn-delete:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0 15px 0;
+    padding: 10px 0;
+}
+
+.productCount {
+    display: flex;
+    align-items: center;
+    padding: 18px 20px;
+    border-radius: 50px; 
+    border: 1px solid #ccc;
+    background-color: #ffb3ba;
+    color: white;
+}
+
+.productCount p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Modal background overlay */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1000; /* Ensure it's on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Scroll if content is too tall */
+  background-color: rgba(0,0,0,0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Modal content box */
+.modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px 30px;
+  width: 600px;
+  max-width: 90%;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+/* Close button */
+.modal .close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #555;
+}
+
+.modal .close:hover {
+  color: #000;
+}
+
+/* Modal header */
+.modal h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.4em;
+  color: #333;
+}
+
+/* Product variant items */
+.modal-products-container .modal-product-item {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.modal-products-container .modal-product-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.modal-products-container h4 {
+  margin: 0 0 10px 0;
+  font-size: 1.2em;
+  color: #222;
+}
+
+/* Variant checkbox and input */
+.variant-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.variant-item label {
+  flex: 1;
+  cursor: pointer;
+}
+
+.variant-qty {
+  width: 60px;
+  margin-left: 15px;
+  padding: 3px 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Submit button */
+.btn-restock-submit {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 1em;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.btn-restock-submit:hover {
+  background-color: #0056b3;
+}

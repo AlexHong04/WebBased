@@ -621,16 +621,66 @@ class ProductController
         }
     }
 
-    function sendLowStockPdf() {
+    function sendLowStockPdf()
+    {
 
-        echo "call 1";
         // if (isset($_SESSION['email'])) {
-            echo "call 2";
-            // $email = $_SESSION['email'];
-            $loginLink = base('app/views/product/lowStockAlert.php?action=sendPdf&email=wongweixin116@gmail.com');
-            // $loginLink = base('app/views/product/lowStockAlert.php?action=sendPdf&email=' . $email);
-            sendPdf('wongweixin116@gmail.com', "Wei Xin", $loginLink);
-            return true;
+        // $email = $_SESSION['email'];
+        $loginLink = base('app/views/product/lowStockAlert.php?action=sendPdf&email=wongweixin116@gmail.com');
+        // $loginLink = base('app/views/product/lowStockAlert.php?action=sendPdf&email=' . $email);
+        sendPdf('wongweixin116@gmail.com', "Wei Xin", $loginLink);
+        return true;
         // }
+    }
+
+    public function handleDeleteProductById($productId)
+    {
+        if (empty($productId)) return false;
+        try {
+            $result = $this->productModel->deleteProductById($productId);
+            $product = $this->getProductById($productId);
+            if ($product && !empty($product['img_url'])) {
+                $images = explode(',', $product['img_url']);
+                $categoryName = $product['category_name'] ?? '';
+                $categoryFolder = "../../../public/images/" . $categoryName . "/";
+
+                foreach ($images as $img) {
+                    $file = $categoryFolder . trim($img);
+                    if (file_exists($file)) unlink($file);
+                }
+            }
+            return $result;
+        } catch (Exception $e) {
+            error_log("Failed to delete product $productId: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getAllUserWishlist(
+        $sort = 'customer_id',
+        $order = 'asc'
+    ) {
+        return $this->productModel->getWishlistBackInStockItems($sort, $order);
+    }
+
+    function getPriorityClass($waitingCount, $stockQty)
+    {
+        if ($stockQty <= 0) return 'priority-out';
+
+        $ratio = $waitingCount / $stockQty;
+
+        if ($ratio >= 1.5) return 'priority-critical';
+        if ($ratio >= 1.0) return 'priority-high';
+        if ($ratio >= 0.5) return 'priority-medium';
+        return 'priority-low';
+    }
+
+    public function handleRestockProductById($productVariantId, $qty, $productId)
+    {
+        $successVariant = $this->productModel->restockVariant($productVariantId, $qty);
+
+        $successProduct = $this->productModel->updateProductUpdatedAt($productId);
+
+        return $successVariant && $successProduct;
     }
 }
