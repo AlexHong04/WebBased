@@ -27,15 +27,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 <html>
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="../../public/img/icon/logo.png" />
-    <title><?php echo $title ?? "My site"; ?></title>
-    <link rel="stylesheet" href="/public/css/pc_reset.css" />
-    <link rel="stylesheet" href="/public/css/header_footer.css" />
-    <?php if (!empty($pageCSS)): ?>
-        <link rel="stylesheet" href="/public/css/<?php echo $pageCSS; ?>" />
-    <?php endif; ?>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="../../public/img/icon/logo.png" />
+	<title><?php echo $title ?? "My site"; ?></title>
+	<link rel="stylesheet" href="/public/css/pc_reset.css" />
+	<link rel="stylesheet" href="/public/css/header_footer.css" />
+	<!-- <link rel="stylesheet" href="/public/css/animation.css" /> -->
+	<?php if (!empty($pageCSS)): ?>
+		<link rel="stylesheet" href="/public/css/<?php echo $pageCSS; ?>" />
+	<?php endif; ?>
+	<link
+		rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 
 <body>
