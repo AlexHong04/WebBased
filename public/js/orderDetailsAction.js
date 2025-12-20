@@ -21,11 +21,21 @@ document.addEventListener("DOMContentLoaded", () => {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: `order_id=${selectedOrderId}&status=Completed`,
+      // body: `order_id=${selectedOrderId}&status=Completed`,
+      body: `action=complete_order&order_id=${selectedOrderId}&status=Completed`,
     })
-      .then((res) => res.text())
-      .then(() => {
-        location.reload();
+      .then((res) => res.json()) 
+      .then((data) => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || "Failed to update order.");
+            document.getElementById("receivedModal").classList.add("hidden");
+        }
+      })
+      .catch(err => {
+          console.error(err);
+          alert("An error occurred.");
       });
   });
 });

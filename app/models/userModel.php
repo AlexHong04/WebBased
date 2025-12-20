@@ -308,11 +308,12 @@ class userModel
         return $this->db->execute();
     }
 
+    // update reward point (when order complete)
     public function updatePoint($custId, $point)
     {
         $this->db->query("
     UPDATE customer
-    SET rewardPoint = :rewardPoint
+    SET rewardPoint = rewardPoint + :rewardPoint
     WHERE customer_id = :customer_id
   ");
 

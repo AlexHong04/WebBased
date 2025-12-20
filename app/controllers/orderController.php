@@ -1,15 +1,18 @@
 <?php
 require_once __DIR__ . '/../models/orderModel.php';
+require_once __DIR__ . '/../models/userModel.php';
 require_once __DIR__ . '/../../app/helpers/mail.php';
 require_once __DIR__ . '/../lib/Pagination.php';
 
 class OrderController
 {
   private $orderModel;
+  private $userModel;
 
   public function __construct()
   {
     $this->orderModel = new OrderModel();
+    $this->userModel = new UserModel();
   }
 
   // public function index($sortColumn = 'order_id', $sortDir = 'ASC')
@@ -158,6 +161,18 @@ class OrderController
       return $refundUpdated && $emailSent;
     }
 
+    if ($newStatus === "Completed") {
+      $order = $this->orderModel->getOrderById($orderId);
+
+      if ($order) {
+        $points = floor($order['total_amount']);
+        $custId = $order['customer_id'];
+
+        $this->userModel->updatePoint($custId, $points);
+        $this->orderModel->updateOrderReward($orderId, $points);
+        $this->orderModel->updateProductTotalSold($orderId);
+      }
+    }
     return true;
   }
 
@@ -231,6 +246,47 @@ class OrderController
     if ($cust && !empty($cust['email'])) {
       $fullName = $cust['firstName'] . ' ' . $cust['lastName'];
       sendCancelOrderApproved($orderId, $cust['email'], $fullName);
+    }
+  }
+
+  public function completeOrder()
+  {
+    $orderId = $_POST['order_id'] ?? null;
+
+    if (!$orderId) {
+      echo json_encode(['success' => false, 'message' => 'Missing Order ID']);
+      return;
+    }
+
+    $order = $this->orderModel->getOrderById($orderId);
+
+    if (!$order) {
+      echo json_encode(['success' => false, 'message' => 'Order not found']);
+      return;
+    }
+
+    if (!isset($_SESSION['customerId']) || $order['customer_id'] !== $_SESSION['customerId']) {
+      echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+      return;
+    }
+
+    $statusRow = $this->orderModel->getOrderStatusById($orderId);
+    $currentStatus = $statusRow ? $statusRow['order_status'] : '';
+
+    if ($currentStatus === 'Completed') {
+      echo json_encode(['success' => false, 'message' => 'Order already completed']);
+      return;
+    }
+
+    $result = $this->updateStatus($orderId, 'Completed');
+
+    if ($result) {
+      $pointsEarned = floor($order['total_amount']);
+      $_SESSION['success_message'] = "Order completed! You earned $pointsEarned points.";
+
+      echo json_encode(['success' => true]);
+    } else {
+      echo json_encode(['success' => false, 'message' => 'Database update failed']);
     }
   }
 }

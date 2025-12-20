@@ -798,4 +798,28 @@ class OrderModel
   //   return $this->db->resultAll();
   // }
 
+  //update order reward points after order is completed
+  public function updateOrderReward($orderId, $points)
+  {
+    $sql = "UPDATE ordertable SET reward = :reward WHERE order_id = :order_id";
+
+    $this->db->query($sql);
+    $this->db->bind(':reward', $points);
+    $this->db->bind(':order_id', $orderId);
+
+    return $this->db->execute();
+  }
+
+  //update product total_sold when order status is "completed"
+  public function updateProductTotalSold($orderId) {
+    $sql = "UPDATE product p
+                JOIN product_variant pv ON p.product_id = pv.product_id
+                JOIN order_items oi ON pv.product_variant_id = oi.product_variant_id
+                SET p.total_sold = IFNULL(p.total_sold, 0) + oi.order_qty
+                WHERE oi.order_id = :order_id";
+
+    $this->db->query($sql);
+    $this->db->bind(':order_id', $orderId);
+    return $this->db->execute();
+  }
 }
