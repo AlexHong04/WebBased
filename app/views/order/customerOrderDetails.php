@@ -3,11 +3,11 @@ session_start();
 include '../../controllers/orderController.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'complete_order') {
-    ob_clean(); 
-    $orderController = new OrderController();
-    header('Content-Type: application/json');
-    $orderController->completeOrder();
-    exit; 
+  ob_clean();
+  $orderController = new OrderController();
+  header('Content-Type: application/json');
+  $orderController->completeOrder();
+  exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -23,11 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $title = "Order Details Page";
 $pageCSS = "orderhistorydetails.css";
 
-include '../header.php';
-
 $orderController = new OrderController();
 $orders = $orderController->getOrderDetails();
 
+include '../header.php';
 
 if (!empty($orders)) {
   $orderId = $orders[0]["order_id"];
@@ -39,7 +38,6 @@ $groupedOrders = [];
 
 foreach ($orders as $row) {
   $order_id = $row['order_id'];
-  // $order_id = trim((string)$row['order_id']);
 
   if (!isset($groupedOrders[$order_id])) {
     $groupedOrders[$order_id] = [
@@ -87,7 +85,6 @@ function calSubtotal($subtotal, $tax)
       <?php unset($_SESSION['success_message']); ?>
 
       <script>
-        // Auto-hide logic for the target page
         setTimeout(() => {
           const popup = document.getElementById("successPopup");
           if (popup) popup.classList.remove("show");

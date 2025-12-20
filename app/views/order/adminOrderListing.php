@@ -49,8 +49,6 @@ $page = $_GET['page'] ?? 1;
 $sort = $_GET['sort'] ?? 'customer_id';
 $dir  = $_GET['dir'] ?? 'asc';
 $statusFilter = $_GET['status'] ?? '';
-$sort = $_GET['sort'] ?? 'customer_id';
-$dir  = $_GET['dir']  ?? 'asc';
 $href = "page=$page&status=$statusFilter";
 
 usort($orders, function ($a, $b) use ($sort, $dir) {
