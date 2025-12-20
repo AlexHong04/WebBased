@@ -9,7 +9,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["ajaxUpdate"])) {
   foreach ($_POST["orders"] as $orderId) {
     $orderController->updateStatus($orderId, $_POST["status"]);
   }
-
   echo "success";
   exit;
 }
@@ -121,8 +120,7 @@ usort($orders, function ($a, $b) use ($sort, $dir) {
                 type="checkbox"
                 name="selected_orders[]"
                 value="<?= $o['order_id'] ?>"
-                class="dataCheckbox"
-                <?php if (in_array($o['order_status'], ['Delivered', 'Completed', 'Cancelled', 'Refunded'])) echo 'disabled'; ?>>
+                class="dataCheckbox">
             </td>
             <td><?= $o['order_id'] ?></td>
             <td><?= $o['customer_id'] ?></td>

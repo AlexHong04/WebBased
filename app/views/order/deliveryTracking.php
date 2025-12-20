@@ -16,6 +16,15 @@ $orderID = $_GET['id'];
 $deliveryDetails = $orderController->getDeliveryDetails($orderID);
 $orderStatuses = $orderController->getOrderStatus($orderID);
 
+if ($deliveryDetails === false) {
+  $deliveryDetails = [
+    'shipment_id' => '-',
+    'receiver_name' => '-',
+    'receiver_phone' => '-',
+    'receiver_address' => '-'
+  ];
+}
+
 function getTrackingData($order_id, $deliveryDetails, $orderStatuses)
 {
   $delivery_data = [

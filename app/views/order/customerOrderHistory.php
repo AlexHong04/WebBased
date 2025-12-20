@@ -1,16 +1,5 @@
 <?php
-// session_start();
 include '../../controllers/orderController.php';
-
-// if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-//   $orderId = $_POST['order_id'] ?? null;
-//   $status  = $_POST['status'] ?? null;
-
-//   if ($orderId && $status) {
-//     $orderController = new OrderController();
-//     $orderController->updateStatus($orderId, $status);
-//   }
-// }
 
 $title = "Order History Page";
 $pageCSS = "orderhistory.css";
@@ -114,7 +103,7 @@ function displayValue($value)
 
           <div class="orderHeader">
             <h2>Order ID: <?= $order_id ?></h2>
-            <div class="orderStatus" <?= $statusClass ?>>
+            <div class="orderStatus <?= $statusClass ?>">
               <h3><?= $orderData['order_status'] ?></h3>
             </div>
           </div>
@@ -183,11 +172,6 @@ function displayValue($value)
                 onclick="window.location.href='customerOrderDetails.php?id=<?= $order_id ?>'">
                 Received
               </button>
-              <!-- <button
-                class="order-action-btn received"
-                data-order-id="<?= $order_id ?>">
-                Received
-              </button> -->
             <?php elseif ($orderData['order_status'] == "Completed" && $orderData['isReviewed'] != null): ?>
               <button type="button"
                 class="order-action-btn view-order"
@@ -210,17 +194,6 @@ function displayValue($value)
       <?php endforeach; ?>
 
     </div>
-    <!-- <div id="receivedModal" class="modal-overlay hidden">
-      <div class="modal-box">
-        <h3>Confirm Order Received</h3>
-        <p>Have you received this order?</p>
-
-        <div class="modal-actions">
-          <button id="cancelReceived" class="cancel-btn">Cancel</button>
-          <button id="confirmReceived" class="confirm-btn">Received</button>
-        </div>
-      </div>
-    </div> -->
   </div>
 
 </div>

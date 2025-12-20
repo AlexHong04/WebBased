@@ -101,7 +101,7 @@
 }
 
 .orderStatus.status-success {
-  background-color: #388e3c;
+  background-color: #2ecc71;
 }
 
 .orderStatus.status-final-fail,
@@ -204,15 +204,15 @@
 
 .btn-container {
   margin-top: 20px;
-  display: flex; /* Align buttons horizontally */
-  gap: 10px; /* Space between buttons */
-  justify-content: flex-end; /* Align buttons to the right */
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
   align-items: center;
   width: auto;
 }
 
 .btn-container button {
-  padding: 8px 12px; /* Add horizontal padding for wider buttons */
+  padding: 8px 12px;
   border-radius: 10px;
   border: none;
   background-color: #ff859f;
@@ -231,7 +231,8 @@
   transform: translateY(-2px);
 }
 
-.btn-container .order-action-btn.cancel-order {
+.btn-container .order-action-btn.cancel-order,
+.btn-container .order-action-btn.pay-now {
   padding: 8px 12px;
   border-radius: 10px;
   border: 2px solid #ff0000;

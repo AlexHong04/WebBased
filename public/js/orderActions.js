@@ -42,32 +42,76 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    // Get the status of selected orders
     const statuses = Array.from(checkedBoxes).map((cb) =>
       cb.closest("tr").querySelector(".order-status").textContent.trim()
     );
+
     const allSameStatus = statuses.every((status) => status === statuses[0]);
 
+    // Determine if any selected status is final (cannot update)
+    const cannotUpdateStatuses = [
+      "Delivered",
+      "Completed",
+      "Cancelled",
+      "Refunded",
+    ];
+    const anyFinalStatus = statuses.some((status) =>
+      cannotUpdateStatuses.includes(status)
+    );
+
+    // Show/Hide buttons
+    viewBtn.style.display = checkedCount >= 1 ? "inline-block" : "none";
+
     if (checkedCount === 1) {
-      viewBtn.style.display = "inline-block";
-      updateBtn.style.display = "inline-block";
+      updateBtn.style.display = anyFinalStatus ? "none" : "inline-block";
     } else if (checkedCount > 1 && allSameStatus) {
-      viewBtn.style.display = "none";
-      updateBtn.style.display = "inline-block";
+      updateBtn.style.display = anyFinalStatus ? "none" : "inline-block";
     } else {
-      viewBtn.style.display = "none";
       updateBtn.style.display = "none";
     }
   }
 
+  // function updateButtons() {
+  //   const checkedBoxes = document.querySelectorAll(".dataCheckbox:checked");
+  //   const checkedCount = checkedBoxes.length;
+
+  //   if (checkedCount === 0) {
+  //     viewBtn.style.display = "none";
+  //     updateBtn.style.display = "none";
+  //     return;
+  //   }
+
+  //   const statuses = Array.from(checkedBoxes).map((cb) =>
+  //     cb.closest("tr").querySelector(".order-status").textContent.trim()
+  //   );
+  //   const allSameStatus = statuses.every((status) => status === statuses[0]);
+
+  //   if (checkedCount === 1) {
+  //     viewBtn.style.display = "inline-block";
+  //     updateBtn.style.display = "inline-block";
+  //   } else if (checkedCount > 1 && allSameStatus) {
+  //     viewBtn.style.display = "none";
+  //     updateBtn.style.display = "inline-block";
+  //   } else {
+  //     viewBtn.style.display = "none";
+  //     updateBtn.style.display = "none";
+  //   }
+  // }
+
   // Show popup when clicking Update
   updateBtn.addEventListener("click", () => {
     const checkedBoxes = document.querySelectorAll(".dataCheckbox:checked");
-    if (checkedBoxes.length === 0) return;
+    if (checkedBoxes.length === 0) {
+      console.log("No checkboxes found"); // Debugging
+      return;
+    }
 
     const currentStatus = checkedBoxes[0]
       .closest("tr")
       .querySelector(".order-status")
       .textContent.trim();
+    console.log("Current Status identified as:", currentStatus);
     selectedCount.innerHTML = `You selected ${checkedBoxes.length} order(s).<br><br>Current status: ${currentStatus}`;
 
     // Filter popup options: only allow next statuses
@@ -95,31 +139,17 @@ document.addEventListener("DOMContentLoaded", function () {
       hiddenInput.value = "";
     }
 
-    popup.style.display = "flex";
+    // popup.style.display = "flex";
+    Object.assign(popup.style, {
+      display: "flex",
+      visibility: "visible",
+      opacity: "1",
+      zIndex: "9999",
+    });
   });
 
   // Cancel popup
   popupCancel.addEventListener("click", () => (popup.style.display = "none"));
-
-  // Dropdown toggle
-  // selected.addEventListener("click", () =>
-  //   popupSelect.classList.toggle("open")
-  // );
-
-  // options.forEach((option) => {
-  //   option.addEventListener("click", () => {
-  //     if (option.style.display === "none") return; // ignore hidden options
-  //     selected.textContent = option.textContent;
-  //     hiddenInput.value = option.dataset.value;
-  //     popupSelect.classList.remove("open");
-  //   });
-  // });
-
-  // document.addEventListener("click", (e) => {
-  //   if (!popupSelect.contains(e.target)) {
-  //     popupSelect.classList.remove("open");
-  //   }
-  // });
 
   // Confirm update
   popupConfirm.addEventListener("click", () => {
@@ -135,18 +165,19 @@ document.addEventListener("DOMContentLoaded", function () {
     formData.append("status", newStatus);
     selectedOrders.forEach((id) => formData.append("orders[]", id));
 
-    fetch("", { method: "POST", body: formData })
+    fetch(window.location.href, { method: "POST", body: formData })
       .then((res) => res.text())
       .then((result) => {
         let cleanResult = result.replace(/<script.*<\/script>/, "").trim();
         if (cleanResult === "success") {
           tableRows.forEach((row) => {
-            const orderId = row.cells[1].textContent;
+            const orderId = row.querySelector(".dataCheckbox").value;
             if (selectedOrders.includes(orderId)) {
-              row.cells[7].textContent = newStatus;
+              row.querySelector(".order-status").textContent = newStatus;
               row.querySelector(".dataCheckbox").checked = false;
             }
           });
+
           popup.style.display = "none";
           showSuccessToast("Order status updated!");
           updateButtons();
@@ -168,15 +199,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Checkbox change listener
   checkboxes.forEach((cb) => cb.addEventListener("change", updateButtons));
 
-  // Search/filter
   function filterTable() {
-    const searchValue = searchInput.value.toLowerCase();
+    const searchValue = searchInput.value.toLowerCase().trim();
     const statusValue = statusFilter.value;
 
     tableRows.forEach((row) => {
-      const orderId = row.cells[1].textContent.toLowerCase();
+      const orderId = row.querySelector(".dataCheckbox").value.toLowerCase();
       const customerId = row.cells[2].textContent.toLowerCase();
-      const status = row.cells[7].textContent.trim();
+      const status = row.querySelector(".order-status").textContent.trim();
 
       const matchesSearch =
         orderId.includes(searchValue) || customerId.includes(searchValue);
@@ -187,6 +217,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateButtons();
   }
+
+  // Search/filter
+  // function filterTable() {
+  //   const searchValue = searchInput.value.toLowerCase();
+  //   const statusValue = statusFilter.value;
+
+  //   tableRows.forEach((row) => {
+  //     const orderId = row.querySelector(".dataCheckbox").value;
+  //     const customerId = row.cells[2].textContent.toLowerCase();
+  //     const status = row.querySelector(".order-status").textContent.trim();
+
+  //     const matchesSearch =
+  //       orderId.includes(searchValue) || customerId.includes(searchValue);
+  //     const matchesStatus = statusValue === "" || status === statusValue;
+
+  //     row.style.display = matchesSearch && matchesStatus ? "" : "none";
+  //   });
+
+  //   updateButtons();
+  // }
 
   document.querySelectorAll(".custom-select").forEach((select) => {
     const selected = select.querySelector(".selected");
@@ -218,8 +268,8 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const orderID = checkedBoxes[0].value;
-    window.location.href = `adminOrderDetails.php?id=${orderID}`;
+    const orderId = checkedBoxes[0].value;
+    window.location.href = `adminOrderDetails.php?id=${orderId}`;
   });
 
   searchInput.addEventListener("input", filterTable);

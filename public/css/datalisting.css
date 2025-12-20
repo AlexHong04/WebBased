@@ -327,12 +327,11 @@
 
 p#selectedCount {
   font-size: 16px;
-  margin: 10px;
 }
 
 .status-custom-select-wrapper {
   text-align: center;
-  margin: 20px 0;
+  /* margin: 20px 0; */
 }
 
 .status-custom-select {

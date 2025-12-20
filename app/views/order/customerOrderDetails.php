@@ -63,6 +63,38 @@ foreach ($orders as $row) {
 
 $orders = $groupedOrders;
 
+
+foreach ($orders as $orderId => $orderData) {
+  $status = $orderData['order_status'];
+  $statusClass = '';
+
+  switch ($status) {
+    case 'Pending':
+    case 'Cancel Requested':
+      $statusClass = 'status-alert';
+      break;
+
+    case 'Paid':
+    case 'Packing':
+    case 'Out for Delivery':
+    case 'Delivered':
+      $statusClass = 'status-progress';
+      break;
+
+    case 'Completed':
+      $statusClass = 'status-success';
+      break;
+
+    case 'Cancelled':
+    case 'Refunded':
+      $statusClass = 'status-final-fail';
+      break;
+
+    default:
+      $statusClass = 'status-default';
+  }
+}
+
 function displayValue($value)
 {
   return empty($value) && $value !== "0" ? "-" : $value;
@@ -98,112 +130,115 @@ function calSubtotal($subtotal, $tax)
     </div>
 
     <div class="orderList">
+      <?php if (!empty($orders)): ?>
+        <?php foreach ($orders as $order_id => $orderData): ?>
+          <div class="order-card-wrapper">
 
-      <?php foreach ($orders as $order_id => $orderData): ?>
-        <div class="order-card-wrapper">
-
-          <div class="orderHeader">
-            <h2>Order ID: <?= $order_id ?></h2>
-            <div class="orderStatus">
-              <h3><?= $orderData['order_status'] ?></h3>
+            <div class="orderHeader">
+              <h2>Order ID: <?= $order_id ?></h2>
+              <div class="orderStatus <?= $statusClass ?>">
+                <h3><?= $orderData['order_status'] ?></h3>
+              </div>
             </div>
-          </div>
 
-          <?php foreach ($orderData['items'] as $item): ?>
-            <div class="orderCard">
+            <?php foreach ($orderData['items'] as $item): ?>
+              <div class="orderCard">
 
-              <div class="col image-col">
-                <img src="/public/images/<?= $item['category_name'] ?>/<?= $item['img_url'] ?>"
-                  alt="<?= $item['product_name'] ?>">
+                <div class="col image-col">
+                  <img src="/public/images/<?= $item['category_name'] ?>/<?= $item['img_url'] ?>"
+                    alt="<?= $item['product_name'] ?>">
+                </div>
+
+                <div class="col info-col">
+                  <p class="name"><?= $item['product_name'] ?></p>
+                  <p class="description"><?= $item['description'] ?></p>
+                  <p class="variant">Variant: <?= $item['variant_name'] ?></p>
+                </div>
+
+                <div class="col qty-col">
+                  <p class="qty">x<?= $item['order_qty'] ?></p>
+                </div>
+
+                <div class="col subtotal-col">
+                  <p class="subtotal">
+                    RM <?= number_format($item['price'] * $item['order_qty'], 2) ?>
+                  </p>
+                </div>
+
               </div>
-
-              <div class="col info-col">
-                <p class="name"><?= $item['product_name'] ?></p>
-                <p class="description"><?= $item['description'] ?></p>
-                <p class="variant">Variant: <?= $item['variant_name'] ?></p>
-              </div>
-
-              <div class="col qty-col">
-                <p class="qty">x<?= $item['order_qty'] ?></p>
-              </div>
-
-              <div class="col subtotal-col">
-                <p class="subtotal">
-                  RM <?= number_format($item['price'] * $item['order_qty'], 2) ?>
-                </p>
-              </div>
-
-            </div>
-          <?php endforeach; ?>
-
-          <div class="orderSummary">
-
-            <p class="total_before_tax">
-              <span class="label">Subtotal (RM):</span>
-              <span class="value"><?= number_format($orderData['total_amount'], 2) ?></span>
-            </p>
-            <p class="order_tax">
-              <span class="label">Tax Charges (RM):</span>
-              <span class="value"><?= number_format($orderData['tax_amount'], 2) ?></span>
-            </p>
-
-            <p class="order_delivery_fee">
-              <span class="label">Delivery Fee (RM):</span>
-              <span class="value">5.00</span>
-            </p>
-
-            <p class="order_total_amount">
-              <span class="label">Total (RM):</span>
-              <span class="value"><?= number_format(calSubtotal($orderData['total_amount'], $orderData['tax_amount']), 2) ?></span>
-
-            </p>
-          </div>
-
-          <div class="transactionSummary">
-            <?php foreach ($statuses as $status): ?>
-              <p class="order_status_time">
-                <span class="label"><?= $status['order_status'] ?>:</span>
-                <span class="value"><?= $status['created_datetime'] ?></span>
-              </p>
             <?php endforeach; ?>
-          </div>
 
-          <?php if ($orderData['order_status'] != "Cancel Requested" && $orderData['order_status'] != "Cancelled" && $orderData['order_status'] != "Refunded"): ?>
-            <div class="btn-container">
-              <?php if ($orderData['order_status'] == "Pending"): ?>
-                <button class="order-action-btn pay-now"
-                  onclick="window.location.href='/id=<?= $order_id ?>'">Pay Now</button>
+            <div class="orderSummary">
 
-              <?php elseif ($orderData['order_status'] == "Paid"): ?>
-                <button class="order-action-btn cancel-order"
-                  onclick="window.location.href='cancelOrder.php?id=<?= $order_id ?>'">Cancel</button>
+              <p class="total_before_tax">
+                <span class="label">Subtotal (RM):</span>
+                <span class="value"><?= number_format($orderData['total_amount'], 2) ?></span>
+              </p>
+              <p class="order_tax">
+                <span class="label">Tax Charges (RM):</span>
+                <span class="value"><?= number_format($orderData['tax_amount'], 2) ?></span>
+              </p>
 
-              <?php elseif ($orderData['order_status'] == "Out For Delivery" || $orderData['order_status'] == "Packing"): ?>
-                <button class="order-action-btn cancel-order"
-                  onclick="window.location.href='cancelOrder.php?id=<?= $order_id ?>'">Cancel</button>
-                <button class="order-action-btn track-order"
-                  onclick="window.location.href='deliveryTracking.php?id=<?= $order_id ?>'">Track Order</button>
+              <p class="order_delivery_fee">
+                <span class="label">Delivery Fee (RM):</span>
+                <span class="value">5.00</span>
+              </p>
 
-              <?php elseif ($orderData['order_status'] == "Out For Delivery"): ?>
-                <button class="order-action-btn track-order"
-                  onclick="window.location.href='deliveryTracking.php?id=<?= $order_id ?>'">Track Order</button>
+              <p class="order_total_amount">
+                <span class="label">Total (RM):</span>
+                <span class="value"><?= number_format(calSubtotal($orderData['total_amount'], $orderData['tax_amount']), 2) ?></span>
 
-              <?php elseif ($orderData['order_status'] == "Delivered"): ?>
-                <button class="order-action-btn track-order"
-                  onclick="window.location.href='deliveryTracking.php?id=<?= $order_id ?>'">Track Order</button>
-                <button class="order-action-btn received" data-order-id="<?= $order_id ?>">Received</button>
-              <?php elseif ($orderData['order_status'] == "Completed" && $isReviewed): ?>
-                <button type="button"
-                  class="order-action-btn review"
-                  onclick="window.location.href='orderRating.php?id=<?= $order_id ?>'">
-                  Review</button>
-              <?php endif; ?>
-
+              </p>
             </div>
-          <?php endif; ?>
 
-        </div>
-      <?php endforeach; ?>
+            <div class="transactionSummary">
+              <?php foreach ($statuses as $status): ?>
+                <p class="order_status_time">
+                  <span class="label"><?= $status['order_status'] ?>:</span>
+                  <span class="value"><?= $status['created_datetime'] ?></span>
+                </p>
+              <?php endforeach; ?>
+            </div>
+
+            <?php if ($orderData['order_status'] != "Cancel Requested" && $orderData['order_status'] != "Cancelled" && $orderData['order_status'] != "Refunded"): ?>
+              <div class="btn-container">
+                <?php if ($orderData['order_status'] == "Pending"): ?>
+                  <button class="order-action-btn pay-now"
+                    onclick="window.location.href='/id=<?= $order_id ?>'">Pay Now</button>
+
+                <?php elseif ($orderData['order_status'] == "Paid"): ?>
+                  <button class="order-action-btn cancel-order"
+                    onclick="window.location.href='cancelOrder.php?id=<?= $order_id ?>'">Cancel</button>
+
+                <?php elseif ($orderData['order_status'] == "Out For Delivery" || $orderData['order_status'] == "Packing"): ?>
+                  <button class="order-action-btn cancel-order"
+                    onclick="window.location.href='cancelOrder.php?id=<?= $order_id ?>'">Cancel</button>
+                  <button class="order-action-btn track-order"
+                    onclick="window.location.href='deliveryTracking.php?id=<?= $order_id ?>'">Track Order</button>
+
+                <?php elseif ($orderData['order_status'] == "Out For Delivery"): ?>
+                  <button class="order-action-btn track-order"
+                    onclick="window.location.href='deliveryTracking.php?id=<?= $order_id ?>'">Track Order</button>
+
+                <?php elseif ($orderData['order_status'] == "Delivered"): ?>
+                  <button class="order-action-btn track-order"
+                    onclick="window.location.href='deliveryTracking.php?id=<?= $order_id ?>'">Track Order</button>
+                  <button class="order-action-btn received" data-order-id="<?= $order_id ?>">Received</button>
+                <?php elseif ($orderData['order_status'] == "Completed" && $isReviewed): ?>
+                  <button type="button"
+                    class="order-action-btn review"
+                    onclick="window.location.href='orderRating.php?id=<?= $order_id ?>'">
+                    Review</button>
+                <?php endif; ?>
+
+              </div>
+            <?php endif; ?>
+
+          </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <p class="no-order">No order items found.</p>
+      <?php endif; ?>
 
     </div>
     <div id="receivedModal" class="modal-overlay hidden">
