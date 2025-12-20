@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../models/orderModel.php';
+require_once __DIR__ . '/../../app/helpers/mail.php';
 require_once __DIR__ . '/../lib/Pagination.php';
 
 class OrderController
@@ -10,6 +11,37 @@ class OrderController
   {
     $this->orderModel = new OrderModel();
   }
+
+  // public function index($sortColumn = 'order_id', $sortDir = 'ASC')
+  // {
+  //   // Whitelist columns to prevent SQL injection
+  //   $allowedColumns = ['order_id', 'customer_id', 'created_datetime', 'total_amount'];
+  //   $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'order_id';
+  //   $sortDir = strtoupper($sortDir) === 'DESC' ? 'DESC' : 'ASC';
+
+  //   // Count total records
+  //   $total = $this->orderModel->countOrders();
+
+  //   // Get current page
+  //   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+  //   // Create pagination object
+  //   $pagination = new Pagination($total, 10, $page); // 10 rows per page
+
+  //   // Fetch paginated and sorted orders
+  //   $orders = $this->orderModel->getOrders(
+  //     $pagination->offset,
+  //     $pagination->recordsPerPage,
+  //     $sortColumn,
+  //     $sortDir
+  //   );
+
+  //   return [
+  //     "orders" => $orders,
+  //     "pagination" => $pagination
+  //   ];
+  // }
+
 
   public function index()
   {
@@ -99,18 +131,57 @@ class OrderController
     return $this->orderModel->getDelivery($orderID);
   }
 
-  public function updateStatus($order_id, $newStatus)
+  public function updateStatus($orderId, $newStatus)
   {
-    if (empty($order_id) || empty($newStatus)) {
+    if (!$orderId || trim($newStatus) === '') {
       return false;
     }
-    $newStatus = trim($_POST['status']);
-    if ($newStatus === "Packing") {
-      return $this->orderModel->createShipment($order_id, $newStatus);
-    } else {
-      return $this->orderModel->adminUpdateOrderStatus($order_id, $newStatus);
+
+    $newStatus = trim($newStatus);
+
+    $updated = $this->orderModel->adminUpdateOrderStatus($orderId, $newStatus);
+    if (!$updated) {
+      return false;
     }
+
+    if ($newStatus === "Packing") {
+      return $this->orderModel->createShipment($orderId, $newStatus);
+    }
+
+    if ($newStatus === "Out for Delivery" || $newStatus === "Delivered") {
+      return $this->orderModel->updateShipment($orderId, $newStatus);
+    }
+
+    if ($newStatus === "Cancelled") {
+      $refundUpdated = $this->orderModel->updateRefundStatus($orderId);
+      $emailSent = $this->sendCancelApproveEmail($orderId);
+      return $refundUpdated && $emailSent;
+    }
+
+    return true;
   }
+
+
+  // public function updateStatus($order_id, $newStatus)
+  // {
+  //   if (empty($order_id) || empty($newStatus)) {
+  //     return false;
+  //   }
+  //   $newStatus = trim($_POST['status']);
+  //   if ($newStatus === "Packing") {
+  //     $updated = $this->orderModel->adminUpdateOrderStatus($order_id, $newStatus);
+  //     if ($updated) {
+  //       return $this->orderModel->createShipment($order_id, $newStatus);
+  //     }
+  //   } else if ($newStatus === "Out for Delivery" || $newStatus === "Delivered") {
+  //     $updated = $this->orderModel->adminUpdateOrderStatus($order_id, $newStatus);
+  //     if ($updated) {
+  //       return $this->orderModel->updateShipment($order_id, $newStatus);
+  //     }
+  //   } else {
+  //     return $this->orderModel->adminUpdateOrderStatus($order_id, $newStatus);
+  //   }
+  // }
 
   public function getTopOrders()
   {
@@ -142,15 +213,24 @@ class OrderController
       return;
     }
 
-    $cancel = $this->orderModel->saveCancellation($orderId);
+    return $this->orderModel->saveCancellation($orderId);
+  }
 
-    if ($cancel) {
-      $_SESSION['success_message'] = "Order cancellation request submitted successfully.";
-    } else {
-      $_SESSION['error_message'] = "Failed to cancel order.";
+  public function sendCancelRequestEmail($orderId)
+  {
+    $cust = $this->orderModel->getCustInfoByOrderId($orderId);
+    if ($cust && !empty($cust['email'])) {
+      $fullName = $cust['firstname'] . ' ' . $cust['lastname'];
+      sendCancelOrderReceived($orderId, $cust['email'], $fullName);
     }
+  }
 
-    header("Location: " . $_SERVER['REQUEST_URI']);
-    exit;
+  public function sendCancelApproveEmail($orderId)
+  {
+    $cust = $this->orderModel->getCustInfoByOrderId($orderId);
+    if ($cust && !empty($cust['email'])) {
+      $fullName = $cust['firstName'] . ' ' . $cust['lastName'];
+      sendCancelOrderApproved($orderId, $cust['email'], $fullName);
+    }
   }
 }

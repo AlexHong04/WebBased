@@ -253,6 +253,27 @@ class OrderModel
     return $this->db->resultAll();
   }
 
+  // public function getOrders($offset, $limit, $sortColumn = 'order_id', $sortDir = 'ASC')
+  // {
+  //   $this->db->query("
+  //       SELECT o.*, os_latest.order_status AS order_status, os_latest.created_datetime AS created_datetime
+  //       FROM ordertable o
+  //       LEFT JOIN (
+  //           SELECT os1.order_id, os1.order_status, os1.created_datetime
+  //           FROM orderstatus os1
+  //           INNER JOIN (
+  //               SELECT order_id, MAX(created_datetime) AS latest_time
+  //               FROM orderstatus
+  //               GROUP BY order_id
+  //           ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
+  //       ) AS os_latest ON o.order_id = os_latest.order_id
+  //        ORDER BY $sortColumn $sortDir
+  //       LIMIT $offset, $limit
+  //   ");
+
+  //   return $this->db->resultAll();
+  // }
+
 
   public function getCustomerProducts($customerId)
   {
@@ -283,6 +304,20 @@ class OrderModel
 
   //   return $this->db->resultAll();
   // }
+
+  public function getCustInfoByOrderId($orderId)
+  {
+    $this->db->query("
+        SELECT c.firstName, c.lastName, c.email
+        FROM customer c
+        JOIN ordertable o
+        ON c.customer_id = o.customer_id
+        WHERE o.order_id = :orderId
+    ");
+    $this->db->bind(':orderId', $orderId);
+    return $this->db->result();
+  }
+
 
   public function getOrder($customerId)
   {
@@ -349,7 +384,7 @@ class OrderModel
   {
     $this->db->query("
     SELECT 
-        o.order_id, 
+        o.order_id,
         os_latest.order_status, 
         os_earliest.earliest_time,
         o.total_amount, 
@@ -499,6 +534,21 @@ class OrderModel
     return $this->db->execute();
   }
 
+  public function updateRefundStatus($orderId)
+  {
+    $newId = $this->db->generateId("orderstatus", "order_status_id", "OS");
+
+    $this->db->query("
+        INSERT INTO orderstatus (order_status_id, order_id, order_status, created_datetime)
+        VALUES (:newId, :order_id, :status, DATE_ADD(NOW(), INTERVAL 3 DAY))
+    ");
+
+    $this->db->bind(':newId', $newId);
+    $this->db->bind(':order_id', $orderId);
+    $this->db->bind(':status', "Refunded");
+
+    return $this->db->execute();
+  }
 
   public function saveCancellation($orderId)
   {
@@ -527,11 +577,6 @@ class OrderModel
 
   public function createShipment($orderId, $newStatus)
   {
-    $updated = $this->updateOrderStatus($orderId, $newStatus);
-    if (!$updated) {
-      return false;
-    }
-
     $newId = $this->db->generateId("shipments", "shipment_id", "SH");
 
     $this->db->query("
@@ -557,9 +602,9 @@ class OrderModel
 
     $this->db->query("
     INSERT INTO shipments
-    (shipment_id, order_id, receiver_name, receiver_phone, receiver_address, shipment_date, status, created_datetime)
+    (shipment_id, order_id, receiver_name, receiver_phone, receiver_address, status, created_datetime)
     VALUES
-    (:shipment_id, :order_id, :receiver_name, :receiver_phone, :receiver_address, CURDATE(), :status, NOW())
+    (:shipment_id, :order_id, :receiver_name, :receiver_phone, :receiver_address, :status, NOW())
   ");
 
     $this->db->bind(':shipment_id', $newId);
@@ -572,6 +617,14 @@ class OrderModel
     return $this->db->execute();
   }
 
+  public function updateShipment($orderId, $newStatus)
+  {
+    $this->db->query("UPDATE shipments SET status = :status,
+    updated_datetime = NOW() WHERE order_id = :order_id");
+    $this->db->bind(':order_id', $orderId);
+    $this->db->bind(':status', $newStatus);
+    return $this->db->execute();
+  }
 
   public function updateCancellation($orderId)
   {

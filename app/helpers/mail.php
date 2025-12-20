@@ -153,10 +153,12 @@ function _sendEmailWithAttachment($toEmail, $toName, $subject, $body, $altBody =
         error_log("Mail Error: {$mail->ErrorInfo}");
         return false;
     }
+}
+
 function sendOtpEmail($toEmail, $toName, $otp)
 {
     $subject = "Reset Password OTP - Lovine";
-    
+
     $body = "
         <div style='font-family: Arial, sans-serif; padding: 20px;'>
             <h2>Password Reset Request</h2>
@@ -170,4 +172,18 @@ function sendOtpEmail($toEmail, $toName, $otp)
     $altBody = "Your OTP is $otp. Do not share it.";
 
     return _sendEmail($toEmail, $toName, $subject, $body, $altBody);
+}
+
+function sendCancelOrderReceived($orderId, $customerEmail, $customerName)
+{
+    $subject = 'Cancellation Request for Order #' . $orderId;
+    $plainText = "Your order #{$orderId} cancellation request has been received. Kindly wait for admin approval, thanks.";
+    return _sendEmail($customerEmail, $customerName, $subject, $plainText);
+}
+
+function sendCancelOrderApproved($orderId, $customerEmail, $customerName)
+{
+    $subject = 'Cancellation Request for Order #' . $orderId;
+    $plainText = "Your order #{$orderId} cancellation request has been approved. Refund will be processed within three days, thanks.";
+    return _sendEmail($customerEmail, $customerName, $subject, $plainText);
 }

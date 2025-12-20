@@ -4,6 +4,7 @@ require_once __DIR__ . '/../helpers/request.php';
 require_once __DIR__ . '/../helpers/mail.php';
 require_once __DIR__ . '/../helpers/validation.php';
 require_once __DIR__ . '/../helpers/auth.php';
+require_once __DIR__ . '/../lib/Pagination.php';
 class userController
 {
     private $userModel;
@@ -76,6 +77,81 @@ class userController
         redirect('../views/home.php');
     }
 
+    // handle user sign in
+    // public function signIn()
+    // {
+    //     if (is_post() && post('action') === 'login') {
+    //         $email = $_POST['email'];
+    //         $password = $_POST['password'];
+    //         $remember = isset($_POST['remember']); // checkbox
+
+    //         if (isset($_SESSION['flash_error'])) {
+    //             unset($_SESSION['flash_error']);
+    //         }
+
+    //         // fetch user by email only
+    //         $user = $this->userModel->getUser($email);
+    //         $staff = $this->userModel->getStaff($email);
+
+    //         if ($user['isActive'] != 1) {
+    //             $_SESSION['flash_error']['login'] = "Account is not activated. Please check your email for the activation link.";
+    //             redirect('signIn.php');
+    //             return;
+    //         }
+
+    //         // verify password
+    //         if ((!$user || !password_verify($password, $user['password'])) && (!$staff || !password_verify($password, $staff['password']))) {
+    //             $_SESSION['flash_error']['login'] = "Invalid email or password.";
+    //             redirect('signIn.php');
+    //             return;
+    //         }
+
+    //         // Create JWT
+    //         $secret = 'Lovine';
+    //         $payload = [
+    //             'customerId' => $user['customer_id'],
+    //             'email' => $user['email'],
+    //             'exp' => time() + (60 * 60) // 1 hour
+    //         ];
+    //         $token = createJWT($payload, $secret);
+
+    //         // save in session
+    //         $_SESSION['token'] = $token;
+
+    //         // ---- Remember Me ----
+    //         if ($remember) {
+    //             setcookie(
+    //                 "remember_token",
+    //                 $token,
+    //                 time() + (60 * 60 * 24 * 30), // 30 days
+    //                 "/",
+    //                 "",
+    //                 false,
+    //                 true
+    //             );
+    //         }
+
+    //         // check staff id == AD direct to admin dashboard else direct to user home
+
+    //         if ($staff) {
+    //             // store staff id in session
+    //             $_SESSION['adminId'] = $staff['admin_id'];
+    //             $_SESSION['email'] = $staff['email'];
+    //             $_SESSION['flash_success']['login'] = "Login successful.";
+    //             redirect('');
+    //             return;
+    //         } else {
+    //             // proceed with user login
+    //             // store user id in session
+    //             $_SESSION['customerId'] = $user['customer_id'];
+    //             $_SESSION['email'] = $user['email'];
+    //             $_SESSION['flash_success']['login'] = "Login successful.";
+    //             redirect('../home.php');
+    //         }
+    //     }
+    // }
+
+    // handle user sign in
     public function signIn()
     {
         if (is_post() && post('action') === 'login') {
@@ -346,5 +422,152 @@ class userController
         } else {
             return ['success' => false, 'message' => 'Failed to update password. Database error.'];
         }
+    }
+
+    // zq
+    public function index()
+    {
+
+        // Count total records
+        $total = $this->userModel->countMembers();
+
+        // Get current page
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+        // Create pagination object
+        $pagination = new Pagination($total, 10, $page); // 10 rows per page
+
+        // Fetch paginated members
+        $members = $this->userModel->getMembers($pagination->offset, $pagination->recordsPerPage);
+
+        return [
+            "members" => $members,
+            "pagination" => $pagination
+        ];
+    }
+
+    public function getMembers()
+    {
+        if (!isset($_GET['id'])) {
+            die("No customer ID provided.");
+        }
+
+        $custID = $_GET['id'];
+
+        $member = $this->userModel->getSpecificMember($custID);
+
+        if (!$member) {
+            die("Member not found.");
+        }
+
+        return $member;
+    }
+
+    public function getMemberAddress()
+    {
+        $custID = $_GET['id'];
+
+        $address = $this->userModel->getAddress($custID);
+
+        return $address;
+    }
+
+    public function updateStatus($customerIds)
+    {
+
+        if (empty($customerIds) || !is_array($customerIds)) {
+            return false;
+        }
+
+        return $this->userModel->updateStatus($customerIds);
+    }
+
+    public function updateMember()
+    {
+        // Only handle POST requests
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return false;
+        }
+
+        // Validate required POST data
+        $customer_id = $_POST['customer_id'] ?? null;
+        if (!$customer_id) {
+            $_SESSION['error_message'] = "Invalid member ID.";
+            return false;
+        }
+
+        if (!empty($_FILES['profile_pic']['name'])) {
+            $file = $_FILES['profile_pic'];
+
+            // Validate
+            $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!in_array($file['type'], $allowed)) {
+                $_SESSION['error_message'] = "Invalid image type";
+                return;
+            }
+
+            $targetDir = __DIR__ . "/../../public/images/profile/";
+            $fileName = basename($file['name']);
+            $targetPath = $targetDir . $fileName;
+
+            // Move uploaded file
+            if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                // Save relative path to DB
+                $img_url = $fileName;
+            } else {
+                $_SESSION['error_message'] = "Failed to upload image.";
+                return false;
+            }
+        }
+
+        // Collect member data safely
+        $memberData = [
+            'customer_id' => $customer_id,
+            'firstName'   => $_POST['firstName'] ?? '',
+            'lastName'    => $_POST['lastName'] ?? '',
+            'phone'       => $_POST['phone'] ?? '',
+            'email'       => $_POST['email'] ?? '',
+            'isBlocked'   => $_POST['isBlocked'] ?? 0,
+            'rewardPoint' => $_POST['rewardPoint'] ?? 0,
+            'img_url' => $img_url ?? null
+        ];
+
+        // Update member in database
+        $updated = $this->userModel->updateMember($memberData);
+
+        if (!$updated) {
+            $_SESSION['error_message'] = "Failed to update member.";
+        }
+
+        // Handle addresses (optional)
+        $addresses = $_POST['addresses'] ?? [];
+        if (!empty($addresses)) {
+            foreach ($addresses as $addr) {
+                // Update existing address
+                $this->userModel->updateAddress($addr['address_id'], $addr);
+            }
+        }
+
+        // Save success message
+        $_SESSION['success_message'] = "Member updated successfully!";
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit;
+    }
+
+    public function updateRewardPoint($custId)
+    {
+        if (empty($custId)) {
+            return false;
+        }
+
+        $member = $this->userModel->getSpecificMember($custId);
+
+        if (!$member) {
+            return false;
+        }
+
+        $newPoint = (int)$member['rewardPoint'] + 10;
+
+        return $this->userModel->updatePoint($custId, $newPoint);
     }
 }

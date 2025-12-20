@@ -55,7 +55,7 @@ class userModel
         return $this->db->execute();
     }
 
-    public function createStaff($firstName, $lastName, $email, $position, $password,$phone)
+    public function createStaff($firstName, $lastName, $email, $position, $password, $phone)
     {
         $adminId = $this->db->generateId('staff', 'admin_id', 'AD');
         $this->db->query("INSERT INTO admin (admin_id,firstName,lastName,email,position,password, phone ,created_at) VALUES (:admin_id, :firstName, :lastName, :email, :position, :password, :phone, NOW())");
@@ -164,8 +164,8 @@ class userModel
         $this->db->bind(':email', $email);
         $this->db->execute();
         return $this->db->rowCount() > 0;
-    }  
-    
+    }
+
     public function updateUserIsBlocked($email, $isBlocked)
     {
         $this->db->query("UPDATE customer SET isBlocked = :isBlocked WHERE email = :email");
@@ -181,7 +181,7 @@ class userModel
         $this->db->query("UPDATE customer SET password = :pass WHERE email = :email");
         $this->db->bind(':pass', $newHashedPassword);
         $this->db->bind(':email', $email);
-        
+
         if ($this->db->execute()) {
             if ($this->db->rowCount() > 0) return true;
         }
@@ -189,7 +189,7 @@ class userModel
         $this->db->query("UPDATE admin SET password = :pass WHERE email = :email");
         $this->db->bind(':pass', $newHashedPassword);
         $this->db->bind(':email', $email);
-        
+
         return $this->db->execute();
     }
 
@@ -212,4 +212,113 @@ class userModel
     // LIMIT 3; ");
     //     return $this->db->resultAll();
     // }
+    // zq
+    public function getAllMembers()
+    {
+        $this->db->query("SELECT * FROM customer");
+        return $this->db->resultAll();
+    }
+
+    public function countMembers()
+    {
+        $this->db->query("SELECT COUNT(*) AS total FROM customer");
+        $result = $this->db->result();
+        return $result["total"];
+    }
+
+    public function getMembers($offset, $limit)
+    {
+        $this->db->query("SELECT * FROM customer LIMIT $offset, $limit");
+        return $this->db->resultAll();
+    }
+
+    public function getSpecificMember($custID)
+    {
+        $this->db->query("SELECT * FROM customer WHERE customer_id = :custID");
+        $this->db->bind(':custID', $custID);
+        return $this->db->result();
+    }
+
+    public function getAddress($custID)
+    {
+        $this->db->query("SELECT * FROM address WHERE customer_id = :custID");
+        $this->db->bind(':custID', $custID);
+        return $this->db->resultAll();
+    }
+
+    public function updateStatus($customerIds)
+    {
+        $idList = implode(",", array_map(function ($id) {
+            return "'" . $id . "'";
+        }, $customerIds));
+
+        $sql = "UPDATE customer SET isBlocked = CASE 
+                WHEN isBlocked = 1 THEN 0
+                ELSE 1
+                END,
+                updated_at = NOW()
+                WHERE customer_id IN ($idList)";
+
+        $this->db->query($sql);
+
+        return $this->db->execute();
+    }
+
+    public function updateMember($data)
+    {
+        $this->db->query("UPDATE customer SET 
+                    firstName = :firstName,
+                    lastName = :lastName,
+                    phone = :phone,
+                    email = :email,
+                    updated_at = NOW(),
+                    isBlocked = :isBlocked,
+                    rewardPoint = :rewardPoint,
+                    img_url = :img_url
+                WHERE customer_id = :customer_id");
+        $this->db->bind(':firstName', $data['firstName']);
+        $this->db->bind(':lastName', $data['lastName']);
+        $this->db->bind(':phone', $data['phone']);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':isBlocked', $data['isBlocked']);
+        $this->db->bind(':rewardPoint', $data['rewardPoint']);
+        $this->db->bind(':img_url', $data['img_url']);
+        $this->db->bind(':customer_id', $data['customer_id']);
+
+        return $this->db->execute();
+    }
+
+    public function updateAddress($address_id, $addressData)
+    {
+        $this->db->query("UPDATE address SET
+                        street_line = :street_line,
+                        city = :city,
+                        state = :state,
+                        postcode = :postcode,
+                        recipient_phone = :recipient_phone
+                    WHERE address_id = :address_id");
+
+        $this->db->bind(':street_line', $addressData['street_line']);
+        $this->db->bind(':city', $addressData['city']);
+        $this->db->bind(':state', $addressData['state']);
+        $this->db->bind(':postcode', $addressData['postcode']);
+        $this->db->bind(':recipient_phone', $addressData['recipient_phone']);
+        $this->db->bind(':address_id', $address_id);
+
+        return $this->db->execute();
+    }
+
+    public function updatePoint($custId, $point)
+    {
+        $this->db->query("
+    UPDATE customer
+    SET rewardPoint = :rewardPoint
+    WHERE customer_id = :customer_id
+  ");
+
+        $this->db->bind(':rewardPoint', $point);
+        $this->db->bind(':customer_id', $custId);
+
+        return $this->db->execute();
+    }
 }
