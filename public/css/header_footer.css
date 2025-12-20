@@ -132,7 +132,9 @@ nav a.cart-link:hover::after {
 }
 
 /* Also prevent underline for links that contain only svg icons */
-nav a > svg::after { display: none; }
+nav a > svg::after {
+  display: none;
+}
 
 /* Header search bar */
 .header-search {
@@ -399,7 +401,7 @@ nav a > svg::after { display: none; }
   transition: all 0.3s ease;
 }
 
-.social-icon{
+.social-icon {
   transition: all 0.25s ease;
 }
 
@@ -407,24 +409,26 @@ nav a > svg::after { display: none; }
 .social-icon:hover {
   background-color: #ffffff; /* white circle */
   transform: translateY(-3px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .social-icon[aria-label="Facebook"]:hover {
-  color: #1877F2; /* Facebook blue icon */
+  color: #1877f2; /* Facebook blue icon */
 }
 .social-icon[aria-label="Twitter"]:hover {
-  color: #1DA1F2; /* Twitter blue icon */
+  color: #1da1f2; /* Twitter blue icon */
 }
 .social-icon[aria-label="Instagram"]:hover {
-  color: #E1306C; /* Instagram magenta icon (approx) */
+  color: #e1306c; /* Instagram magenta icon (approx) */
 }
 .social-icon[aria-label="YouTube"]:hover {
-  color: #FF0000; /* YouTube red icon */
+  color: #ff0000; /* YouTube red icon */
 }
 
 /* ensure SVG paths use currentColor for stroke/fill where applicable */
-.social-icon svg { color: inherit; }
+.social-icon svg {
+  color: inherit;
+}
 
 .social-icon svg {
   width: 20px;
@@ -525,4 +529,100 @@ nav a > svg::after { display: none; }
     max-width: 300px;
     margin: 0 auto;
   }
+}
+
+/* The Dark overlay behind the popup */
+.popup-overlay {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px); /* Glass blur effect */
+  z-index: 10000;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* The actual white box */
+.popup-box {
+  background: #ffffff;
+  width: 90%;
+  max-width: 400px;
+  padding: 25px;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Animation when active */
+.popup-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.popup-overlay.active .popup-box {
+  transform: translateY(0);
+}
+
+/* Typography */
+.popup-box h3 {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+  font-weight: 700;
+}
+
+.popup-box p {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* The Scanner Area Customization */
+#qr-reader {
+  width: 100%;
+  border: none !important;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000; /* Placeholder while loading */
+}
+
+/* Hide html5-qrcode standard styling */
+#qr-reader__scan_region img {
+  display: none;
+}
+
+/* The Close Button */
+#qrCancel {
+  background: #f3f4f6;
+  color: #1f2937;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 5px;
+}
+
+#qrCancel:hover {
+  background: #e5e7eb;
+  transform: scale(1.02);
+}
+
+#qrCancel:active {
+  transform: scale(0.98);
 }
