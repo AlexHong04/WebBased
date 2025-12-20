@@ -956,6 +956,86 @@ body {
   font-size: 1.1rem;
 }
 
+/* Share Modal Styles */
+.share-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    display: none; 
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(3px);
+}
+
+.share-modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    position: relative;
+    animation: scaleUp 0.3s ease;
+}
+
+.share-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+}
+
+.share-modal-close:hover { color: #333; }
+
+#qrcode-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+#qrcode-container img {
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+.share-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.btn-share-action {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: 0.2s;
+}
+
+.btn-copy { background: #f0f0f0; color: #333; }
+.btn-copy:hover { background: #e0e0e0; }
+
+.btn-download { background: #fc84a3; color: #fff; }
+.btn-download:hover { background: #ff6b93; }
+
+@keyframes scaleUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
 /* --- Responsive (Mobile) --- */
 @media (max-width: 768px) {
   .product-container,

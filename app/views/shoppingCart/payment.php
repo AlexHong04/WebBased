@@ -13,9 +13,7 @@ if (!is_array($data)) {
     exit;
 }
 extract($data);
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -26,6 +24,7 @@ extract($data);
     <title>Payment Gateway</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="/public/css/payment.css">
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 
 <body>
@@ -41,14 +40,17 @@ extract($data);
             <form action="payment.php?payment_id=<?= encode($paymentId) ?>" method="POST" id="paymentForm" novalidate>
                 <input type="hidden" name="payment_id" value="<?= encode($paymentId) ?>">
 
+                <input type="hidden" name="stripePaymentId" id="stripePaymentId">
+
                 <?php if ($paymentMethod === 'Credit Card'): ?>
                     <div id="credit-card-section">
                         <h3 style="margin-bottom: 20px; color: var(--primary-pink); text-align: center;">
-                            <i class="far fa-credit-card"></i> Card Details
+                            <!-- <i class="far fa-credit-card"></i> Card Details -->
+                            <i class="far fa-credit-card"></i> Secure Payment
                         </h3>
 
                         <div class="form-group">
-                            <label class="form-label">Card Number</label>
+                            <!-- <label class="form-label">Card Number</label>
                             <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="19" id="cc-input" required>
                             <small class="error-message" id="cc-input-error"></small>
                         </div>
@@ -63,17 +65,26 @@ extract($data);
                                 <label class="form-label">CVV</label>
                                 <input type="password" class="form-control" placeholder="123" maxlength="3" id="cc-cvv" required>
                                 <small class="error-message" id="cc-cvv-error"></small>
-                            </div>
+                            </div> -->
+                            <label class="form-label">Card Information</label>
+                            <div id="card-element" class="form-control" style="padding: 12px;"></div>
+                            <div id="card-errors" class="error-message" style="display:none; color:#dc3545; margin-top:5px;"></div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Card Holder Name</label>
-                            <input type="text" class="form-control" placeholder="Name on Card" id="cc-name" required>
-                            <small class="error-message" id="cc-name-error"></small>
+                            <!-- <input type="text" class="form-control" placeholder="Name on Card" id="cc-name" required>
+                            <small class="error-message" id="cc-name-error"></small> -->
+                            <input type="text" class="form-control" id="cardholder-name" placeholder="Name on Card" required>
+                            <small class="error-message" id="cardholder-name-error" style="display:none; color:#dc3545;"></small>
                         </div>
 
-                        <button type="submit" class="pay-btn">
+                        <!-- <button type="submit" class="pay-btn">
                             Confirm Payment
+                        </button> -->
+
+                        <button type="button" id="stripe-submit-btn" class="pay-btn">
+                            Pay RM <?= encode($formattedAmount) ?>
                         </button>
                     </div>
                 <?php endif; ?>
@@ -147,15 +158,14 @@ extract($data);
     </div>
 
     <script>
-        // --- Leave Page Protection Logic ---
+        const paymentMethod = '<?= encode($paymentMethod) ?>';
         let isSubmitting = false;
-
         const paymentForm = document.getElementById('paymentForm');
-        if (paymentForm) {
-            paymentForm.addEventListener('submit', function() {
-                isSubmitting = true;
-            });
-        }
+        // if (paymentForm) {
+        //     paymentForm.addEventListener('submit', function() {
+        //         isSubmitting = true;
+        //     });
+        // }
 
         function showLeaveModal() {
             document.getElementById('leaveModalOverlay').style.display = 'flex';
@@ -186,7 +196,216 @@ extract($data);
             }
         });
 
-        const paymentMethod = '<?= encode($paymentMethod) ?>';
+        // Stripe Payment Logic
+        const stripeBtn = document.getElementById('stripe-submit-btn');
+
+        if (paymentMethod === 'Credit Card' && stripeBtn) {
+            const stripe = Stripe('pk_test_51Sg74oBZXdC5koAQQ3tfKsDvX0fJHGOHzxO5OV1bUii2GxEG7ajPDXMnc6XK1p2LKmlQK1gpRLxyiJgGXXQ4fl7300qw5VIN3m');
+            const elements = stripe.elements();
+
+            const style = {
+                base: {
+                    color: '#333',
+                    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                    fontSmoothing: 'antialiased',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: '#888'
+                    }
+                },
+                invalid: {
+                    color: '#dc3545',
+                    iconColor: '#dc3545'
+                }
+            };
+
+            const card = elements.create('card', {
+                style: style
+            });
+            card.mount('#card-element');
+
+            card.on('change', function(event) {
+                const displayError = document.getElementById('card-errors');
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                    displayError.style.display = 'block';
+                } else {
+                    displayError.textContent = '';
+                    displayError.style.display = 'none';
+                }
+            });
+
+            // Stripe Button Click Handler
+            stripeBtn.addEventListener('click', async function(ev) {
+                ev.preventDefault();
+
+                clearErrors();
+                const nameInput = document.getElementById('cardholder-name');
+                if (!nameInput.value.trim()) {
+                    showError('cardholder-name', 'Please enter Card Holder Name');
+                    return;
+                }
+
+                console.log(1,nameInput.value);
+                console.log(2,nameInput);
+                if (/\d/.test(nameInput.value)) {
+                    showError('cardholder-name', 'Card Holder Name cannot contain numbers');
+                    return;
+                }
+
+                // Disable button to prevent multiple clicks
+                stripeBtn.disabled = true;
+                stripeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                isSubmitting = true;
+
+                const clientSecret = '<?= $clientSecret ?? '' ?>';
+
+                const result = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: {
+                        card: card,
+                        billing_details: {
+                            name: nameInput.value
+                        }
+                    }
+                });
+
+                if (result.error) {
+                    //Processing error
+                    const errorElement = document.getElementById('card-errors');
+                    errorElement.textContent = result.error.message;
+                    errorElement.style.display = 'block';
+
+                    stripeBtn.disabled = false;
+                    stripeBtn.textContent = 'Try Again';
+                    isSubmitting = false;
+                } else {
+                    // Payment succeeded
+                    if (result.paymentIntent.status === 'succeeded') {
+                        document.getElementById('stripePaymentId').value = result.paymentIntent.id;
+                        paymentForm.submit();
+                    }
+                }
+            });
+        }
+
+
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', function(e) {
+                if (document.getElementById('stripePaymentId').value) {
+                    return;
+                }
+
+                if (paymentMethod === 'Credit Card') {
+                    e.preventDefault();
+                    return;
+                }
+
+                clearErrors();
+                let isValid = true;
+
+                if (paymentMethod === 'TNG') {
+                    const phoneSection = document.getElementById('tng-phone-content');
+
+                    if (phoneSection && phoneSection.style.display !== 'none') {
+                        const phoneInput = document.querySelector('.phone-field');
+                        let rawPhone = phoneInput.value.trim();
+
+                        let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+
+                        if (cleanPhone.startsWith('0')) {
+                            cleanPhone = cleanPhone.substring(1);
+                        }
+
+                        if (!cleanPhone) {
+                            phoneInput.style.borderColor = 'var(--error-red)';
+                            showTngError('tng-phone-error', 'Please enter TNG phone number');
+                            isValid = false;
+                        } else if (cleanPhone.startsWith('11')) {
+                            if (cleanPhone.length !== 10) {
+                                phoneInput.style.borderColor = 'var(--error-red)';
+                                showTngError('tng-phone-error', '011 numbers must be 10 digits (after +60)');
+                                isValid = false;
+                            }
+                        } else if (/^1[02-9]/.test(cleanPhone)) {
+                            if (cleanPhone.length !== 9) {
+                                phoneInput.style.borderColor = 'var(--error-red)';
+                                showTngError('tng-phone-error', '012-019 numbers must be 9 digits (after +60)');
+                                isValid = false;
+                            }
+                        } else {
+                            phoneInput.style.borderColor = 'var(--error-red)';
+                            showTngError('tng-phone-error', 'Invalid format. Phone must start with 01x or 1x');
+                            isValid = false;
+                        }
+
+                        let pinCode = '';
+                        let pinComplete = true;
+                        pinBoxes.forEach(box => {
+                            if (box.value === '') pinComplete = false;
+                            pinCode += box.value;
+                        });
+
+                        if (!pinComplete || pinCode.length !== 6) {
+                            pinBoxes.forEach(b => b.style.borderColor = 'var(--error-red)');
+                            showTngError('tng-pin-error', 'Please enter your 6-digit TNG PIN');
+                            isValid = false;
+                        }
+                    }
+                }
+
+                /*
+                if (paymentMethod === 'Credit Card') {
+                    const cardNum = document.getElementById('cc-input').value.replace(/\s/g, '');
+                    if (!cardNum || cardNum.length < 16) {
+                        showError('cc-input', 'Invalid Card Number (16 digits)');
+                        isValid = false;
+                    }
+
+                    const name = document.getElementById('cc-name').value;
+                    if (!name) {
+                        showError('cc-name', 'Required');
+                        isValid = false;
+                    } else if (/\d/.test(name)) {
+                        showError('cc-name', 'Name cannot contain numbers');
+                        isValid = false;
+                    }
+
+                    const cvv = document.getElementById('cc-cvv').value;
+                    if (!cvv || cvv.length < 3) {
+                        showError('cc-cvv', 'Required (3 digits)');
+                        isValid = false;
+                    }
+
+                    const exp = document.getElementById('cc-exp').value;
+                    const expParts = exp.split('/');
+                    if (!exp || expParts.length !== 2) {
+                        showError('cc-exp', 'Format: MM/YYYY');
+                        isValid = false;
+                    } else if (expParts.length === 2) {
+                        const month = parseInt(expParts[0], 10);
+                        const year = parseInt(expParts[1], 10);
+                        const now = new Date();
+                        const currentYear = now.getFullYear();
+                        const currentMonth = now.getMonth() + 1;
+
+                        if (month < 1 || month > 12) {
+                            showError('cc-exp', 'Invalid Month (01-12)');
+                            isValid = false;
+                        } else if (year < currentYear || (year === currentYear && month < currentMonth)) {
+                            showError('cc-exp', 'Card Expired');
+                            isValid = false;
+                        }
+                    }
+                }
+                */
+
+                if (!isValid) {
+                    e.preventDefault();
+                } else {
+                    isSubmitting = true;
+                }
+            });
+        }
 
         function showError(inputId, message) {
             const input = document.getElementById(inputId);
@@ -210,8 +429,8 @@ extract($data);
 
         function clearErrors() {
             document.querySelectorAll('.form-control, .phone-field, .pin-box').forEach(input => {
-                input.classList.remove('is-invalid');
                 input.style.borderColor = '';
+                input.classList.remove('is-invalid');
             });
             document.querySelectorAll('.error-message').forEach(small => {
                 small.style.display = 'none';
@@ -219,6 +438,7 @@ extract($data);
             });
         }
 
+        /*
         const ccInput = document.getElementById('cc-input');
         if (ccInput) {
             ccInput.addEventListener('input', function(e) {
@@ -241,6 +461,7 @@ extract($data);
                 e.target.value = input;
             });
         }
+        */
 
         // --- TNG Logic ---
         function switchTngTab(tabName) {
@@ -277,114 +498,6 @@ extract($data);
                     }
                 }
             });
-        });
-
-        // --- Form Submission Validation ---
-        document.getElementById('paymentForm').addEventListener('submit', function(e) {
-            clearErrors();
-            let isValid = true;
-
-            // === A. Credit Card Validation ===
-            if (paymentMethod === 'Credit Card') {
-                const cardNum = document.getElementById('cc-input').value.replace(/\s/g, '');
-                if (!cardNum || cardNum.length < 16) {
-                    showError('cc-input', 'Invalid Card Number (16 digits)');
-                    isValid = false;
-                }
-
-                const name = document.getElementById('cc-name').value;
-                if (!name) {
-                    showError('cc-name', 'Required');
-                    isValid = false;
-                } else if (/\d/.test(name)) {
-                    showError('cc-name', 'Name cannot contain numbers');
-                    isValid = false;
-                }
-
-                const cvv = document.getElementById('cc-cvv').value;
-                if (!cvv || cvv.length < 3) {
-                    showError('cc-cvv', 'Required (3 digits)');
-                    isValid = false;
-                }
-
-                const exp = document.getElementById('cc-exp').value;
-                const expParts = exp.split('/');
-                if (!exp || expParts.length !== 2) {
-                    showError('cc-exp', 'Format: MM/YYYY');
-                    isValid = false;
-                } else if (expParts.length === 2) {
-                    const month = parseInt(expParts[0], 10);
-                    const year = parseInt(expParts[1], 10);
-                    const now = new Date();
-                    const currentYear = now.getFullYear();
-                    const currentMonth = now.getMonth() + 1;
-
-                    if (month < 1 || month > 12) {
-                        showError('cc-exp', 'Invalid Month (01-12)');
-                        isValid = false;
-                    } else if (year < currentYear || (year === currentYear && month < currentMonth)) {
-                        showError('cc-exp', 'Card Expired');
-                        isValid = false;
-                    }
-                }
-            }
-
-            // === B. TNG Validation ===
-            if (paymentMethod === 'TNG') {
-                const phoneSection = document.getElementById('tng-phone-content');
-
-                if (phoneSection && phoneSection.style.display !== 'none') {
-                    const phoneInput = document.querySelector('.phone-field');
-                    let rawPhone = phoneInput.value.trim();
-
-                    let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
-
-                    if (cleanPhone.startsWith('0')) {
-                        cleanPhone = cleanPhone.substring(1);
-                    }
-
-                    if (!cleanPhone) {
-                        phoneInput.style.borderColor = 'var(--error-red)';
-                        showTngError('tng-phone-error', 'Please enter TNG phone number');
-                        isValid = false;
-                    } else if (cleanPhone.startsWith('11')) {
-                        if (cleanPhone.length !== 10) {
-                            phoneInput.style.borderColor = 'var(--error-red)';
-                            showTngError('tng-phone-error', '011 numbers must be 10 digits (after +60)');
-                            isValid = false;
-                        }
-                    } else if (/^1[02-9]/.test(cleanPhone)) {
-                        if (cleanPhone.length !== 9) {
-                            phoneInput.style.borderColor = 'var(--error-red)';
-                            showTngError('tng-phone-error', '012-019 numbers must be 9 digits (after +60)');
-                            isValid = false;
-                        }
-                    } else {
-                        phoneInput.style.borderColor = 'var(--error-red)';
-                        showTngError('tng-phone-error', 'Invalid format. Phone must start with 01x or 1x');
-                        isValid = false;
-                    }
-
-                    let pinCode = '';
-                    let pinComplete = true;
-                    pinBoxes.forEach(box => {
-                        if (box.value === '') pinComplete = false;
-                        pinCode += box.value;
-                    });
-
-                    if (!pinComplete || pinCode.length !== 6) {
-                        pinBoxes.forEach(b => b.style.borderColor = 'var(--error-red)');
-                        showTngError('tng-pin-error', 'Please enter your 6-digit TNG PIN');
-                        isValid = false;
-                    }
-                }
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-            } else {
-                isSubmitting = true;
-            }
         });
     </script>
 

@@ -114,7 +114,7 @@ if ($selectedVid && $variantImgFound) {
 $realAvailable = $currStock;
 $isWishlisted = $product['is_wishlisted'] ?? false;
 ?>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <?php if (isset($product) && $product): ?>
@@ -250,7 +250,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
                             <i class="<?= $isWishlisted ? 'fas' : 'far' ?> fa-heart"></i>
                         </button>
 
-                        <button type="button" class="share-btn" onclick="copyProductLink(this)" title="Share Product">
+                        <button type="button" class="share-btn" onclick="openShareModal()" title="Share Product">
                             <i class="fas fa-share-alt"></i>
                         </button>
                     </div>
@@ -407,6 +407,27 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         <div class="toast-progress"></div>
     </div>
 <?php endif; ?>
+
+<div id="shareModalOverlay" class="share-modal-overlay" onclick="closeShareModal(event)">
+    <div class="share-modal-content">
+        <span class="share-modal-close" onclick="closeShareModal(event, true)">&times;</span>
+
+        <h3 style="margin:0; color:#333;">Share this Product</h3>
+        <p style="color:#777; font-size:0.9rem; margin-top:5px;">Scan QR code to view</p>
+
+        <div id="qrcode-container"></div>
+
+        <div class="share-actions">
+            <button class="btn-share-action btn-copy" onclick="copyLinkFromModal(this)">
+                <i class="fas fa-link"></i> Copy Link
+            </button>
+
+            <button class="btn-share-action btn-download" onclick="downloadQRCode()">
+                <i class="fas fa-download"></i> Save QR
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
     const WISHLIST_API_URL = '/app/controllers/wishlist_router.php';
@@ -576,7 +597,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         const stockDisplay = document.getElementById('stockDisplay');
         const qtyInput = document.getElementById('quantity');
         const addToCartBtn = document.querySelector('.add-to-cart-btn');
-        
+
         // Update Stock Display & Button State
         if (stockQty > 0) {
             stockDisplay.innerHTML = `<span class="status-in-stock">${status} (${stockQty} available)</span>`;
@@ -846,22 +867,86 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         }
     }
 
-    // Share Product Functionality
-    function copyProductLink(btn) {
+    // --- Share & QR Code Logic ---
+    function openShareModal() {
+        const overlay = document.getElementById('shareModalOverlay');
+        const container = document.getElementById('qrcode-container');
+        const currentUrl = window.location.href;
+
+        // clear previous QR code (prevent duplicates)
+        container.innerHTML = "";
+
+        // new QRCode
+        try {
+            new QRCode(container, {
+                text: currentUrl,
+                width: 180,
+                height: 180,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        } catch (e) {
+            console.error("QR Code Error:", e);
+            container.innerHTML = "<p>Error generating QR Code</p>";
+        }
+
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; 
+    }
+
+    function closeShareModal(event, force = false) {
+        if (force || event.target.id === 'shareModalOverlay') {
+            document.getElementById('shareModalOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto'; 
+        }
+    }
+
+    // copy link functionality 
+    function copyLinkFromModal(btn) {
         const url = window.location.href;
-        
         navigator.clipboard.writeText(url).then(() => {
-            showToast('Link copied to clipboard!', 'success');
-            
-            const originalIcon = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-check"></i>';
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.style.background = '#d4edda'; 
+
             setTimeout(() => {
-                btn.innerHTML = originalIcon;
+                btn.innerHTML = originalHTML;
+                btn.style.background = '#f0f0f0';
             }, 2000);
+
+            if (typeof showToast === 'function') {
+                showToast('Link copied to clipboard!', 'success');
+            }
         }).catch(err => {
             console.error('Failed to copy: ', err);
-            showToast('Failed to copy link.', 'error');
         });
+    }
+
+    function downloadQRCode() {
+        const container = document.getElementById('qrcode-container');
+        const img = container.querySelector('img');
+
+        if (img && img.src) {
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = 'product-qrcode.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            const canvas = container.querySelector('canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL("image/png");
+                link.download = 'product-qrcode.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert("QR Code not ready yet, please try again.");
+            }
+        }
     }
 </script>
 
