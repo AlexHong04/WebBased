@@ -822,4 +822,29 @@ class OrderModel
     $this->db->bind(':order_id', $orderId);
     return $this->db->execute();
   }
+  
+  // expried unpaid order handling for cron job
+    public function getExpiredUnpaidOrders($hours = 4) {
+        $sql = "SELECT o.order_id, p.payment_id 
+                FROM ordertable o
+                JOIN payment p ON o.order_id = p.order_id
+                
+                JOIN (
+                    SELECT os1.order_id, os1.order_status
+                    FROM orderstatus os1
+                    JOIN (
+                        SELECT order_id, MAX(created_datetime) AS latest_time
+                        FROM orderstatus
+                        GROUP BY order_id
+                    ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
+                ) os_latest ON o.order_id = os_latest.order_id
+
+                WHERE p.payment_status = 'Unpaid' 
+                AND os_latest.order_status = 'Pending' -- only pending orders
+                AND p.created_datetime < DATE_SUB(NOW(), INTERVAL ? HOUR)";
+        
+        $this->db->query($sql);
+        $this->db->bind(1, $hours);
+        return $this->db->resultAll();
+    }
 }

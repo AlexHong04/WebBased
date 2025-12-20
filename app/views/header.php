@@ -21,6 +21,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     $controller->signOut();
     exit;
 }
+
+$cronPath = __DIR__ . '/../controllers/cronController.php'; 
+if (file_exists($cronPath)) {
+    require_once $cronPath;
+    $cron = new cronController();
+    $cron->runOrderCleanup(); 
+}
 ?>
 
 <!DOCTYPE html>
