@@ -2,13 +2,13 @@
 session_start();
 include '../../controllers/orderController.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'complete_order') {
-  ob_clean();
-  $orderController = new OrderController();
-  header('Content-Type: application/json');
-  $orderController->completeOrder();
-  exit;
-}
+// if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'complete_order') {
+//   ob_clean();
+//   $orderController = new OrderController();
+//   header('Content-Type: application/json');
+//   $orderController->completeOrder();
+//   exit;
+// }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $orderId = $_POST['order_id'] ?? null;
@@ -200,23 +200,19 @@ function calSubtotal($subtotal, $tax)
               <?php endforeach; ?>
             </div>
 
-            <?php if ($orderData['order_status'] != "Cancel Requested" && $orderData['order_status'] != "Cancelled" && $orderData['order_status'] != "Refunded"): ?>
+            <?php if ($orderData['order_status'] != "Cancel Requested" && $orderData['order_status'] != "Cancelled" && $orderData['order_status'] != "Refunded" && $orderData['order_status'] != "Completed"): ?>
               <div class="btn-container">
                 <?php if ($orderData['order_status'] == "Pending"): ?>
                   <button class="order-action-btn pay-now"
                     onclick="window.location.href='/id=<?= $order_id ?>'">Pay Now</button>
 
-                <?php elseif ($orderData['order_status'] == "Paid"): ?>
-                  <button class="order-action-btn cancel-order"
-                    onclick="window.location.href='cancelOrder.php?id=<?= $order_id ?>'">Cancel</button>
-
-                <?php elseif ($orderData['order_status'] == "Out For Delivery" || $orderData['order_status'] == "Packing"): ?>
+                <?php elseif ($orderData['order_status'] == "Paid" || $orderData['order_status'] == "Packing"): ?>
                   <button class="order-action-btn cancel-order"
                     onclick="window.location.href='cancelOrder.php?id=<?= $order_id ?>'">Cancel</button>
                   <button class="order-action-btn track-order"
                     onclick="window.location.href='deliveryTracking.php?id=<?= $order_id ?>'">Track Order</button>
 
-                <?php elseif ($orderData['order_status'] == "Out For Delivery"): ?>
+                <?php elseif ($orderData['order_status'] == "Out for Delivery"): ?>
                   <button class="order-action-btn track-order"
                     onclick="window.location.href='deliveryTracking.php?id=<?= $order_id ?>'">Track Order</button>
 
@@ -224,6 +220,7 @@ function calSubtotal($subtotal, $tax)
                   <button class="order-action-btn track-order"
                     onclick="window.location.href='deliveryTracking.php?id=<?= $order_id ?>'">Track Order</button>
                   <button class="order-action-btn received" data-order-id="<?= $order_id ?>">Received</button>
+
                 <?php elseif ($orderData['order_status'] == "Completed" && $isReviewed): ?>
                   <button type="button"
                     class="order-action-btn review"

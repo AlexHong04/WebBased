@@ -33,6 +33,11 @@
   font-size: 30px;
 }
 
+.no-order {
+  width: 100%;
+  text-align: center;
+}
+
 .order-card {
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -119,7 +124,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.popup-overlay {
+.rating-popup-overlay {
   position: fixed;
   top: 0;
   left: 0;

@@ -10,6 +10,7 @@ include '../header.php';
 $orderId = $_GET['id'];
 $orderController = new OrderController();
 $orders = $orderController->getOrderDetails();
+$custId = $orders[0]['customer_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $orderId = $_POST['order_id'] ?? $_GET['id'] ?? null;
@@ -18,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($orderId && $reason) {
     $orderController->cancelOrder($orderId, $reason);
     $orderController->sendCancelRequestEmail($orderId);
-    $_SESSION['success_message'] = "Order cancellation request submitted successfully!";
+    $_SESSION['flash_success'] = "Order cancellation request submitted successfully!";
     echo "success";
     exit;
   }
@@ -27,13 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="order-cancellation-section">
   <h1>Order Cancellation</h1>
-
-  <!-- <?php if (!empty($_SESSION['success_message'])): ?>
-    <div id="successPopup" class="successPopup show">
-      <?= $_SESSION['success_message'] ?>
-    </div>
-    <?php unset($_SESSION['success_message']); ?>
-  <?php endif; ?> -->
 
   <div id="errorPopup" class="customPopup"></div>
 
@@ -151,8 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         })
         .then((response) => {
           if (response.ok) {
-            // CHANGE THIS to your desired page (e.g., Order History)
-            window.location.href = "customerOrderDetails.php?id=<?= $orderId ?>";
+            window.location.href = "customerOrderhistory.php?id=<?= $custId ?>";
           }
         });
     });
@@ -162,7 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       errorPopup.textContent = msg;
       errorPopup.classList.add("show");
 
-      // Auto-hide after 3 seconds
       setTimeout(() => {
         errorPopup.classList.remove("show");
       }, 3000);

@@ -93,7 +93,7 @@
 }
 
 .orderStatus.status-alert {
-  background-color: #d32f2f;
+  background-color: #f72b2b;
 }
 
 .orderStatus.status-progress {
@@ -322,6 +322,71 @@
 .cancel-btn:hover {
   background-color: #adadad;
   transform: translateY(-2px) scale(1);
+}
+
+.successPopup,
+.customPopup {
+  min-width: 250px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  border: 2px solid transparent;
+  position: fixed;
+  top: 50px;
+  right: 20px;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 0.5s, transform 0.5s;
+  font-family: "Arial", Helvetica, sans-serif;
+}
+
+.successPopup.show,
+.customPopup.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.successPopup::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 100%;
+  background-color: #4caf50;
+  transform-origin: left; /* start scaling from left */
+  transform: scaleX(0);
+  animation: progress-bar 3s linear forwards;
+}
+
+.customPopup::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 100%;
+  background-color: #ff0202;
+  transform-origin: left; /* start scaling from left */
+  transform: scaleX(0);
+  animation: progress-bar 3s linear forwards;
+}
+
+.successPopup.show::after,
+.customPopup.show::after {
+  animation: progress-bar 3s linear forwards;
+}
+
+@keyframes progress-bar {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
 }
 
 /* Toast Notification */

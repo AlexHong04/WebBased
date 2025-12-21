@@ -11,10 +11,13 @@ $memberController = new userController();
 $orderController = new OrderController();
 $reviewController = new ReviewController();
 
+// $orderId = $_GET['order_id'] ?? null;
+// $reviewItems = $orderController->getReviewOrders($orderId);
 $item = $orderController->getReviewOrderDetails();
 $custId = $item['customer_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $orderId = $_GET['order_id'] ?? null;
   $reviewController->reviewOrder();
   $memberController->updateRewardPoint($custId);
   $_SESSION['show_success_popup'] = true;
@@ -87,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
   </div>
   <?php if (!empty($_SESSION['show_success_popup'])): ?>
-    <div class="popup-overlay show">
+    <div class="rating-popup-overlay show">
       <div class="center-popup">
         <p>Your review has been submitted successfully!</p>
         <p>Congratulations! You have earned 10 points on your review.</p>

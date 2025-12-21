@@ -151,21 +151,21 @@ $fullOrderData = fillEmptyPeriods($orderData);
         <?php endforeach; ?>
       </div>
     </div>
-    <div class="category-chart-card">
-      <h3>Top 3 Most Ordered Category</h3>
 
-      <div class="category-bar-chart">
-        <?php foreach ($topCategory as $category): ?>
-          <div class="category-bar-item">
-            <span class="label"><?= $category['category_name'] ?></span>
-            <div class="category-bar">
-              <div class="category-bar-fill" data-value=<?= $category['numOfOrder'] ?>></div>
-            </div>
-            <span class="value"><?= $category['numOfOrder'] ?></span>
-          </div>
+    <div class="pie-chart-wrapper">
+      <h3>Category Orders</h3>
+      <div id="categoryPie" class="pie-chart"></div>
+
+      <ul class="pie-legend">
+        <?php foreach ($topCategory as $i => $category): ?>
+          <li>
+            <span class="legend-color color-<?= $i ?>"></span>
+            <?= $category['category_name'] ?> (<?= $category['numOfOrder'] ?>)
+          </li>
         <?php endforeach; ?>
-      </div>
+      </ul>
     </div>
+
   </div>
 
   <div class="order-chart-card">
@@ -189,7 +189,6 @@ $fullOrderData = fillEmptyPeriods($orderData);
 
 <script>
   const bars = document.querySelectorAll(".bar-fill");
-  const categoryBars = document.querySelectorAll(".category-bar-fill");
   const orderData = <?= json_encode($fullOrderData) ?>;
   const statusSelect = document.getElementById('statusSelect');
   const selected = statusSelect.querySelector('.selected');
@@ -229,16 +228,6 @@ $fullOrderData = fillEmptyPeriods($orderData);
     bar.style.width = percentage + "%";
   });
 
-  const categoryMaxValue = Math.max(
-    ...Array.from(categoryBars).map(categoryBars => parseInt(categoryBars.dataset.value))
-  );
-
-  categoryBars.forEach(categoryBars => {
-    const value = categoryBars.dataset.value;
-    const percentage = (value / categoryMaxValue) * 100;
-    categoryBars.style.width = percentage + "%";
-  });
-
   function loadChart(type) {
     const chart = document.getElementById("orderChart");
     chart.innerHTML = "";
@@ -261,4 +250,29 @@ $fullOrderData = fillEmptyPeriods($orderData);
 
   // Load default (week)
   loadChart("week");
+
+  const categoryData = <?= json_encode($topCategory) ?>;
+  const pie = document.getElementById("categoryPie");
+
+  const total = categoryData.reduce(
+    (sum, item) => sum + parseInt(item.numOfOrder),
+    0
+  );
+
+  let currentAngle = 0;
+  const colors = ["#ceeef9ff", "#ffd1d1ff", "#d8c5fcff", "#c6f8e7ff", "#fdf3c8ff", ];
+  const segments = [];
+
+  categoryData.forEach((item, index) => {
+    const value = parseInt(item.numOfOrder);
+    const angle = (value / total) * 360;
+
+    segments.push(
+      `${colors[index]} ${currentAngle}deg ${currentAngle + angle}deg`
+    );
+
+    currentAngle += angle;
+  });
+
+  pie.style.background = `conic-gradient(${segments.join(",")})`;
 </script>

@@ -17,12 +17,6 @@ $orderId = $_GET['id'];
 
 $orderItems = $orderController->getReviewOrders($orderId);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $reviewController->reviewOrder();
-
-  header("Location: " . $_SERVER['REQUEST_URI']);
-  exit;
-}
 ?>
 
 <section class="order-rating-section">
@@ -65,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endforeach; ?>
 
   <?php else: ?>
-    <p>No completed orders found.</p>
+    <p class="no-order">No completed orders found.</p>
   <?php endif; ?>
 </section>
 

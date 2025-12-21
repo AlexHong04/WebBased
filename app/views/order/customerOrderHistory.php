@@ -47,37 +47,6 @@ foreach ($orders as $row) {
 
 $orders = $groupedOrders;
 
-foreach ($orders as $orderId => $orderData) {
-  $status = $orderData['order_status'];
-  $statusClass = '';
-
-  switch ($status) {
-    case 'Pending':
-    case 'Cancel Requested':
-      $statusClass = 'status-alert';
-      break;
-
-    case 'Paid':
-    case 'Packing':
-    case 'Out for Delivery':
-    case 'Delivered':
-      $statusClass = 'status-progress';
-      break;
-
-    case 'Completed':
-      $statusClass = 'status-success';
-      break;
-
-    case 'Cancelled':
-    case 'Refunded':
-      $statusClass = 'status-final-fail';
-      break;
-
-    default:
-      $statusClass = 'status-default';
-  }
-}
-
 function displayValue($value)
 {
   return empty($value) && $value !== "0" ? "-" : $value;
@@ -86,6 +55,19 @@ function displayValue($value)
 ?>
 
 <div class="orderHistory">
+  <?php if (!empty($_SESSION['success_message'])): ?>
+    <div id="successPopup" class="successPopup show">
+      <?= $_SESSION['success_message'] ?>
+    </div>
+    <?php unset($_SESSION['success_message']); ?>
+
+    <script>
+      setTimeout(() => {
+        const popup = document.getElementById("successPopup");
+        if (popup) popup.classList.remove("show");
+      }, 3000);
+    </script>
+  <?php endif; ?>
   <div class="dataDetailsBox">
 
     <?php if (!empty($toastMsg)): ?>
@@ -105,21 +87,49 @@ function displayValue($value)
     <div class="statusTabs">
       <button class="tab active" data-status="">All</button>
       <button class="tab" data-status="Pending">To Pay</button>
-      <button class="tab" data-status="Paid Packing Out_for_delivery Delivered">To Receive</button>
+      <button class="tab" data-status="Paid Packing Out for Delivery Delivered">To Receive</button>
       <button
         class="tab"
-        data-status="<?= (
-                        $orderData['order_status'] === 'Completed' &&
-                        empty($isReviewed)
-                      ) ?>">
+        data-status="Completed">
         To Review
       </button>
-      <button class="tab" data-status="Cancel_requested Cancelled Refunded">Refund & Cancellations</button>
+      <button class="tab" data-status="Cancel Requested Cancelled Refunded">Refund & Cancellations</button>
     </div>
 
     <div class="orderList">
 
       <?php foreach ($orders as $order_id => $orderData): ?>
+        <?php
+        $status = strtolower(trim($orderData['order_status']));
+        $statusClass = '';
+
+        switch ($status) {
+          case 'pending':
+          case 'cancel requested':
+            $statusClass = 'status-alert';
+            break;
+
+          case 'paid':
+          case 'packing':
+          case 'out for delivery':
+          case 'delivered':
+            $statusClass = 'status-progress';
+            break;
+
+          case 'completed':
+            $statusClass = 'status-success';
+            break;
+
+          case 'cancelled':
+          case 'refunded':
+          case 'reviewed':
+            $statusClass = 'status-final-fail';
+            break;
+
+          default:
+            $statusClass = 'status-default';
+        }
+        ?>
         <div class="order-card-wrapper">
 
           <div class="orderHeader">
@@ -176,7 +186,7 @@ function displayValue($value)
                 onclick="window.location.href='customerOrderDetails.php?id=<?= $order_id ?>'">
                 View Order
               </button>
-            <?php elseif ($orderData['order_status'] == "Out For Delivery" || $orderData['order_status'] == "Cancel Requested" || $orderData['order_status'] == "Cancelled" || $orderData['order_status'] == "Refunded"): ?>
+            <?php elseif ($orderData['order_status'] == "Out for Delivery" || $orderData['order_status'] == "Cancel Requested" || $orderData['order_status'] == "Cancelled" || $orderData['order_status'] == "Refunded"): ?>
               <button type="button"
                 class="order-action-btn view-order"
                 onclick="window.location.href='customerOrderDetails.php?id=<?= $order_id ?>'">

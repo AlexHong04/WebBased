@@ -385,6 +385,7 @@ class OrderModel
     $this->db->query("
     SELECT 
         o.order_id,
+        o.customer_id,
         os_latest.order_status, 
         os_earliest.earliest_time,
         o.total_amount, 
@@ -458,35 +459,66 @@ class OrderModel
   {
     $this->db->query("
         SELECT 
-            o.order_id, 
-            o.customer_id,
-            o.total_amount, 
-            o.tax_fee, 
-            oi.product_variant_id, 
-            oi.price, 
-            oi.order_qty,
-            p.product_name, 
-            p.description, 
-            p.img_url,
-            c.category_name, 
-            v.variant_name,
-            pm.created_datetime AS payment_time
-        FROM ordertable o
-        JOIN order_items oi ON o.order_id = oi.order_id
-        JOIN product_variant pv ON oi.product_variant_id = pv.product_variant_id
-        JOIN variant v ON pv.variant_id = v.variant_id
-        JOIN product p ON pv.product_id = p.product_id
-        JOIN category c ON p.category_id = c.category_id
-        JOIN payment pm ON o.order_id = pm.order_id
+    o.order_id, 
+    o.customer_id,
+    o.total_amount, 
+    o.tax_fee, 
+    oi.product_variant_id, 
+    oi.price, 
+    oi.order_qty,
+    p.product_name, 
+    p.description, 
+    p.img_url,
+    c.category_name, 
+    v.variant_name,
+    pm.created_datetime AS payment_time
+FROM ordertable o
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN product_variant pv ON oi.product_variant_id = pv.product_variant_id
+JOIN variant v ON pv.variant_id = v.variant_id
+JOIN product p ON pv.product_id = p.product_id
+JOIN category c ON p.category_id = c.category_id
+JOIN payment pm ON o.order_id = pm.order_id
+WHERE o.order_id = :order_id
+AND NOT EXISTS (
+    SELECT 1
+    FROM review r
+    WHERE r.order_id = o.order_id
+      AND r.product_variant_id = oi.product_variant_id
+);
 
-        -- Left join review to check which items already reviewed
-        LEFT JOIN review r 
-            ON r.order_id = o.order_id 
-            AND r.product_variant_id = oi.product_variant_id
-
-        WHERE o.order_id = :order_id
-          AND r.product_variant_id IS NULL
     ");
+    // $this->db->query("
+    //     SELECT 
+    //         o.order_id, 
+    //         o.customer_id,
+    //         o.total_amount, 
+    //         o.tax_fee, 
+    //         oi.product_variant_id, 
+    //         oi.price, 
+    //         oi.order_qty,
+    //         p.product_name, 
+    //         p.description, 
+    //         p.img_url,
+    //         c.category_name, 
+    //         v.variant_name,
+    //         pm.created_datetime AS payment_time
+    //     FROM ordertable o
+    //     JOIN order_items oi ON o.order_id = oi.order_id
+    //     JOIN product_variant pv ON oi.product_variant_id = pv.product_variant_id
+    //     JOIN variant v ON pv.variant_id = v.variant_id
+    //     JOIN product p ON pv.product_id = p.product_id
+    //     JOIN category c ON p.category_id = c.category_id
+    //     JOIN payment pm ON o.order_id = pm.order_id
+
+    //     -- Left join review to check which items already reviewed
+    //     LEFT JOIN review r 
+    //       ON r.order_id = o.order_id 
+    //       AND r.product_variant_id = oi.product_variant_id
+
+    //     WHERE o.order_id = :order_id
+    //       AND r.review_id IS NULL
+    // ");
 
     $this->db->bind(':order_id', $orderID);
 
@@ -671,7 +703,6 @@ class OrderModel
         WHERE os.order_status = 'Paid'
         GROUP BY c.category_name
         ORDER BY numOfOrder DESC
-        LIMIT 3
     ");
 
     return $this->db->resultAll();
