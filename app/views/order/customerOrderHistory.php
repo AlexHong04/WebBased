@@ -9,7 +9,7 @@ $title = "Order History Page";
 $pageCSS = "orderhistory.css";
 
 if (isset($_GET['status']) && $_GET['status'] === 'pending_payment') {
-  $_SESSION['flash_warning'] = "Payment cancelled. You can complete payment here.";
+  // $_SESSION['flash_warning'] = "Payment cancelled. You can complete payment here.";
   $toastMsg = "Payment cancelled. You can complete payment here.";
   $toastType = "warning";
 }
