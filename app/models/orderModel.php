@@ -697,24 +697,31 @@ class OrderModel
 
     return $this->db->resultAll();
   }
+
   public function getOrdersByTimeline($period)
   {
     switch ($period) {
       case 'month':
-        // Aggregate by week of the month
-        $label = "FLOOR((DAY(os.created_datetime)-1)/7)+1"; // Week 1-4
-        $groupBy = $label;
+        $label = "FLOOR((DAY(os.created_datetime)-1)/7)+1";
+        $groupBy = "period_label";
         break;
 
       case 'year':
-        // Aggregate by month
         $label = "MONTHNAME(os.created_datetime)";
         $groupBy = "MONTH(os.created_datetime)";
-        break;
+        $this->db->query("
+                SELECT MONTHNAME(os.created_datetime) AS period_label, SUM(oi.order_qty) AS numOfOrder
+                FROM ordertable o
+                JOIN orderstatus os ON o.order_id = os.order_id
+                JOIN order_items oi ON o.order_id = oi.order_id
+                WHERE os.order_status = 'Paid'
+                GROUP BY MONTH(os.created_datetime), MONTHNAME(os.created_datetime)
+                ORDER BY MONTH(os.created_datetime)
+            ");
+        return $this->db->resultAll();
 
       case 'week':
       default:
-        // Aggregate by day of week
         $label = "CASE DAYOFWEEK(os.created_datetime)
                         WHEN 1 THEN 'Sun'
                         WHEN 2 THEN 'Mon'
@@ -724,7 +731,8 @@ class OrderModel
                         WHEN 6 THEN 'Fri'
                         WHEN 7 THEN 'Sat'
                       END";
-        $groupBy = "DAYOFWEEK(os.created_datetime)";
+        $groupBy = "DAYOFWEEK(os.created_datetime), $label";
+        $orderBy = "DAYOFWEEK(os.created_datetime)";
         break;
     }
 
@@ -737,11 +745,57 @@ class OrderModel
         JOIN order_items oi ON o.order_id = oi.order_id
         WHERE os.order_status = 'Paid'
         GROUP BY $groupBy
-        ORDER BY $groupBy
+        ORDER BY " . ($orderBy ?? $groupBy) . "
     ");
 
     return $this->db->resultAll();
   }
+
+  // public function getOrdersByTimeline($period)
+  // {
+  //   switch ($period) {
+  //     case 'month':
+  //       // Aggregate by week of the month
+  //       $label = "FLOOR((DAY(os.created_datetime)-1)/7)+1"; // Week 1-4
+  //       $groupBy = $label;
+  //       break;
+
+  //     case 'year':
+  //       // Aggregate by month
+  //       $label = "MONTHNAME(os.created_datetime)";
+  //       $groupBy = "MONTH(os.created_datetime)";
+  //       break;
+
+  //     case 'week':
+  //     default:
+  //       // Aggregate by day of week
+  //       $label = "CASE DAYOFWEEK(os.created_datetime)
+  //                       WHEN 1 THEN 'Sun'
+  //                       WHEN 2 THEN 'Mon'
+  //                       WHEN 3 THEN 'Tue'
+  //                       WHEN 4 THEN 'Wed'
+  //                       WHEN 5 THEN 'Thu'
+  //                       WHEN 6 THEN 'Fri'
+  //                       WHEN 7 THEN 'Sat'
+  //                     END";
+  //       $groupBy = "DAYOFWEEK(os.created_datetime)";
+  //       break;
+  //   }
+
+  //   $this->db->query("
+  //       SELECT 
+  //           $label AS period_label, 
+  //           SUM(oi.order_qty) AS numOfOrder
+  //       FROM ordertable o
+  //       JOIN orderstatus os ON o.order_id = os.order_id
+  //       JOIN order_items oi ON o.order_id = oi.order_id
+  //       WHERE os.order_status = 'Paid'
+  //       GROUP BY $groupBy
+  //       ORDER BY $groupBy
+  //   ");
+
+  //   return $this->db->resultAll();
+  // }
 
 
 
@@ -811,7 +865,8 @@ class OrderModel
   }
 
   //update product total_sold when order status is "completed"
-  public function updateProductTotalSold($orderId) {
+  public function updateProductTotalSold($orderId)
+  {
     $sql = "UPDATE product p
                 JOIN product_variant pv ON p.product_id = pv.product_id
                 JOIN order_items oi ON pv.product_variant_id = oi.product_variant_id
@@ -822,10 +877,11 @@ class OrderModel
     $this->db->bind(':order_id', $orderId);
     return $this->db->execute();
   }
-  
+
   // expried unpaid order handling for cron job
-    public function getExpiredUnpaidOrders($hours = 4) {
-        $sql = "SELECT o.order_id, p.payment_id 
+  public function getExpiredUnpaidOrders($hours = 4)
+  {
+    $sql = "SELECT o.order_id, p.payment_id 
                 FROM ordertable o
                 JOIN payment p ON o.order_id = p.order_id
                 
@@ -842,9 +898,9 @@ class OrderModel
                 WHERE p.payment_status = 'Unpaid' 
                 AND os_latest.order_status = 'Pending' -- only pending orders
                 AND p.created_datetime < DATE_SUB(NOW(), INTERVAL ? HOUR)";
-        
-        $this->db->query($sql);
-        $this->db->bind(1, $hours);
-        return $this->db->resultAll();
-    }
+
+    $this->db->query($sql);
+    $this->db->bind(1, $hours);
+    return $this->db->resultAll();
+  }
 }
