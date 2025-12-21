@@ -26,18 +26,22 @@ class PaymentController
             return;
         }
 
+        $orderId = get('order_id');
         $paymentId = get('payment_id');
+        $payment = null;
 
-        if (!$paymentId) {
+        if ($orderId) {
+            $payment = $this->paymentModel->getPaymentByOrderId($orderId);
+        } elseif ($paymentId) {
+            $payment = $this->paymentModel->getPaymentById($paymentId);
+        }
+
+        if (!$payment) {
             redirect('/app/views/shoppingCart/cart.php');
             return;
         }
 
-        $payment = $this->paymentModel->getPaymentById($paymentId);
-
-        if (!$payment) {
-            die("Invalid Payment ID");
-        }
+        // $payment = $this->paymentModel->getPaymentById($paymentId);
 
         if ($payment['payment_status'] === 'Paid') {
             temp('flash_success', 'This order has already been paid.');
@@ -45,8 +49,12 @@ class PaymentController
             redirect('/app/views/shoppingCart/receipt.php?order_id=' . $payment['order_id']);
             return;
         }
-        $orderId = $payment['order_id'];
-        $order = $this->orderModel->getOrderById($orderId);
+        // $orderId = $payment['order_id'];
+        // $order = $this->orderModel->getOrderById($orderId);
+
+
+        $currentOrderId = $payment['order_id']; 
+        $order = $this->orderModel->getOrderById($currentOrderId);
 
         if (!$order) {
             die("Order not found");
@@ -57,6 +65,7 @@ class PaymentController
             return;
         }
 
+        $paymentId = $payment['payment_id'];
         $totalAmount = $payment['amount'];
         $paymentMethod = $payment['payment_method'];
         $formattedAmount = number_format($totalAmount, 2);
@@ -91,7 +100,7 @@ class PaymentController
         // Prepare View Data
         $data = [
             'paymentId' => $paymentId,
-            'orderId' => $orderId,
+            'orderId' => $currentOrderId,
             'totalAmount' => $totalAmount,
             'paymentMethod' => $paymentMethod,
             'formattedAmount' => $formattedAmount,

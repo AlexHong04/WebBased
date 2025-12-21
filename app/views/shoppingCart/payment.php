@@ -178,7 +178,15 @@ extract($data);
 
         function leavePage() {
             isSubmitting = true;
-            window.location.href = '/app/views/shoppingCart/cart.php?status=pending_payment';
+            const paymentConfig = window.paymentConfig || {};
+            const custId = paymentConfig.customerId;
+
+            if (custId) {
+                window.location.href = `/app/views/order/customerOrderHistory.php?id=${custId}&status=pending_payment`;
+            } else {
+                console.error("Missing Customer ID");
+                window.location.href = '/app/views/shoppingCart/cart.php?status=pending_payment';
+            }
         }
 
         history.pushState(null, null, location.href);
@@ -246,8 +254,6 @@ extract($data);
                     return;
                 }
 
-                console.log(1,nameInput.value);
-                console.log(2,nameInput);
                 if (/\d/.test(nameInput.value)) {
                     showError('cardholder-name', 'Card Holder Name cannot contain numbers');
                     return;
@@ -499,6 +505,14 @@ extract($data);
                 }
             });
         });
+
+        window.paymentConfig = {
+            paymentMethod: '<?= encode($paymentMethod) ?>',
+            stripeKey: 'pk_test_51Sg74oBZXdC5koAQQ3tfKsDvX0fJHGOHzxO5OV1bUii2GxEG7ajPDXMnc6XK1p2LKmlQK1gpRLxyiJgGXXQ4fl7300qw5VIN3m',
+            clientSecret: '<?= $clientSecret ?? '' ?>',
+
+            customerId: '<?= $_SESSION['customerId'] ?? '' ?>'
+        };
     </script>
 
 </body>

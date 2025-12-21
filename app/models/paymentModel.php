@@ -16,6 +16,14 @@ class PaymentModel {
         return $this->db->result();
     }
 
+    // Get Payment Details by Order ID
+    public function getPaymentByOrderId($orderId) {
+        $sql = "SELECT * FROM payment WHERE order_id = ? LIMIT 1";
+        $this->db->query($sql);
+        $this->db->bind(1, $orderId);
+        return $this->db->result();
+    }
+
     // Update Payment Status to 'Paid'
     public function updatePaymentStatus($paymentId, $status = 'Paid') {
         $sql = "UPDATE payment SET payment_status = ?, updated_datetime = NOW() WHERE payment_id = ?";

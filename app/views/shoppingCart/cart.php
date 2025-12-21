@@ -22,11 +22,6 @@ if ($msg = temp('flash_error')) {
     $toastMsg = $msg;
     $toastType = 'success';
 }
-// payment cancellation status from checkout
-if (isset($_GET['status']) && $_GET['status'] === 'pending_payment') {
-    $toastMsg = "Pending Payment: Your transaction was not completed.";
-    $toastType = "warning";
-}
 
 include '../header.php';
 ?>

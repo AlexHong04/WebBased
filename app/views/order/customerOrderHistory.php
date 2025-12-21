@@ -1,8 +1,18 @@
 <?php
 include '../../controllers/orderController.php';
 
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+$customerId = $_SESSION['customerId'] ?? null;
+
 $title = "Order History Page";
 $pageCSS = "orderhistory.css";
+
+if (isset($_GET['status']) && $_GET['status'] === 'pending_payment') {
+  $_SESSION['flash_warning'] = "Payment cancelled. You can complete payment here.";
+  $toastMsg = "Payment cancelled. You can complete payment here.";
+  $toastType = "warning";
+}
 
 include '../header.php';
 
@@ -77,6 +87,17 @@ function displayValue($value)
 
 <div class="orderHistory">
   <div class="dataDetailsBox">
+
+    <?php if (!empty($toastMsg)): ?>
+      <div id="toast-notification" class="toast-notification toast-<?= $toastType ?>" style="display: flex;">
+        <div class="toast-content">
+          <i class="fas fa-exclamation-circle toast-icon"></i>
+          <span class="toast-message"><?= htmlspecialchars($toastMsg) ?></span>
+        </div>
+        <div class="toast-progress"></div>
+      </div>
+    <?php endif; ?>
+
     <p>Order History</p>
 
     <input type="text" id="orderSearch" placeholder="Search by order ID, product name..." />
@@ -140,8 +161,8 @@ function displayValue($value)
           <div class="btn-container">
             <?php if ($orderData['order_status'] == "Pending"): ?>
               <button type="button"
-                class="order-action-btn pay-now">
-                <!-- onclick="window.location.href='/payment.php?id=<?= $order_id ?>'"> -->
+                class="order-action-btn pay-now"
+                onclick="window.location.href='/app/views/shoppingCart/payment.php?order_id=<?= $order_id ?>'">
                 Pay Now
               </button>
             <?php elseif ($orderData['order_status'] == "Paid" || $orderData['order_status'] == "Packing"): ?>
