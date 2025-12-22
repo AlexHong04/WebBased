@@ -22,68 +22,57 @@ include __DIR__ . '/../header.php';
 <section class="profile-section">
     <h1 class="section-title">My Profile</h1>
 
-    <div class="profile-container">
+    <form class="profile-container" id="profile-form" method="POST" enctype="multipart/form-data">
+
         <div class="profile-sidebar">
-            <!-- <div class="profile-avatar">
-                <img id="profile-image" src="/images/DefaultAvatar.png" alt="Profile Avatar">
-                <div class="avatar-overlay">
-                    <label for="avatar-upload" class="avatar-change-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24" fill="currentColor">
-                            <path d="M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z" />
-                        </svg>
-                    </label>
-                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
-                </div>
-            </div> -->
-            <form id="profile-form" method="POST" enctype="multipart/form-data">
-                <div class="profile-avatar" id="avatarDropZone">
-                    <label for="profile-pic-input" class="avatar-label">
-                        <img id="profile-pic-preview"
-                            src="<?= !empty($profileData['img_url'])
-                                        ? '/public/images/profile/' . htmlspecialchars($profileData['img_url'])
-                                        : '/public/images/profile/user.png' ?>"
-                            alt="Profile Picture">
-                        <div class="plus">+</div>
-                    </label>
 
-                    <input type="file" name="profile_pic" id="profile-pic-input" accept="image/*">
-                </div>
+            <div class="profile-avatar" id="avatarDropZone">
+                <label for="profile-pic-input" class="avatar-label">
+                    <img id="profile-pic-preview"
+                        src="<?= !empty($profileData['img_url'])
+                                    ? '/public/images/profile/' . htmlspecialchars($profileData['img_url'])
+                                    : '/public/images/profile/user.png' ?>"
+                        alt="Profile Picture">
+                    <div class="plus">+</div>
+                </label>
 
-                <h2 id="profile-name"><?= htmlspecialchars(($profileData['firstName'] ?? '') . ' ' . ($profileData['lastName'] ?? '')) ?></h2>
-                <p id="profile-gender"><?= htmlspecialchars($profileData['gender'] ?? '') ?></p>
+                <input type="file" name="profile_pic" id="profile-pic-input" accept="image/*">
+            </div>
 
-                <div class="profile-nav">
-                    <a href="profile.php" class="active">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
-                            <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z" />
-                        </svg>
-                        Profile Information
-                    </a>
-                    <a href="#">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
-                            <path d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z" />
-                        </svg>
-                        Address Book
-                    </a>
-                    <a href="resetPassword.php">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
-                            <path d="M400 224h-24v-72C376 68.2 307.8 0 224 0S72 68.2 72 152v72H48c-26.5 0-48 21.5-48 48v192c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V272c0-26.5-21.5-48-48-48zm-104 0H152v-72c0-39.7 32.3-72 72-72s72 32.3 72 72v72z" />
-                        </svg>
-                        Reset Password
-                    </a>
-                    <a href="wishlist.php">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
-                            <path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z" />
-                        </svg>
-                        Wishlist
-                    </a>
-                </div>
+            <h2 id="profile-name"><?= htmlspecialchars(($profileData['firstName'] ?? '') . ' ' . ($profileData['lastName'] ?? '')) ?></h2>
+            <p id="profile-gender"><?= htmlspecialchars($profileData['gender'] ?? '') ?></p>
+
+            <div class="profile-nav">
+                <a href="profile.php" class="active">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
+                        <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z" />
+                    </svg>
+                    Profile Information
+                </a>
+                <a href="addressBook.php">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
+                        <path d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z" />
+                    </svg>
+                    Address Book
+                </a>
+                <a href="resetPassword.php">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
+                        <path d="M400 224h-24v-72C376 68.2 307.8 0 224 0S72 68.2 72 152v72H48c-26.5 0-48 21.5-48 48v192c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V272c0-26.5-21.5-48-48-48zm-104 0H152v-72c0-39.7 32.3-72 72-72s72 32.3 72 72v72z" />
+                    </svg>
+                    Reset Password
+                </a>
+                <a href="wishlist.php">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
+                        <path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z" />
+                    </svg>
+                    Wishlist
+                </a>
+            </div>
         </div>
 
         <div class="profile-content">
             <div class="profile-form-container">
                 <h3>Edit Profile Information</h3>
-
 
                 <input type="hidden" name="action" value="updateProfile">
 
@@ -179,10 +168,10 @@ include __DIR__ . '/../header.php';
 
             </div>
         </div>
-        </form>
-    </div>
+    </form>
 </section>
+
 <?php include '../footer.php' ?>
 
-<script src="/public/js/validation.js'"></script>
+<script src="/public/js/validation.js"></script>
 <script src="/public/js/profile.js"></script>

@@ -6,20 +6,20 @@ document.addEventListener("DOMContentLoaded", function () {
   const avatarDropZone = document.getElementById("avatarDropZone");
   const fileInput = document.getElementById("profile-pic-input");
   const previewImg = document.getElementById("profile-pic-preview");
-
   const inputs = form.querySelectorAll(
-    "input.form-control, textarea.form-control"
+    "input:not([type='hidden']):not([type='file']), textarea"
   );
-
   // 点击 Edit 按钮的逻辑
   editBtn.addEventListener("click", function (e) {
-    if (editBtn.innerText === "Edit Profile") {
+    if (editBtn.innerText.trim() === "Edit Profile") {
       e.preventDefault();
-
+      console.log("进入编辑模式");
       // 1. 开启所有文本输入框
       inputs.forEach((input) => {
         input.removeAttribute("readonly");
+        input.removeAttribute("disabled");
         input.style.backgroundColor = "#fff";
+        input.style.cursor = "text";
       });
 
       // 2. 📸 开启图片上传功能
@@ -31,7 +31,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (inputs.length > 0) inputs[0].focus();
     } else {
-      // 提交表单...
+      console.log("提交表单以保存更改");
+      form.submit();
     }
   });
 

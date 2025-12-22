@@ -256,3 +256,12 @@
     box-shadow: none;
     transform: translateY(1px); 
 }
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 10;
+}
