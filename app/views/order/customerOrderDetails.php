@@ -1,6 +1,8 @@
 <?php
 session_start();
-include '../../controllers/orderController.php';
+require_once '../../controllers/orderController.php';
+
+$customerId = $_SESSION['customerId'] ?? null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'complete_order') {
   ob_clean();
@@ -125,7 +127,8 @@ function calSubtotal($subtotal, $tax)
     <?php endif; ?>
 
     <div class="dataDetailsHeader">
-      <a href="#" class="back-link" onclick="history.back(); return false;">&#x293A;</a>
+      <!-- <a href="#" class="back-link" onclick="history.back(); return false;">&#x293A;</a> -->
+        <a href="/app/views/order/customerOrderHistory.php?id=<?= $customerId ?>" class="back-link">&#x293A;</a>
       <h1>Order Details</h1>
     </div>
 
