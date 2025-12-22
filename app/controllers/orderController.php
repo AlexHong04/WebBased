@@ -15,92 +15,12 @@ class OrderController
     $this->userModel = new UserModel();
   }
 
-  // public function index($sortColumn = 'order_id', $sortDir = 'ASC')
-  // {
-  //   // Whitelist columns to prevent SQL injection
-  //   $allowedColumns = ['order_id', 'customer_id', 'created_datetime', 'total_amount'];
-  //   $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'order_id';
-  //   $sortDir = strtoupper($sortDir) === 'DESC' ? 'DESC' : 'ASC';
-
-  //   // Count total records
-  //   $total = $this->orderModel->countOrders();
-
-  //   // Get current page
-  //   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-
-  //   // Create pagination object
-  //   $pagination = new Pagination($total, 10, $page); // 10 rows per page
-
-  //   // Fetch paginated and sorted orders
-  //   $orders = $this->orderModel->getOrders(
-  //     $pagination->offset,
-  //     $pagination->recordsPerPage,
-  //     $sortColumn,
-  //     $sortDir
-  //   );
-
-  //   return [
-  //     "orders" => $orders,
-  //     "pagination" => $pagination
-  //   ];
-  // }
-
-
-  // public function index()
-  // {
-
-  //   // Count total records
-  //   $total = $this->orderModel->countOrders();
-
-  //   // Get current page
-  //   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-
-  //   // Create pagination object
-  //   $pagination = new Pagination($total, 10, $page); // 10 rows per page
-
-  //   // Fetch paginated members
-  //   $orders = $this->orderModel->getOrders($pagination->offset, $pagination->recordsPerPage);
-
-  //   return [
-  //     "orders" => $orders,
-  //     "pagination" => $pagination
-  //   ];
-  // }
-
-  // public function index()
-  // {
-  //   $page   = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-  //   $status = $_GET['status'] ?? '';
-  //   $sort   = $_GET['sort'] ?? 'customer_id';
-  //   $dir    = $_GET['dir'] ?? 'asc';
-
-  //   // Count filtered records
-  //   $total = $this->orderModel->countOrders($status);
-
-  //   $pagination = new Pagination($total, 10, $page);
-
-  //   // Fetch filtered + paginated orders
-  //   $orders = $this->orderModel->getOrders(
-  //     $pagination->offset,
-  //     $pagination->recordsPerPage,
-  //     $status,
-  //     $sort,
-  //     $dir
-  //   );
-
-  //   return [
-  //     "orders"     => $orders,
-  //     "pagination" => $pagination,
-  //     "filters"    => compact('status', 'sort', 'dir')
-  //   ];
-  // }
-
   public function index()
   {
     $filters = [
       'page'   => $_GET['page'] ?? 1,
       'status' => $_GET['status'] ?? '',
-      'sort'   => $_GET['sort'] ?? 'customer_id',
+      'sort'   => $_GET['sort'] ?? 'order_id',
       'dir'    => $_GET['dir'] ?? 'asc'
     ];
 
@@ -230,28 +150,6 @@ class OrderController
     }
     return true;
   }
-
-
-  // public function updateStatus($order_id, $newStatus)
-  // {
-  //   if (empty($order_id) || empty($newStatus)) {
-  //     return false;
-  //   }
-  //   $newStatus = trim($_POST['status']);
-  //   if ($newStatus === "Packing") {
-  //     $updated = $this->orderModel->adminUpdateOrderStatus($order_id, $newStatus);
-  //     if ($updated) {
-  //       return $this->orderModel->createShipment($order_id, $newStatus);
-  //     }
-  //   } else if ($newStatus === "Out for Delivery" || $newStatus === "Delivered") {
-  //     $updated = $this->orderModel->adminUpdateOrderStatus($order_id, $newStatus);
-  //     if ($updated) {
-  //       return $this->orderModel->updateShipment($order_id, $newStatus);
-  //     }
-  //   } else {
-  //     return $this->orderModel->adminUpdateOrderStatus($order_id, $newStatus);
-  //   }
-  // }
 
   public function getTopOrders()
   {

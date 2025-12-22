@@ -221,13 +221,6 @@ class OrderModel
     return $this->db->result();
   }
 
-  // public function countOrders()
-  // {
-  //   $this->db->query("SELECT COUNT(*) AS total FROM ordertable");
-  //   $result = $this->db->result();
-  //   return $result["total"];
-  // }
-
   public function countOrders($status = '')
   {
     $sql = "SELECT COUNT(*) AS total
@@ -255,33 +248,6 @@ class OrderModel
     $result = $this->db->result();
     return (int) ($result["total"] ?? 0);
   }
-
-
-  // public function countOrders($status = '')
-  // {
-  //   $sql = "SELECT COUNT(*) AS total
-  //       FROM ordertable o
-  //       LEFT JOIN (
-  //           SELECT os1.order_id, os1.order_status, os1.created_datetime
-  //           FROM orderstatus os1
-  //           INNER JOIN (
-  //               SELECT order_id, MAX(created_datetime) AS latest_time
-  //               FROM orderstatus
-  //               GROUP BY order_id
-  //           ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
-  //       ) AS os_latest ON o.order_id = os_latest.order_id";
-  //   if ($status !== '') {
-  //     $sql .= " WHERE order_status = :status";
-  //   }
-
-  //   $this->db->query($sql);
-  //   if ($status !== '') {
-  //     $this->db->bind(':status', $status);
-  //   }
-
-  //   $result = $this->db->result();
-  //   return (int) ($result->total ?? 0);
-  // }
 
   public function getOrders($offset, $limit, $status = '', $sort = 'customer_id', $dir = 'asc')
   {
@@ -323,26 +289,6 @@ class OrderModel
     return $this->db->resultAll();
   }
 
-  // public function getOrders($offset, $limit)
-  // {
-  //   $this->db->query("
-  // SELECT o.*, os_latest.order_status AS order_status, os_latest.created_datetime AS created_datetime
-  // FROM ordertable o
-  // LEFT JOIN (
-  //     SELECT os1.order_id, os1.order_status, os1.created_datetime
-  //     FROM orderstatus os1
-  //     INNER JOIN (
-  //         SELECT order_id, MAX(created_datetime) AS latest_time
-  //         FROM orderstatus
-  //         GROUP BY order_id
-  //     ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
-  // ) AS os_latest ON o.order_id = os_latest.order_id
-  //       LIMIT $offset, $limit
-  //   ");
-
-  //   return $this->db->resultAll();
-  // }
-
   public function getCustomerProducts($customerId)
   {
     $this->db->query("
@@ -357,21 +303,6 @@ class OrderModel
 
     return $this->db->resultAll();
   }
-
-
-  // zq
-  // public function getOrderItemsByCustID($customerId)
-  // {
-  //   $this->db->query("
-  //           SELECT DISTINCT oi.order_qty, oi.price
-  //           FROM ordertable o
-  //           JOIN order_items oi ON o.order_id = oi.order_id
-  //           WHERE o.customer_id = :customer_id
-  //   ");
-  //   $this->db->bind(':customer_id', $customerId);
-
-  //   return $this->db->resultAll();
-  // }
 
   public function getCustInfoByOrderId($orderId)
   {
@@ -556,37 +487,6 @@ AND NOT EXISTS (
 );
 
     ");
-    // $this->db->query("
-    //     SELECT 
-    //         o.order_id, 
-    //         o.customer_id,
-    //         o.total_amount, 
-    //         o.tax_fee, 
-    //         oi.product_variant_id, 
-    //         oi.price, 
-    //         oi.order_qty,
-    //         p.product_name, 
-    //         p.description, 
-    //         p.img_url,
-    //         c.category_name, 
-    //         v.variant_name,
-    //         pm.created_datetime AS payment_time
-    //     FROM ordertable o
-    //     JOIN order_items oi ON o.order_id = oi.order_id
-    //     JOIN product_variant pv ON oi.product_variant_id = pv.product_variant_id
-    //     JOIN variant v ON pv.variant_id = v.variant_id
-    //     JOIN product p ON pv.product_id = p.product_id
-    //     JOIN category c ON p.category_id = c.category_id
-    //     JOIN payment pm ON o.order_id = pm.order_id
-
-    //     -- Left join review to check which items already reviewed
-    //     LEFT JOIN review r 
-    //       ON r.order_id = o.order_id 
-    //       AND r.product_variant_id = oi.product_variant_id
-
-    //     WHERE o.order_id = :order_id
-    //       AND r.review_id IS NULL
-    // ");
 
     $this->db->bind(':order_id', $orderID);
 
@@ -605,7 +505,6 @@ AND NOT EXISTS (
 
     return null;
   }
-
 
   public function getDelivery($orderID)
   {
