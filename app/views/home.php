@@ -2,9 +2,10 @@
 $title = "Home Page";
 $pageCSS = "home.css";
 
-include 'header.php';
+require_once __DIR__ . '/header.php';
 require_once __DIR__ . '/../controllers/userController.php';
-require_once __DIR__ .'/../helpers/auth.php';
+require_once __DIR__ . '/../controllers/productsController.php';
+require_once __DIR__ . '/../helpers/auth.php';
 require_once __DIR__ . '/../helpers/html.php';
 
 // authenticate();
@@ -12,6 +13,7 @@ require_once __DIR__ . '/../helpers/html.php';
 // var_dump($_COOKIE['remember_token']);
 
 $userController = new userController();
+$productController = new ProductController();
 // Fetch data for sections
 // $top_selling = $userController->getTopSalesData();
 // echo "<pre>";
@@ -19,11 +21,16 @@ $userController = new userController();
 // echo "</pre>";
 // exit();
 // array (replace with DB queries)
-$top_selling = array(
-    array("id" => 1, "name" => "Premium Leather Wallet", "price" => 75.00, "img" => "../../public/images/Earrings/pearl_earrings_big.jpeg", "category" => "top", "rating" => 4.5),
-    array("id" => 2, "name" => "Smart Fitness Tracker", "price" => 99.99, "img" => "../../public/images/Earrings/pearl_earrings_big.jpeg", "category" => "top", "rating" => 4.2),
-    array("id" => 3, "name" => "Wireless Headphones", "price" => 249.00, "img" => "../../public/images/Earrings/pearl_earrings_big.jpeg", "category" => "top", "rating" => 4.8),
-);
+
+// $data = $productController->displayProducts();
+$top_selling = $data['topSelling'];
+$new_arrivals = $data['newArrivals'];
+
+// $top_selling = array(
+//     array("id" => 1, "name" => "Premium Leather Wallet", "price" => 75.00, "img" => "../../public/images/Earrings/pearl_earrings_big.jpeg", "category" => "top", "rating" => 4.5),
+//     array("id" => 2, "name" => "Smart Fitness Tracker", "price" => 99.99, "img" => "../../public/images/Earrings/pearl_earrings_big.jpeg", "category" => "top", "rating" => 4.2),
+//     array("id" => 3, "name" => "Wireless Headphones", "price" => 249.00, "img" => "../../public/images/Earrings/pearl_earrings_big.jpeg", "category" => "top", "rating" => 4.8),
+// );
 
 // $new_arrivals = array(
 //     array("id" => 11, "name" => "Eco-Friendly Water Bottle", "price" => 25.00, "img" => "../../public/images/Earrings/pearl_earrings_big.jpeg", "category" => "new"),
@@ -40,33 +47,56 @@ $slides = array(
 
 
 // --- Render helpers ---
-function renderProducts($products, $category, $title, $viewAll = '#')
+function renderProducts($products, $category, $title, $viewAll = 'category/categoryHomePage.php')
 {
+    if (empty($products)) {
+        return;
+    }
 ?>
     <div class="section-header">
         <h2 class="section-title"><?php echo htmlspecialchars($title); ?></h2>
         <a href="<?php echo $viewAll; ?>" class="section-link">View All</a>
     </div>
     <div class="product-grid" role="list">
-        <?php foreach ($products as $p): if (($p['category'] ?? null) !== $category) continue; ?>
-            <article class="product-card" role="listitem" aria-label="<?php echo htmlspecialchars($p['name']); ?>">
-                <div class="product-img" style="background-image: url('<?php echo htmlspecialchars($p['img']); ?>');"></div>
-                <div class="product-body">
-                    <p class="product-name"><?php echo htmlspecialchars($p['name']); ?></p>
-                    <div class="product-rating" aria-hidden="true">
-                        <?php $rating = isset($p['rating']) ? round($p['rating']) : 0;
-                        for ($i = 1; $i <= 5; $i++) {
-                            echo $i <= $rating ? '<span class="star">★</span>' : '<span class="star empty">☆</span>';
-                        } ?>
-                        <span class="rating-number"><?php echo isset($p['rating']) ? number_format($p['rating'], 1) : '0.0'; ?></span>
+        <?php foreach ($products as $p):
+            $catName = $p['category_name'] ?? 'Uncategorized';
+            $safeCatName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $catName);
+
+            $img_url = $p['img_url'] ?? '';
+            $images = explode(',', $img_url);
+            if (count($images) === 1) {
+                $images = explode('，', $img_url);
+            }
+            $display_img = trim($images[0]);
+
+            $fullPath = empty($display_img)
+                ? '../../public/images/default.png'
+                : "../../public/images/$safeCatName/$display_img";
+
+            $detailUrl = "product/product_details.php?id=" . $p['product_id'];
+        ?>
+            <a href="<?php echo $detailUrl; ?>" style="text-decoration: none; color: inherit; display: block;">
+                <article class="product-card" role="listitem" aria-label="<?php echo htmlspecialchars($p['product_name']); ?>">
+                    <div class="product-img" style="background-image: url('<?php echo htmlspecialchars($fullPath); ?>');"></div>
+
+                    <div class="product-body">
+                        <p class="product-name"><?php echo htmlspecialchars($p['product_name']); ?></p>
+                        <div class="product-rating" aria-hidden="true">
+                            <?php $rating = isset($p['rate']) ? round($p['rate']) : 0;
+                            for ($i = 1; $i <= 5; $i++) {
+                                echo $i <= $rating ? '<span class="star">★</span>' : '<span class="star empty">☆</span>';
+                            } ?>
+                            <span class="rating-number"><?php echo isset($p['rate']) ? number_format($p['rate'], 1) : '0.0'; ?></span>
+                        </div>
+                        <div class="product-price">RM<?php echo number_format($p['sale_price'], 2); ?></div>
                     </div>
-                    <div class="product-price">RM<?php echo number_format($p['price'], 2); ?></div>
-                </div>
-            </article>
+                </article>
+            </a>
         <?php endforeach; ?>
     </div>
 <?php
 }
+
 ?>
 
 <main class="flex-1">
@@ -95,7 +125,7 @@ function renderProducts($products, $category, $title, $viewAll = '#')
 
     <?php renderProducts($top_selling, 'top', 'Top Selling Products'); ?>
 
-    <!-- <?php renderProducts($new_arrivals, 'new', 'New Arrivals'); ?> -->
+    <?php renderProducts($new_arrivals, 'new', 'New Arrivals Products'); ?>
 
 </main>
 <?php showToast(); ?>
