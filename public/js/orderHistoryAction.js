@@ -80,13 +80,4 @@ document.addEventListener("DOMContentLoaded", () => {
       location.reload();
     });
 
-  const toast = document.getElementById("toast-notification");
-  if (toast) {
-    setTimeout(() => {
-      toast.style.transition = "opacity 0.5s ease, transform 0.5s ease";
-      toast.style.opacity = "0";
-      toast.style.transform = "translateY(-20px)";
-      setTimeout(() => toast.remove(), 500);
-    }, 3000);
-  }
 });

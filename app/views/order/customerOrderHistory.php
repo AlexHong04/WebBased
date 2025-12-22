@@ -78,6 +78,19 @@ function displayValue($value)
         </div>
         <div class="toast-progress"></div>
       </div>
+      <script>
+        setTimeout(() => {
+          const toast = document.getElementById("toast-notification");
+          if (toast) {
+            toast.style.transition = "opacity 0.5s ease";
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(-20px)";
+            setTimeout(() => {
+              toast.style.display="none";
+            }, 500);
+          }
+        }, 3000);
+        </script>
     <?php endif; ?>
 
     <p>Order History</p>
