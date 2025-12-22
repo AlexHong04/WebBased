@@ -751,10 +751,10 @@ $fullApiUrl = $protocol . $host . $apiPath;
                 const r = c.querySelector('input');
                 if (r.checked) {
                     c.style.borderColor = 'var(--primary-pink)';
-                    c.style.backgroundColor = '#fffbfd';
+                    // c.style.backgroundColor = '#fffbfd';
                 } else {
                     c.style.borderColor = '#ddd';
-                    c.style.backgroundColor = '#fff';
+                    // c.style.backgroundColor = '#fff';
                 }
             });
         }

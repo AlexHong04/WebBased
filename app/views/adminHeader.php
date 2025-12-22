@@ -29,7 +29,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 <body>
   <header>
     <div class="header-container">
-      <div class="logo">Lo<span>vine</span></div>
+      <div class="logo">
+        <a href="/app/views/adminDashboard.php">
+          <img src="/public/images/lovine_logo_circle.png" alt="Lovine Logo" class="logo-image" />
+        </a>
+      </div>
       <nav>
         <ul>
           <li><a href="/app/views/adminDashboard.php">Home</a></li>
