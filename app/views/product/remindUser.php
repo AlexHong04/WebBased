@@ -39,9 +39,13 @@ function renderTemplate($templateText, $customer, $item)
 $controller = new ProductsController();
 if (isset($_GET['action']) && $_GET['action'] === 'systemCall' && isset($_GET['phone'])) {
     $phone = $_GET['phone'];
-    $controller->systemCall($phone);
+    $cname = $_GET['cname'] ?? 'Customer';
+    $pname = $_GET['pname'] ?? 'item';
+
+    $controller->systemCall($phone, $cname, $pname);
+
     $current_page = strtok($_SERVER["REQUEST_URI"], '?');
-    header("Location: $current_page");
+    header("Location: $current_page?call_active=true&called_num=" . urlencode($phone) . "&cname=" . urlencode($cname));
     exit;
 }
 $wishlistItems = $controller->getAllUserWishlist($current_sort, $current_order);
@@ -67,7 +71,9 @@ foreach ($wishlistItems as $item) {
     $customers[$customer_id]['items'][] = $item;
 }
 $customerCount = count($customers);
-include '../header.php';
+
+
+include '../adminHeader.php';
 ?>
 
 <head>
@@ -79,8 +85,10 @@ include '../header.php';
 
 <body>
     <div class="container">
-        <h1>Back In Stock Notifications</h1>
-
+        <div class="backInStock-header">
+            <a href="#" class="back-link" onclick="window.location.href='/app/views/adminDashboard.php'">&#x293A;</a>
+            <h1>Back In Stock Management</h1>
+        </div>
         <div class="controls-row">
             <div class="search_sort">
                 <input
@@ -146,9 +154,9 @@ include '../header.php';
                         <td><?php echo htmlspecialchars($customer['customer_id']); ?></td>
                         <td><strong><?php echo htmlspecialchars($customer['firstname'] . ' ' . $customer['lastname']); ?></strong></td>
                         <td>
-                            <?php echo htmlspecialchars($customer['phone']); ?>
+                            <span class="phone-number-display"><?php echo htmlspecialchars($customer['phone']); ?></span>
 
-                            <a href="<?php echo $_SERVER['PHP_SELF']; ?>?action=systemCall&phone=<?php echo urlencode($customer['phone']); ?>"
+                            <a href="<?php echo $_SERVER['PHP_SELF']; ?>?action=systemCall&phone=<?php echo urlencode($customer['phone']); ?>&cname=<?php echo urlencode($customer['firstname']); ?>&pname=<?php echo urlencode($customer['items'][0]['product_name']); ?>"
                                 class="phone-link"
                                 aria-label="System Call"
                                 onclick="return confirm('Initiate Twilio system call to <?php echo $customer['phone']; ?>?')">
@@ -157,6 +165,8 @@ include '../header.php';
                                     <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" />
                                 </svg>
                             </a>
+
+                            <div class="log-container-<?php echo preg_replace('/[^0-9]/', '', $customer['phone']); ?>"></div>
                         </td>
                         <td>
                             <div class="nested-product-container">
@@ -211,6 +221,38 @@ include '../header.php';
         </div>
 
         <div id="paginationControls" class="pagination-controls-bar"></div>
+    </div>
+    <div id="callModal" class="floating-container" style="display: none;">
+        <div class="modal-content communication-log" id="draggablePopup">
+            <div class="drag-handle" id="dragHandle">
+                <span>::: Drag to move :::</span>
+            </div>
+
+            <div class="log-header">
+                <span class="log-badge">MESSAGE SESSION</span>
+            </div>
+
+            <div class="pulse-container">
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="static-icon">
+                    <svg viewBox="0 0 24 24" width="40" height="40" fill="white">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.767 5.767 0 1.267.405 2.436 1.096 3.389l-.72 2.628 2.687-.706c.823.515 1.785.814 2.812.814 3.181 0 5.767-2.586 5.767-5.767 0-3.181-2.586-5.767-5.767-5.767zm5.091 8.214c-.134.377-.678.723-1.077.771-.399.048-.893.078-1.455-.101-.341-.108-.75-.246-1.285-.478-2.282-.992-3.757-3.324-3.871-3.475-.114-.151-.929-1.238-.929-2.361 0-1.123.584-1.675.792-1.902.208-.227.453-.284.604-.284h.434c.142 0 .33-.053.518.397.19.453.65 1.585.707 1.698.057.113.094.246.019.397-.075.151-.113.245-.226.377-.113.132-.24.296-.341.397-.113.113-.23.237-.1.462.13.225.578.954 1.242 1.543.855.76 1.574 1.002 1.792 1.115.218.113.344.094.471-.053.127-.147.547-.638.693-.855.147-.217.293-.183.491-.109.198.075 1.254.59 1.471.698.217.108.362.163.415.255.053.094.053.543-.081.92z" />
+                    </svg>
+                </div>
+            </div>
+
+            <h2 id="callingName">Wei Xin</h2>
+            <p id="callingNumber">+60 12-345 6789</p>
+
+            <div class="session-timer">
+                <div class="time-box">
+                    <span id="minutes">00</span>:<span id="seconds">00</span>
+                </div>
+            </div>
+
+            <button id="endCallBtn" class="btn-save">Finish & Log</button>
+        </div>
     </div>
     <script src="/public/js/remindUser.js"></script>
 </body>

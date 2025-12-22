@@ -256,8 +256,8 @@ button:hover {
 
 .button-action {
   display: flex;
-  justify-content: flex-end; /* or flex-end if you want them aligned to the right */
-  gap: 15px; /* spacing between buttons */
+  justify-content: flex-end;
+  gap: 15px;
   margin-top: 20px;
 }
 

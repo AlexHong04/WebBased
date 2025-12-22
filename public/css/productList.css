@@ -263,8 +263,8 @@ a i {
 }
 
 .btn-restock {
-  background-color: rgba(249, 173, 30, 0.412);
-  color: #d06f01;
+  background-color: rgba(30, 132, 249, 0.219);
+  color: #1419a8;
   border: none;
   padding: 10px 16px;
   border-radius: 8px;
@@ -288,7 +288,7 @@ a i {
 }
 
 .btn-delete {
-  background-color: #dc3545;
+  background-color: #e42135b8;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -300,7 +300,6 @@ a i {
   align-items: center;
   gap: 6px;
   transition: all 0.2s ease;
-  box-shadow: 0 3px 8px rgba(220, 53, 69, 0.25);
 }
 
 .btn-delete:hover {
@@ -317,6 +316,24 @@ a i {
   background-color: #ccc;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.btn-add-product {
+  background-color: rgba(237, 41, 255, 0.158);
+  color: #50008d;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  transition: all 0.2s ease;
+}
+
+.btn-add-product:hover {
+  transform: translateY(-1px);
+  background-color: rgba(183, 34, 196, 0.158);
 }
 
 .show-variants-btn {
@@ -611,3 +628,16 @@ a i {
   color: white;
 }
 
+.actions a svg {
+  color: #000000; /* blue */
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.actions a svg:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}

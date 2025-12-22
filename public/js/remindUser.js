@@ -167,3 +167,97 @@ document.addEventListener("DOMContentLoaded", function () {
 
   loadSentStatuses();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('callModal');
+    const popup = document.getElementById('draggablePopup');
+    const handle = document.getElementById('dragHandle');
+    const endBtn = document.getElementById('endCallBtn');
+    
+    // 1. GET DATA FROM URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const isCallActive = urlParams.get('call_active') === 'true';
+    const calledNum = urlParams.get('called_num');
+    const calledName = urlParams.get('cname');
+
+    // 2. ONLY RUN TIMER IF CALL IS ACTIVE
+    if (isCallActive) {
+        console.log("Call detected for:", calledName);
+        modal.style.display = 'block';
+        
+        // Populate UI
+        if(calledNum) document.getElementById('callingNumber').innerText = calledNum;
+        if(calledName) document.getElementById('callingName').innerText = calledName;
+
+        // --- TIMER LOGIC ---
+        let totalSeconds = 0;
+        const minEl = document.getElementById('minutes');
+        const secEl = document.getElementById('seconds');
+        const startTimeStr = new Date().toLocaleTimeString();
+
+        const timerInterval = setInterval(() => {
+            totalSeconds++;
+            minEl.innerText = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            secEl.innerText = (totalSeconds % 60).toString().padStart(2, '0');
+        }, 1000);
+
+        // --- FINISH BUTTON LOGIC ---
+        endBtn.onclick = function() {
+            console.log("Finish clicked. Saving log...");
+            clearInterval(timerInterval);
+            
+            const endTimeStr = new Date().toLocaleTimeString();
+            const duration = minEl.innerText + ":" + secEl.innerText;
+
+            // Save to LocalStorage using phone as key (digits only)
+            const cleanPhone = calledNum.replace(/\D/g,'');
+            const logData = { start: startTimeStr, end: endTimeStr, dur: duration };
+            localStorage.setItem('log_' + cleanPhone, JSON.stringify(logData));
+
+            // Hide modal and Clean URL
+            modal.style.display = 'none';
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Immediately update the table display
+            displayLogsInTable();
+        };
+    }
+
+    // 3. DRAG LOGIC (Remains the same)
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    handle.onmousedown = (e) => {
+        isDragging = true;
+        offsetX = e.clientX - popup.offsetLeft;
+        offsetY = e.clientY - popup.offsetTop;
+    };
+
+    document.onmousemove = (e) => {
+        if (!isDragging) return;
+        popup.style.left = (e.clientX - offsetX) + 'px';
+        popup.style.top = (e.clientY - offsetY) + 'px';
+        popup.style.right = 'auto';
+    };
+
+    document.onmouseup = () => { isDragging = false; };
+
+    // 4. FUNCTION TO SHOW LOGS UNDER PHONE NUMBERS
+    function displayLogsInTable() {
+        document.querySelectorAll('.phone-number-display').forEach(span => {
+            const phone = span.innerText.trim().replace(/\D/g,'');
+            const savedLog = JSON.parse(localStorage.getItem('log_' + phone));
+            const container = document.querySelector('.log-container-' + phone);
+
+            if (savedLog && container) {
+                container.innerHTML = `
+                    <div style="font-size: 10px; color: #15803d; background: #f0fdf4; padding: 4px; border-radius: 4px; margin-top: 5px; border: 1px solid #bbf7d0; display: inline-block;">
+                        ⏱️ <b>${savedLog.dur}</b> (${savedLog.start} - ${savedLog.end})
+                    </div>
+                `;
+            }
+        });
+    }
+
+    displayLogsInTable(); // Run this regardless of whether a call is active
+});

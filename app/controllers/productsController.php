@@ -141,7 +141,7 @@ class ProductsController
             foreach ($_POST['variant_ids'] as $i => $vid) {
                 $minStock = $_POST['min_stock_levels'][$i] ?? 1;
                 $stockQty = $_POST['stock_qtys'][$i] ?? 1;
-                $stockStatus = ($stockQty == 0) ? 'out_of_stock' : (($stockQty <= $minStock) ? 'low_stock' : 'in_stock');
+                $stockStatus = ($stockQty == 0) ? 'Out Of Stock' : (($stockQty <= $minStock) ? 'Low Stock' : 'In Stock');
                 $variantId = $this->productModel->generateId('product_variant', 'product_variant_id', 'PV');
 
                 $imgFileName = null;
@@ -182,11 +182,11 @@ class ProductsController
                 'variants' => $variantsData
             ]);
 
-            $_SESSION['success_message'] = "Product and variants added successfully!";
+            $_SESSION['flash_success'] = "Product created successfully!";
             header("Location: productList.php");
             exit();
         } catch (Exception $e) {
-            $_SESSION['error_message'] = "Error saving product: " . $e->getMessage();
+            $_SESSION['flash_error'] = "Error updating product: " . $e->getMessage();
             return [
                 'success' => false,
                 'message' => $e->getMessage()
@@ -486,8 +486,7 @@ class ProductsController
     public function updateProductForm()
     {
         try {
-            $productId = $_POST['product_id'];
-
+            $productId = $_POST['product_id'] ?? null;
             if (empty($productId)) {
                 return [
                     'success' => false,
@@ -496,31 +495,42 @@ class ProductsController
                 ];
             }
 
+            $oldProduct = $this->productModel->getProductById($productId);
+            $oldCategoryId = $oldProduct['category_id'] ?? null;
+            $oldCategory = $this->productModel->getCategoryById($oldCategoryId);
+            $oldCategoryName = $oldCategory['category_name'] ?? 'uncategorized';
+            $oldCategorySafe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $oldCategoryName);
+            $oldCategoryFolder = "../../../public/images/$oldCategorySafe/";
+
             $categoryId = $_POST['category_id'];
             $category = $this->productModel->getCategoryById($categoryId);
             $categoryName = $category['category_name'] ?? 'uncategorized';
             $categoryNameSafe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $categoryName);
-
-            $categoryFolder = "../../../public/images/$categoryNameSafe/";
-            if (!is_dir($categoryFolder)) {
-                mkdir($categoryFolder, 0777, true);
+            $newCategoryFolder = "../../../public/images/$categoryNameSafe/";
+            if (!is_dir($newCategoryFolder)) {
+                mkdir($newCategoryFolder, 0777, true);
             }
 
             $productImages = [];
-
             if (isset($_POST['product_images_existing'])) {
-                if (is_array($_POST['product_images_existing'])) {
-                    foreach ($_POST['product_images_existing'] as $existingString) {
-                        if (!empty($existingString) && is_string($existingString)) {
-                            $images = explode(',', $existingString);
-                            $productImages = array_merge($productImages, array_filter($images));
+                $existingImages = is_array($_POST['product_images_existing'])
+                    ? array_merge(...array_map(fn($s) => explode(',', $s), $_POST['product_images_existing']))
+                    : explode(',', $_POST['product_images_existing']);
+
+                if ($oldCategorySafe !== $categoryNameSafe) {
+                    foreach ($existingImages as $imageFile) {
+                        $oldPath = $oldCategoryFolder . $imageFile;
+                        $newPath = $newCategoryFolder . $imageFile;
+
+                        if (file_exists($oldPath) && !file_exists($newPath)) {
+                            rename($oldPath, $newPath);
                         }
                     }
-                } elseif (is_string($_POST['product_images_existing']) && !empty($_POST['product_images_existing'])) {
-                    $images = explode(',', $_POST['product_images_existing']);
-                    $productImages = array_filter($images);
                 }
+
+                $productImages = array_filter($existingImages);
             }
+
 
             if (!empty($_FILES['product_images']['name'][0])) {
                 foreach ($_FILES['product_images']['name'] as $i => $name) {
@@ -528,7 +538,7 @@ class ProductsController
 
                     $ext = pathinfo($name, PATHINFO_EXTENSION);
                     $newName = $productId . "_img" . (count($productImages) + 1) . "." . $ext;
-                    $destination = $categoryFolder . $newName;
+                    $destination = $newCategoryFolder . $newName;
 
                     if (move_uploaded_file($_FILES['product_images']['tmp_name'][$i], $destination)) {
                         $productImages[] = $newName;
@@ -546,22 +556,22 @@ class ProductsController
                     $stockStatus = ($stockQty == 0) ? 'out_of_stock' : (($stockQty <= $minStock) ? 'low_stock' : 'in_stock');
 
                     $variantId = $_POST['product_variant_ids'][$i] ?? $this->productModel->generateId('product_variant', 'product_variant_id', 'PV');
+                    $imgFileName = $_POST['variant_existing_images'][$i] ?? null;
 
-                    $imgFileName = null;
-
-                    if (isset($_POST['variant_existing_images']) && is_array($_POST['variant_existing_images'])) {
-                        if (isset($_POST['variant_existing_images'][$i]) && !empty($_POST['variant_existing_images'][$i])) {
-                            $imgFileName = $_POST['variant_existing_images'][$i];
+                    if ($imgFileName && $oldCategorySafe !== $categoryNameSafe) {
+                        $oldPath = $oldCategoryFolder . $imgFileName;
+                        $newPath = $newCategoryFolder . $imgFileName;
+                        if (file_exists($oldPath) && !file_exists($newPath)) {
+                            rename($oldPath, $newPath);
                         }
                     }
 
                     if (!empty($_FILES['variant_images_group']['name'][$i])) {
                         $ext = pathinfo($_FILES['variant_images_group']['name'][$i], PATHINFO_EXTENSION);
                         $imgFileName = $variantId . "." . $ext;
-                        $destination = $categoryFolder . $imgFileName;
-
+                        $destination = $newCategoryFolder . $imgFileName;
                         if (move_uploaded_file($_FILES['variant_images_group']['tmp_name'][$i], $destination)) {
-                            // Image uploaded successfully
+                            // Uploaded successfully
                         }
                     }
 
@@ -590,6 +600,7 @@ class ProductsController
                 'product' => $productData,
                 'variants' => $variantsData
             ]);
+
             $_SESSION['flash_success'] = "Product updated successfully!";
             return [
                 'success' => true,
@@ -613,6 +624,7 @@ class ProductsController
         $loginLink = base('app/views/product/lowStockAlert.php?action=sendPdf&email=wongweixin116@gmail.com');
         // $loginLink = base('app/views/product/lowStockAlert.php?action=sendPdf&email=' . $email);
         sendPdf('wongweixin116@gmail.com', "Wei Xin", $loginLink);
+        $_SESSION['flash_success'] = "Email sent successfully!";
         return true;
         // }
     }
@@ -935,7 +947,7 @@ class ProductsController
         exit;
     }
 
-    public function systemCall($phone)
+    public function systemCall($phone, $firstname = 'Customer', $productName = 'your item')
     {
         // Remove non-digits
         $phone = preg_replace('/\D/', '', $phone);
@@ -948,31 +960,17 @@ class ProductsController
         }
         $phone = '+' . $phone;
 
-        echo "<h1>Debug Mode</h1>";
-        echo "Attempting to call: <strong>" . htmlspecialchars($phone) . "</strong><br>";
-
         $twilio = new TwilioSMS(
             'AC691f78ade95d9649a59a8e5c7a431e7a',
             '242e93ca44f709be3f93cd4ea0bd012a',
             '+14199241697'
         );
 
-        $msg = "Hi Wei Xin. How about today !!!";
+        $msg = "Hi " . $firstname . ". Your product, " . $productName . ", is back in stock. Don't miss out!";
 
         $result = $twilio->call($phone, $msg);
-
-        echo "<pre>";
-        print_r($result);
-        echo "</pre>";
-
-        if ($result['success'] === false) {
-            echo "<h2 style='color:red'>FAILED! Check the error message above.</h2>";
-        } else {
-            echo "<h2 style='color:green'>SUCCESS! Phone should ring.</h2>";
-        }
-        die("Script stopped for debugging.");
+        return $result;
     }
-
 
     public function handleDeleteProductVariantById(string $variantId)
     {

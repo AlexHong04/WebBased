@@ -3,6 +3,7 @@ $title = "Product Maintenance";
 $pageCSS = "productList.css";
 
 include '../../controllers/productsController.php';
+include_once '../../helpers/html.php';
 
 $controller = new ProductsController();
 
@@ -21,9 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $controller->handleRestockProductById($variantId, $qty, $productId);
                 }
             }
-            $_SESSION['success_message'] = "Selected products restocked successfully!";
+            $_SESSION['flash_success'] = "Bulk restock completed successfully!";
         } else {
-            $_SESSION['error_message'] = "No quantities entered for restocking.";
+            $_SESSION['flash_error'] = "Failed to restock products. Please try again.";
         }
 
         header("Location: productList.php");
@@ -37,16 +38,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($productIds as $id) {
                 $controller->handleDeleteProductById($id);
             }
-            $_SESSION['success_message'] = count($productIds) . " product(s) deleted successfully!";
+            $_SESSION['flash_success'] = count($productIds) . " product(s) deleted successfully!";
         } else {
-            $_SESSION['error_message'] = "No products selected for deletion.";
+            $_SESSION['flash_error'] = "Failed to delete products. Please try again.";
         }
 
         header("Location: productList.php");
         exit;
     }
 }
-include '../header.php';
+include '../adminHeader.php';
 
 $current_sort = $_GET['sort'] ?? 'product_id';
 $current_order = $_GET['order'] ?? 'asc';
@@ -59,6 +60,9 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
 ?>
 
 <body>
+    <?php
+    showToast();
+    ?>
     <div class="main-content-wrapper">
 
         <div class="filter-sidebar">
@@ -122,6 +126,15 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
                     </div>
 
                     <div class="table-header-right">
+
+                        <button type="button"
+                            id="addProductBtn"
+                            class="btn-add-product"
+                            onclick="window.location.href='/app/views/product/addSingleProduct.php'">
+                            ➕ Add Product
+                        </button>
+
+
                         <button type="button" id="bulkRestockBtn" class="btn btn-restock">
                             📦 Bulk Restock Selected
                         </button>
@@ -192,7 +205,13 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
                                     echo '<td>
                                 <div class="actions">
                                     <a href="addSingleProduct.php?product_id=' . $product['product_id'] . '">
-                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" 
+                                        width="16" height="16" 
+                                        viewBox="0 0 512 512" 
+                                        fill="currentColor">
+                                    <path d="M448 0H320c-17.7 0-32 14.3-32 32s14.3 32 32 32h75.3L201 258.3c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L440 109.3V184c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32z"/>
+                                    <path d="M64 64v384c0 35.3 28.7 64 64 64h320c35.3 0 64-28.7 64-64V256c0-17.7-14.3-32-32-32s-32 14.3-32 32v192c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V64c0-17.7-14.3-32-32-32S64 46.3 64 64z"/>
+                                    </svg>
                                     </a>
                                      <form method="POST" action="productList.php" class="delete-single-form" style="display:inline;">
                                         <input type="hidden" name="delete_selected" value="1">

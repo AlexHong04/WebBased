@@ -48,12 +48,14 @@ class ProductModel
         $sort_order = 'asc'
     ) {
         $where_clause = '';
+
+        // 1. Handle Filtering using the stock_status attribute
         switch ($filter) {
             case 'lowStock':
-                $where_clause = "WHERE stock_status = 'Low Stock' OR stock_status = 'Out of Stock'";
+                $where_clause = "WHERE stock_status IN ('Low Stock', 'Out of Stock')";
                 break;
             case 'outOfStock':
-                $where_clause = "WHERE stock_qty <= 0";
+                $where_clause = "WHERE stock_status = 'Out of Stock'";
                 break;
             case 'all':
                 $where_clause = "";
@@ -61,23 +63,27 @@ class ProductModel
             case 'countLowStock':
                 return $this->getCountByFilter("stock_status = 'Low Stock'");
             case 'countOutOfStock':
-                return $this->getCountByFilter("stock_qty <= 0");
+                return $this->getCountByFilter("stock_status = 'Out of Stock'");
             case 'countAll':
-                return $this->getCountByFilter("1=1"); // Count all
+                return $this->getCountByFilter("1=1");
         }
 
-        $safe_columns = ['product_variant_id', 'stock_qty', 'min_stock_level'];
-        $sort = in_array($sort_column, $safe_columns) ? $sort_column : 'product_variant_id';
         $order = (strtoupper($sort_order) === 'DESC') ? 'DESC' : 'ASC';
 
-        $query = "SELECT * FROM product_variant {$where_clause} ORDER BY {$sort} {$order}";
+        $safe_columns = ['product_variant_id', 'stock_qty', 'min_stock_level', 'product_name', 'stock_status'];
+
+        $sort = in_array($sort_column, $safe_columns) ? $sort_column : 'product_variant_id';
+
+        $sort_sql = "ORDER BY {$sort} {$order}";
+
+        // 3. Execute Query
+        $query = "SELECT * FROM product_variant {$where_clause} {$sort_sql}";
 
         $this->db->query($query);
         $this->db->execute();
 
         return $this->db->resultAll();
     }
-
     private function getCountByFilter(string $condition): int
     {
         $query = "SELECT COUNT(*) AS count FROM product_variant WHERE {$condition}";

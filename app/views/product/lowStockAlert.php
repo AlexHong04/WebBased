@@ -2,8 +2,9 @@
 $title = "Low Stock Alert";
 $pageCSS = "lowStockAlert.css";
 
-require_once __DIR__ . '/../header.php';
+require_once __DIR__ . '/../adminHeader.php';
 include '../../controllers/productsController.php';
+include_once '../../helpers/html.php';
 
 $controller = new ProductsController();
 
@@ -25,13 +26,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'sendPdf') {
 ?>
 
 <body>
+    <?php
+    showToast();
+    ?>
     <div class="container">
         <h1>🚨 Low Stock Alert Dashboard</h1>
 
         <div class="insights-panel">
 
             <div class="insight-card low-stock-count-card">
-                <h3>⚠️ Low Stock Variants</h3>
+                <h3>⚠️ Emergency Variants</h3>
                 <p id="lowStockCount"><?php echo $lowStockCount; ?></p>
                 <small>Need immediate review.</small>
             </div>
@@ -119,13 +123,15 @@ if (isset($_GET['action']) && $_GET['action'] === 'sendPdf') {
                             <?php echo ($current_sort === 'stock_qty') ? ($current_order === 'asc' ? '▲' : '▼') : ''; ?>
                         </th>
 
-                        <th>Stock Status</th>
+                        <th class="sortable" data-sort-column="stock_status">
+                            Stock Status
+                            <?php echo ($current_sort === 'stock_status') ? ($current_order === 'asc' ? '▲' : '▼') : ''; ?>
+                        </th>
 
                         <th class="sortable" data-sort-column="suggested_purchase_quantity">
                             Suggest Qty
                             <?php echo ($current_sort === 'suggested_purchase_quantity') ? ($current_order === 'asc' ? '▲' : '▼') : ''; ?>
                         </th>
-                        <th>Action</th>
 
                     </tr>
                 </thead>
@@ -153,13 +159,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'sendPdf') {
                                 <td class="stock-qty-cell"><?php echo htmlspecialchars($product['stock_qty'] ?? 0); ?></td>
                                 <td><span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span></td>
                                 <td class="suggestQty"><?php echo htmlspecialchars($product['stock_qty'] + 20 ?? 0); ?></td>
-                                <td>
-                                    <div class="actions">
-                                        <a href="addSingleProduct.php?product_id=<?php echo $product['product_id'] ?? ''; ?>">
-                                            <i class="fa-solid fa-arrow-up-right-from-square" style="color:black"></i>
-                                        </a>
-                                    </div>
-                                </td>
+
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>

@@ -139,3 +139,22 @@ document.addEventListener("DOMContentLoaded", function () {
     // Start the process by running the filter and pagination for the first time
     filterTable(); 
 });
+
+document.querySelectorAll('.sortable').forEach(header => {
+    header.addEventListener('click', () => {
+        const column = header.dataset.sortColumn;
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentSort = urlParams.get('sort');
+        const currentOrder = urlParams.get('order') || 'asc';
+        
+        let newOrder = 'asc';
+        if (currentSort === column && currentOrder === 'asc') {
+            newOrder = 'desc';
+        }
+        
+        urlParams.set('sort', column);
+        urlParams.set('order', newOrder);
+        
+        window.location.search = urlParams.toString();
+    });
+});

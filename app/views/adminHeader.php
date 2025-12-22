@@ -36,6 +36,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
           <li><a href="/app/views/member/memberListing.php">Member</a></li>
           <li><a href="/app/views/order/adminOrderListing.php">Order</a></li>
           <li><a href="/app/views/product/productList.php">Product</a></li>
+          <li><a href="/app/views/product/remindUser.php">Notify User</a></li>
         </ul>
       </nav>
 
