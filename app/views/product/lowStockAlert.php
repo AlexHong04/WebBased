@@ -191,5 +191,3 @@ if (isset($_GET['action']) && $_GET['action'] === 'sendPdf') {
 
     <script src="/public/js/lowStockAlert.js"></script>
 </body>
-
-<?php include '../footer.php' ?>

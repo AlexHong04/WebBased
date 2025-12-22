@@ -252,5 +252,3 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
     </div>
     <script src="/public/js/productList.js"></script>
 </body>
-
-<?php include '../footer.php' ?>

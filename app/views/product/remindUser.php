@@ -242,4 +242,3 @@ include '../adminHeader.php';
     </div>
     <script src="/public/js/remindUser.js"></script>
 </body>
-<?php include '../footer.php'; ?>

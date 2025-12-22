@@ -346,5 +346,3 @@ include '../adminHeader.php';
 </script>
 
 <script src="/public/js/addSingleProduct.js" defer></script>
-
-<?php include '../footer.php'; ?>
