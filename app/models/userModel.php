@@ -35,11 +35,14 @@ class userModel
     // get user by id
     public function getUserById($id)
     {
-        $this->db->query("SELECT cu.firstName,cu.lastName,cu.email,cu.gender,cu.phone, ad.street_line,ad.city,ad.state, ad.postcode FROM customer cu LEFT JOIN address ad ON cu.customer_id = ad.customer_id WHERE cu.customer_id = :id");
+        // Added cu.img_url to the select list
+        $this->db->query("SELECT cu.customer_id, cu.firstName, cu.lastName, cu.email, cu.gender, cu.phone, cu.img_url, ad.street_line, ad.city, ad.state, ad.postcode 
+                      FROM customer cu 
+                      LEFT JOIN address ad ON cu.customer_id = ad.customer_id 
+                      WHERE cu.customer_id = :id");
         $this->db->bind(':id', $id);
         return $this->db->result();
     }
-
     // get admin by id
     public function getAdminById($id)
     {
@@ -115,41 +118,93 @@ class userModel
         return $this->db->result();
     }
 
-    public function updateUser($firstName, $lastName, $phone, $email, $id, $street_line, $city, $state, $postcode)
+    public function updateUser($data)
     {
-        $this->db->query("UPDATE customer SET firstName=:firstName, lastName=:lastName,phone=:phone,email=:email,updated_at=NOW() WHERE customer_id=:id");
-        $this->db->bind(':firstName', $firstName);
-        $this->db->bind(':lastName', $lastName);
-        $this->db->bind(':phone', $phone);
-        $this->db->bind(':email', $email);
-        $this->db->bind(':id', $id);
+        // 1. 🟢 Customer 表更新逻辑 (参考 updateMember)
+        // ----------------------------------------------------
+        $sql = "UPDATE customer SET 
+                firstName = :firstName, 
+                lastName = :lastName, 
+                phone = :phone, 
+                email = :email, 
+                updated_at = NOW()";
+
+        // 动态检查是否有图片上传
+        if (isset($data['img_url'])) {
+            $sql .= ", img_url = :img_url";
+        }
+
+        $sql .= " WHERE customer_id = :id";
+
+        $this->db->query($sql);
+
+        // 绑定基本参数
+        $this->db->bind(':firstName', $data['firstName']);
+        $this->db->bind(':lastName', $data['lastName']);
+        $this->db->bind(':phone', $data['phone']);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':id', $data['customer_id']);
+
+        // 动态绑定图片参数
+        if (isset($data['img_url'])) {
+            $this->db->bind(':img_url', $data['img_url']);
+        }
+
+        // 如果主表更新失败，直接返回 false
         if (!$this->db->execute()) {
             return false;
         }
 
-        // update / insert address table
-        if (!empty($street_line) || !empty($city) || !empty($state) || !empty($postcode)) {
-            $this->db->query("SELECT customer_id FROM address WHERE customer_id=:id");
-            $this->db->bind(':id', $id);
+        // 2. 🟡 Address 表更新逻辑 (保留原有逻辑，但改为从数组取值)
+        // ----------------------------------------------------
+
+        // 检查数组中是否有地址数据 (注意这里用 $data['key'])
+        $hasAddressData = !empty($data['streetLine']) ||
+            !empty($data['city']) ||
+            !empty($data['state']) ||
+            !empty($data['postcode']);
+
+        if ($hasAddressData) {
+            // 检查该用户是否已有地址记录
+            $this->db->query("SELECT customer_id FROM address WHERE customer_id = :id");
+            $this->db->bind(':id', $data['customer_id']);
             $existingAddress = $this->db->result();
 
             if ($existingAddress) {
-                $this->db->query("UPDATE address SET recipient_name=:recipient_name,recipient_phone=:recipient_phone, street_line=:street_line, city=:city, state=:state, postcode=:postcode, is_default=:is_default WHERE customer_id=:cid");
+                // 更新现有地址
+                $this->db->query("UPDATE address SET 
+                    recipient_name = :recipient_name,
+                    recipient_phone = :recipient_phone, 
+                    street_line = :street_line, 
+                    city = :city, 
+                    state = :state, 
+                    postcode = :postcode, 
+                    is_default = :is_default 
+                    WHERE customer_id = :cid");
             } else {
+                // 插入新地址
                 $address_id = $this->db->generateId('address', 'address_id', 'AD');
-                $this->db->query("INSERT INTO address (address_id,customer_id,recipient_name,recipient_phone, street_line, city, state, postcode, is_default) VALUES (:aid,:cid ,:recipient_name, :recipient_phone, :street_line, :city, :state, :postcode, :is_default)");
+                $this->db->query("INSERT INTO address (address_id, customer_id, recipient_name, recipient_phone, street_line, city, state, postcode, is_default) 
+                                  VALUES (:aid, :cid, :recipient_name, :recipient_phone, :street_line, :city, :state, :postcode, :is_default)");
                 $this->db->bind(':aid', $address_id);
             }
-            $this->db->bind(':recipient_name', $firstName . ' ' . $lastName);
-            $this->db->bind(':recipient_phone', $phone);
-            $this->db->bind(':street_line', $street_line);
-            $this->db->bind(':city', $city);
-            $this->db->bind(':state', $state);
-            $this->db->bind(':postcode', $postcode);
-            $this->db->bind(':cid', $id);
-            $this->db->bind(':is_default', 1);
+
+            // 绑定地址参数
+            // 注意：recipient_name 通常是 First + Last Name 拼接
+            $fullName = $data['firstName'] . ' ' . $data['lastName'];
+
+            $this->db->bind(':recipient_name', $fullName);
+            $this->db->bind(':recipient_phone', $data['phone']);
+            $this->db->bind(':street_line', $data['streetLine']); // 确保 Controller 传过来的是 streetLine
+            $this->db->bind(':city', $data['city']);
+            $this->db->bind(':state', $data['state']);
+            $this->db->bind(':postcode', $data['postcode']);
+            $this->db->bind(':cid', $data['customer_id']);
+            $this->db->bind(':is_default', 1); // 默认为默认地址
+
             return $this->db->execute();
         }
+
         return true;
     }
 
@@ -276,25 +331,6 @@ class userModel
         return $this->db->rowCount() > 0;
     }
 
-    // // home
-    // public function getTopSalesData()
-    // {
-    //     $this->db->query("SELECT 
-    // p.product_id,
-    // p.product_name,
-    // p.sale_price,
-    // p.rate,
-    // SUM(oi.order_qty) AS total_units_sold,
-    // SUM(oi.order_qty * oi.price) AS total_revenue
-    // FROM Product p JOIN Product_Variant pv ON p.product_id = pv.product_id
-    // JOIN order_Items oi ON pv.product_variant_id = oi.product_variant_id
-    // JOIN `ordertable` o ON oi.order_id = o.order_id
-    // WHERE o.order_status = 'Completed'
-    // GROUP BY p.product_id, p.product_name, p.sale_price, p.rate
-    // ORDER BY total_units_sold DESC
-    // LIMIT 3; ");
-    //     return $this->db->resultAll();
-    // }
     // zq
     public function getAllMembers()
     {

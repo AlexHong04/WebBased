@@ -689,3 +689,136 @@ textarea.form-control {
   font-size: 0.875em;
   margin-top: 0.25rem;
 }
+
+.profile-avatar input[type="file"] {
+  display: none;
+}
+
+.profile-avatar img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.profile-avatar img:hover {
+  opacity: 0.8;
+}
+
+.avatar-label {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.avatar-label img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: 0.2s;
+}
+
+.avatar-label img:hover {
+  opacity: 0.85;
+}
+
+.plus {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 28px;
+  height: 28px;
+  background: #ff859f;
+  color: #fff;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  font-weight: bold;
+  pointer-events: none;
+}
+.avatar-label {
+  position: relative;
+  border: 2px dashed transparent;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  padding: 5px;
+}
+
+.drop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.profile-avatar.drag-over .drop-overlay {
+  opacity: 1;
+}
+
+.profile-avatar {
+  position: relative;
+  border: 2px dashed transparent; /* Invisible border normally */
+  transition: all 0.3s ease;
+  border-radius: 50%; /* Optional: matches your avatar shape */
+}
+
+/* Dragging state - This class is added by your JS */
+.profile-avatar.drag-over {
+  border-color: #007bff; /* Blue border when dragging over */
+  background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
+  transform: scale(1.05);
+}
+
+.profile-avatar .plus {
+  display: none; /* 默认隐藏加号 */
+}
+
+.avatar-label {
+  pointer-events: none; /* 默认禁止点击 label */
+  cursor: default; /* 鼠标变回默认箭头 */
+}
+
+/* 编辑模式 (Edit Mode) - 这些样式会在 JS 添加 'edit-mode' 类后生效 */
+.profile-avatar.edit-mode .plus {
+  display: flex; /* 显示加号 */
+}
+
+.profile-avatar.edit-mode .avatar-label {
+  pointer-events: auto; /* 允许点击 */
+  cursor: pointer; /* 鼠标变成手型 */
+}
+
+.profile-avatar.edit-mode {
+  border-color: #eee; /* 编辑模式下给个淡淡的边框提示范围 (可选) */
+}
+#profile-pic-input {
+  display: none; /*通常我们会隐藏原生丑陋的 input，只点 label*/
+}
+
+/* 3. 编辑模式：允许点击 */
+/* 当 JS 给父容器加上 'edit-mode' 类时，恢复点击功能 */
+.profile-avatar.edit-mode .avatar-label {
+  pointer-events: auto; /* ✅ 恢复点击 */
+  cursor: pointer; /* 变回手型 */
+}
+
+.profile-avatar.edit-mode .plus {
+  display: flex !important; /* 显示 + 号 */
+}

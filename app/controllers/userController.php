@@ -301,22 +301,26 @@ class userController
         }
         return null;
     }
-
     public function updateProfile()
     {
         if (is_post()) {
             if (isset($_SESSION['customerId'])) {
                 $customerId = $_SESSION['customerId'];
+                // Get current user data
                 $currentUserData = $this->userModel->getUserById($customerId);
-                $firstName = post('firstName');
-                $lastName = post('lastName');
-                $phone = post('phone');
-                $email = post('email');
-                $addressLine = post('streetLine');
 
-                $city = post('city');
-                $state = post('state');
-                $postcode = post('postcode');
+                $firstName = post('firstName');
+                $lastName  = post('lastName');
+                $phone     = post('phone');
+                $email     = post('email');
+                $addressLine = post('streetLine');
+                $city      = post('city');
+                $state     = post('state');
+                $postcode  = post('postcode');
+
+                $errors = [];
+
+                // --- Validation Logic (Email & Phone) ---
                 if ($email != $currentUserData['email']) {
                     if ($this->userModel->getIsEmailExists($email) || $this->userModel->getIsStaffEmailExists($email)) {
                         $errors['email'] = "This Email is already registered.";
@@ -331,14 +335,70 @@ class userController
                     }
                 }
 
+                // --- 📸 Image Upload Logic (Updated to match updateMember) ---
+                $uploadedImgName = null;
+
+                // Check if file is uploaded and no errors
+                if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] === UPLOAD_ERR_OK) {
+
+                    $file = $_FILES['profile_pic'];
+                    $fileName = $file['name'];
+                    $fileTmpPath = $file['tmp_name'];
+
+                    // Get extension for validation
+                    $fileNameCmps = explode(".", $fileName);
+                    $fileExtension = strtolower(end($fileNameCmps));
+                    $allowedfileExtensions = array('jpg', 'gif', 'png', 'jpeg', 'webp');
+
+                    if (in_array($fileExtension, $allowedfileExtensions)) {
+
+                        // 1. 👇 CHANGE HERE: Use original filename instead of MD5 hash
+                        // This matches the logic in your updateMember function
+                        $newFileName = basename($fileName);
+
+                        // 2. Define upload directory
+                        $uploadFileDir = __DIR__ . '/../../public/images/profile/';
+                        $dest_path = $uploadFileDir . $newFileName;
+
+                        // 3. Move file
+                        if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                            // ✅ Success, store the filename
+                            $uploadedImgName = $newFileName;
+                        } else {
+                            $errors['profile_pic'] = "Error saving file to directory.";
+                        }
+                    } else {
+                        $errors['profile_pic'] = "Invalid file type. Allowed: " . implode(',', $allowedfileExtensions);
+                    }
+                }
+
                 if (!empty($errors)) {
                     $_SESSION['flash_error'] = $errors;
                     $_SESSION['old'] = $_POST;
-                    // redirect('profile.php');
+                    redirect('profile.php');
                     return;
                 }
 
-                $this->userModel->updateUser($firstName, $lastName, $phone, $email, $customerId, $addressLine, $city, $state, $postcode);
+                // --- 📦 Build Data Array ---
+                $updateData = [
+                    'customer_id' => $customerId,
+                    'firstName'   => $firstName,
+                    'lastName'    => $lastName,
+                    'phone'       => $phone,
+                    'email'       => $email,
+                    'streetLine'  => $addressLine,
+                    'city'        => $city,
+                    'state'       => $state,
+                    'postcode'    => $postcode
+                ];
+
+                // ✅ If a new image was uploaded, add it to the array
+                if ($uploadedImgName) {
+                    $updateData['img_url'] = $uploadedImgName;
+                }
+
+                // Call Model to update
+                $this->userModel->updateUser($updateData);
 
                 redirect('profile.php');
             } else {
@@ -346,7 +406,6 @@ class userController
             }
         }
     }
-
     public function resetPassword()
     {
         if (isset($_SESSION['flash_error'])) {
@@ -385,13 +444,6 @@ class userController
         redirect('resetPassword.php');
     }
 
-
-    // public function getTopSalesData()
-    // {
-    //     return $this->userModel->getTopSalesData();
-    // }
-
-
     public function forgetPasswordSendOTP($phone)
     {
         if (!$this->userModel->getIsPhoneExists($phone)) {
@@ -401,31 +453,26 @@ class userController
         if (isset($_SESSION['last_otp_sent']) && (time() - $_SESSION['last_otp_sent'] < 60)) {
             return false;
         }
-
-        // Normalize MY phone: 017-6265778 → 60176265778
         $phone = preg_replace('/\D/', '', $phone);
         if (str_starts_with($phone, '01')) {
             $phone = '6' . $phone;
         }
         $phone = '+' . $phone;
-        // Generate secure OTP
         $otp = random_int(100000, 999999);
 
         // Twilio credentials
         $sid   = 'AC691f78ade95d9649a59a8e5c7a431e7a';
         $token = '242e93ca44f709be3f93cd4ea0bd012a';
-        $from  = '+14199241697'; // Twilio phone number
+        $from  = '+14199241697';
 
-        // Create Twilio object
         $twilio = new TwilioSMS($sid, $token, $from);
 
-        // Send SMS
         $message = "Your OTP is {$otp}. Do not share this code.";
 
         $isSent = $twilio->sendSMS($phone, $message);
 
         if ($isSent) {
-            $_SESSION['last_otp_sent'] = time(); // Record time
+            $_SESSION['last_otp_sent'] = time();
             return $otp;
         }
 

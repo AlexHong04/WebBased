@@ -44,7 +44,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="/public/img/icon/logo.png" />
+    <link rel="icon" href="/public/images/lovine_logo_circle.png" />
     <title><?php echo $title ?? "My site"; ?></title>
 
     <link rel="stylesheet" href="/public/css/pc_reset.css" />
