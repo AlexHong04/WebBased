@@ -238,20 +238,72 @@ document.addEventListener("DOMContentLoaded", function () {
   //   updateButtons();
   // }
 
+  // const urlParams = new URLSearchParams(window.location.search);
+  // const currentStatus = urlParams.get("status") || "";
+
+  // document.querySelectorAll(".custom-select").forEach((select) => {
+  //   const selected = select.querySelector(".selected");
+  //   const options = select.querySelector(".options");
+
+  //   selected.addEventListener("click", () => select.classList.toggle("open"));
+  //   options.querySelectorAll("li").forEach((option) => {
+  //     option.addEventListener("click", () => {
+  //       selected.textContent = option.textContent;
+  //       document.getElementById("statusFilter").value = option.dataset.value;
+  //       select.classList.remove("open");
+  //       const params = new URLSearchParams(window.location.search);
+  //       params.set("status", option.dataset.value); // use 'status'
+  //       params.set("page", 1);
+  //       window.location.search = params.toString();
+  //       filterTable();
+  //     });
+  //   });
+
+  //   document.addEventListener("click", (e) => {
+  //     if (!select.contains(e.target)) select.classList.remove("open");
+  //   });
+  // });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentStatus = urlParams.get("status") || ""; // get current status from URL
+
   document.querySelectorAll(".custom-select").forEach((select) => {
     const selected = select.querySelector(".selected");
     const options = select.querySelector(".options");
+    const hiddenInput = select.querySelector("input[type=hidden]");
 
+    // Set initial value based on URL
+    hiddenInput.value = currentStatus;
+    if (currentStatus === "") {
+      selected.textContent = "All Status";
+    } else {
+      const option = select.querySelector(
+        `.options li[data-value="${currentStatus}"]`
+      );
+      if (option) selected.textContent = option.textContent;
+    }
+
+    // Handle dropdown click
     selected.addEventListener("click", () => select.classList.toggle("open"));
+
+    // Handle selecting an option
     options.querySelectorAll("li").forEach((option) => {
       option.addEventListener("click", () => {
         selected.textContent = option.textContent;
-        document.getElementById("statusFilter").value = option.dataset.value;
+        hiddenInput.value = option.dataset.value;
         select.classList.remove("open");
-        filterTable();
+
+        // Update URL with new filter and reset page to 1
+        const params = new URLSearchParams(window.location.search);
+        params.set("status", option.dataset.value);
+        params.set("page", 1);
+        window.location.search = params.toString();
+
+        filterTable(); // optional, if you are using client-side filtering
       });
     });
 
+    // Close dropdown if clicked outside
     document.addEventListener("click", (e) => {
       if (!select.contains(e.target)) select.classList.remove("open");
     });

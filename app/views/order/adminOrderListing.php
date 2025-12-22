@@ -18,12 +18,26 @@ $pageCSS = "datalisting.css";
 
 include  '../adminHeader.php';
 $orderController = new OrderController();
-
 $data = $orderController->index();
-if (!empty($data)) {
-  $orders = $data["orders"];
-  $pagination = $data["pagination"];
-}
+$filters    = $data['filters'];
+$orders     = $data['orders'];
+$pagination = $data['pagination'];
+
+$sort = $filters['sort'] ?? 'order_id';
+$dir  = $filters['dir'] ?? 'asc';
+$statusFilter = $_GET['status'] ?? '';
+$selectedText = $statusFilter !== '' ? $statusFilter : 'All Status';
+
+$baseQuery = http_build_query([
+  'status' => $statusFilter,
+  'sort'   => $filters['sort'],
+  'dir'    => $filters['dir']
+]);
+
+$href = http_build_query([
+  'page'   => $filters['page'],
+  'status' => $filters['status']
+]);
 
 $statusOption = [
   'Pending',
@@ -45,25 +59,6 @@ $fields = [
   'total_amount' => 'Total Amount (RM)',
   'redeemed_point' => 'Redeemed Point'
 ];
-
-$page = $_GET['page'] ?? 1;
-$sort = $_GET['sort'] ?? 'customer_id';
-$dir  = $_GET['dir'] ?? 'asc';
-$statusFilter = $_GET['status'] ?? '';
-$href = "page=$page&status=$statusFilter";
-
-usort($orders, function ($a, $b) use ($sort, $dir) {
-  $valA = is_object($a) ? $a->$sort : $a[$sort];
-  $valB = is_object($b) ? $b->$sort : $b[$sort];
-
-  if ($valA == $valB) return 0;
-
-  if ($dir === 'asc') {
-    return ($valA < $valB) ? -1 : 1;
-  } else {
-    return ($valA > $valB) ? -1 : 1;
-  }
-});
 ?>
 
 <div class='dataListing'>
@@ -75,8 +70,8 @@ usort($orders, function ($a, $b) use ($sort, $dir) {
         <input type="text" id="dataSearch" placeholder="Search ID...">
 
         <div class="custom-select" id="statusSelect">
-          <input type="hidden" id="statusFilter" value="">
-          <div class="selected">All Status</div>
+          <input type="hidden" id="statusFilter" value="<?= htmlspecialchars($currentStatus) ?>">
+          <div class="selected"><?= htmlspecialchars($selectedText) ?></div>
           <ul class="options">
             <li data-value="">All Status</li>
             <?php foreach ($statusOption as $status): ?>
@@ -88,7 +83,7 @@ usort($orders, function ($a, $b) use ($sort, $dir) {
       </div>
 
       <div class="pagination-container">
-        <?= $pagination->render(); ?>
+        <?= $pagination->render($baseQuery); ?>
       </div>
 
       <div id="actionButtons">
@@ -98,23 +93,22 @@ usort($orders, function ($a, $b) use ($sort, $dir) {
     </div>
   </div>
 
-
-  <table class='data'>
-    <thead>
-      <tr class="thead">
-        <th>Select</th>
-        <?php table_headers($fields, $sort, $dir, $href); ?>
-        <!-- <th>Order Id</th>
+  <?php if (!empty($orders)): ?>
+    <table class='data'>
+      <thead>
+        <tr class="thead">
+          <th>Select</th>
+          <?php table_headers($fields, $sort, $dir, $href); ?>
+          <!-- <th>Order Id</th>
         <th>Customer Id</th>
         <th>Created At</th>
         <th>Item Quantity</th>
         <th>Total Amount (RM)</th>
         <th>Redeemed Point</th> -->
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php if (!empty($orders)): ?>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
         <?php foreach ($orders as $index => $o): ?>
           <tr>
             <td>
@@ -133,13 +127,11 @@ usort($orders, function ($a, $b) use ($sort, $dir) {
             <td class="order-status"><?= $o['order_status'] ?></td>
           </tr>
         <?php endforeach ?>
-      <?php else: ?>
-        <tr>
-          <td colspan="8">No orders found.</td>
-        </tr>
-      <?php endif; ?>
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  <?php else: ?>
+    <p class="no-order" style="font-size: 16px;font-weight: normal;">No orders found.</p>
+  <?php endif; ?>
 
   <!-- Status Update Popup -->
   <div id="statusPopup" class="popup-overlay">

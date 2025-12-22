@@ -4,7 +4,7 @@
   font-family: "Arial", Helvetica, sans-serif;
 }
 
-.dataListing p {
+.dataListing > p {
   font-weight: bold;
   font-size: 30px;
   padding: 10px;
@@ -132,6 +132,11 @@
 
 .data input[type="checkbox"] {
   accent-color: #ffbebe;
+}
+
+.no-order {
+  font-size: 20px;
+  font-weight: normal;
 }
 
 .custom-select {

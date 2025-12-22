@@ -46,24 +46,79 @@ class OrderController
   // }
 
 
+  // public function index()
+  // {
+
+  //   // Count total records
+  //   $total = $this->orderModel->countOrders();
+
+  //   // Get current page
+  //   $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+  //   // Create pagination object
+  //   $pagination = new Pagination($total, 10, $page); // 10 rows per page
+
+  //   // Fetch paginated members
+  //   $orders = $this->orderModel->getOrders($pagination->offset, $pagination->recordsPerPage);
+
+  //   return [
+  //     "orders" => $orders,
+  //     "pagination" => $pagination
+  //   ];
+  // }
+
+  // public function index()
+  // {
+  //   $page   = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+  //   $status = $_GET['status'] ?? '';
+  //   $sort   = $_GET['sort'] ?? 'customer_id';
+  //   $dir    = $_GET['dir'] ?? 'asc';
+
+  //   // Count filtered records
+  //   $total = $this->orderModel->countOrders($status);
+
+  //   $pagination = new Pagination($total, 10, $page);
+
+  //   // Fetch filtered + paginated orders
+  //   $orders = $this->orderModel->getOrders(
+  //     $pagination->offset,
+  //     $pagination->recordsPerPage,
+  //     $status,
+  //     $sort,
+  //     $dir
+  //   );
+
+  //   return [
+  //     "orders"     => $orders,
+  //     "pagination" => $pagination,
+  //     "filters"    => compact('status', 'sort', 'dir')
+  //   ];
+  // }
+
   public function index()
   {
+    $filters = [
+      'page'   => $_GET['page'] ?? 1,
+      'status' => $_GET['status'] ?? '',
+      'sort'   => $_GET['sort'] ?? 'customer_id',
+      'dir'    => $_GET['dir'] ?? 'asc'
+    ];
 
-    // Count total records
-    $total = $this->orderModel->countOrders();
+    $total = $this->orderModel->countOrders($filters['status']);
+    $pagination = new Pagination($total, 10, $filters['page']);
 
-    // Get current page
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-
-    // Create pagination object
-    $pagination = new Pagination($total, 10, $page); // 10 rows per page
-
-    // Fetch paginated members
-    $orders = $this->orderModel->getOrders($pagination->offset, $pagination->recordsPerPage);
+    $orders = $this->orderModel->getOrders(
+      $pagination->offset,
+      $pagination->recordsPerPage,
+      $filters['status'],
+      $filters['sort'],
+      $filters['dir']
+    );
 
     return [
-      "orders" => $orders,
-      "pagination" => $pagination
+      'orders'     => $orders,
+      'pagination' => $pagination,
+      'filters'    => $filters
     ];
   }
 

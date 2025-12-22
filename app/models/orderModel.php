@@ -220,43 +220,46 @@ class OrderModel
     $this->db->bind(1, $orderId);
     return $this->db->result();
   }
-  public function countOrders()
-  {
-    $this->db->query("SELECT COUNT(*) AS total FROM ordertable");
-    $result = $this->db->result();
-    return $result["total"];
-  }
 
-  // public function getOrders($offset, $limit)
+  // public function countOrders()
   // {
-  //   $this->db->query("SELECT * FROM ordertable LIMIT $offset, $limit");
-  //   return $this->db->resultAll();
+  //   $this->db->query("SELECT COUNT(*) AS total FROM ordertable");
+  //   $result = $this->db->result();
+  //   return $result["total"];
   // }
 
-  public function getOrders($offset, $limit)
+  public function countOrders($status = '')
   {
-    $this->db->query("
-        SELECT o.*, os_latest.order_status AS order_status, os_latest.created_datetime AS created_datetime
-        FROM ordertable o
-        LEFT JOIN (
-            SELECT os1.order_id, os1.order_status, os1.created_datetime
-            FROM orderstatus os1
-            INNER JOIN (
-                SELECT order_id, MAX(created_datetime) AS latest_time
-                FROM orderstatus
-                GROUP BY order_id
-            ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
-        ) AS os_latest ON o.order_id = os_latest.order_id
-        LIMIT $offset, $limit
-    ");
+    $sql = "SELECT COUNT(*) AS total
+            FROM ordertable o
+            LEFT JOIN (
+                SELECT os1.order_id, os1.order_status, os1.created_datetime
+                FROM orderstatus os1
+                INNER JOIN (
+                    SELECT order_id, MAX(created_datetime) AS latest_time
+                    FROM orderstatus
+                    GROUP BY order_id
+                ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
+            ) AS os_latest ON o.order_id = os_latest.order_id";
 
-    return $this->db->resultAll();
+    if ($status !== '') {
+      $sql .= " WHERE os_latest.order_status = :status";
+    }
+
+    $this->db->query($sql);
+
+    if ($status !== '') {
+      $this->db->bind(':status', $status);
+    }
+
+    $result = $this->db->result();
+    return (int) ($result["total"] ?? 0);
   }
 
-  // public function getOrders($offset, $limit, $sortColumn = 'order_id', $sortDir = 'ASC')
+
+  // public function countOrders($status = '')
   // {
-  //   $this->db->query("
-  //       SELECT o.*, os_latest.order_status AS order_status, os_latest.created_datetime AS created_datetime
+  //   $sql = "SELECT COUNT(*) AS total
   //       FROM ordertable o
   //       LEFT JOIN (
   //           SELECT os1.order_id, os1.order_status, os1.created_datetime
@@ -266,14 +269,79 @@ class OrderModel
   //               FROM orderstatus
   //               GROUP BY order_id
   //           ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
-  //       ) AS os_latest ON o.order_id = os_latest.order_id
-  //        ORDER BY $sortColumn $sortDir
+  //       ) AS os_latest ON o.order_id = os_latest.order_id";
+  //   if ($status !== '') {
+  //     $sql .= " WHERE order_status = :status";
+  //   }
+
+  //   $this->db->query($sql);
+  //   if ($status !== '') {
+  //     $this->db->bind(':status', $status);
+  //   }
+
+  //   $result = $this->db->result();
+  //   return (int) ($result->total ?? 0);
+  // }
+
+  public function getOrders($offset, $limit, $status = '', $sort = 'customer_id', $dir = 'asc')
+  {
+    $allowedSort = ['order_id', 'customer_id', 'created_datetime', 'total_amount'];
+    if (!in_array($sort, $allowedSort)) {
+      $sort = 'customer_id';
+    }
+
+    $dir = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
+
+    // FORCE integers (prevents SQL injection)
+    $offset = (int)$offset;
+    $limit  = (int)$limit;
+
+    $sql = "SELECT o.*, os_latest.order_status AS order_status, os_latest.created_datetime AS created_datetime
+        FROM ordertable o
+        LEFT JOIN (
+            SELECT os1.order_id, os1.order_status, os1.created_datetime
+            FROM orderstatus os1
+            INNER JOIN (
+                SELECT order_id, MAX(created_datetime) AS latest_time
+                FROM orderstatus
+                GROUP BY order_id
+            ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
+        ) AS os_latest ON o.order_id = os_latest.order_id";
+
+    if ($status !== '') {
+      $sql .= " WHERE order_status = :status";
+    }
+
+    $sql .= " ORDER BY $sort $dir LIMIT $offset, $limit";
+
+    $this->db->query($sql);
+
+    if ($status !== '') {
+      $this->db->bind(':status', $status);
+    }
+
+    return $this->db->resultAll();
+  }
+
+  // public function getOrders($offset, $limit)
+  // {
+  //   $this->db->query("
+  // SELECT o.*, os_latest.order_status AS order_status, os_latest.created_datetime AS created_datetime
+  // FROM ordertable o
+  // LEFT JOIN (
+  //     SELECT os1.order_id, os1.order_status, os1.created_datetime
+  //     FROM orderstatus os1
+  //     INNER JOIN (
+  //         SELECT order_id, MAX(created_datetime) AS latest_time
+  //         FROM orderstatus
+  //         GROUP BY order_id
+  //     ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
+  // ) AS os_latest ON o.order_id = os_latest.order_id
   //       LIMIT $offset, $limit
   //   ");
 
   //   return $this->db->resultAll();
   // }
-
 
   public function getCustomerProducts($customerId)
   {
