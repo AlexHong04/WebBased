@@ -395,7 +395,7 @@ class OrderModel
         oi.order_qty,
         p.product_name, 
         p.description, 
-        p.img_url,
+        pv.img_url,
         c.category_name, 
         v.variant_name,
         pm.created_datetime AS payment_time
@@ -468,7 +468,7 @@ class OrderModel
     oi.order_qty,
     p.product_name, 
     p.description, 
-    p.img_url,
+    pv.img_url,
     c.category_name, 
     v.variant_name,
     pm.created_datetime AS payment_time

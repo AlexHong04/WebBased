@@ -31,9 +31,9 @@ function renderTemplate($templateText, $customer, $item)
         '{firstname}' => $customer['firstname'] ?? '',
         '{lastname}' => $customer['lastname'] ?? '',
         '{product_name}' => $item['product_name'] ?? '',
-        '{product_variant}' => $item['product_variant_id'] ?? '',
+        '{product_id}' => $item['product_id'] ?? '',
         '{stock_qty}' => $item['stock_qty'] ?? '',
-        '{product_link}' => "https://yourstore.com/product/{$item['product_variant_id']}" ?? ''
+        '{product_link}' => "http://localhost:8000/app/views/product/product_details.php?{$item['product_id']}" ?? ''
     ];
     return str_replace(array_keys($replacements), array_values($replacements), $templateText);
 }
@@ -176,7 +176,7 @@ $customerCount = count($customers);
 
     <td class="action-cell">
         <div class="action-wrapper">
-            <textarea class="templatePreview" rows="4" readonly><?php echo htmlspecialchars($messageText); ?></textarea>
+            <textarea class="templatePreview" rows="10" readonly><?php echo htmlspecialchars($messageText); ?></textarea>
 
             <div class="button-group">
                 <a href="<?php echo $wa_link; ?>"

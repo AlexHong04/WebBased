@@ -152,7 +152,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'sendPdf') {
                                 <td><?php echo htmlspecialchars($product['min_stock_level'] ?? 'N/A'); ?></td>
                                 <td class="stock-qty-cell"><?php echo htmlspecialchars($product['stock_qty'] ?? 0); ?></td>
                                 <td><span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span></td>
-                                <td><?php echo htmlspecialchars($product['stock_qty'] + 20 ?? 0); ?></td>
+                                <td class="suggestQty"><?php echo htmlspecialchars($product['stock_qty'] + 20 ?? 0); ?></td>
                                 <td>
                                     <div class="actions">
                                         <a href="addSingleProduct.php?product_id=<?php echo $product['product_id'] ?? ''; ?>">

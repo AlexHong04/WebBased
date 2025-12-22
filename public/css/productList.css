@@ -251,8 +251,40 @@ a i {
 
 .table-header {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+}
+
+.table-header-right {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-restock {
+  background-color: rgba(249, 173, 30, 0.412);
+  color: #d06f01;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  transition: all 0.2s ease;
+}
+
+.btn-restock:hover {
+  transform: translateY(-1px);
+  background-color: rgba(215, 142, 7, 0.412);
+}
+
+#bulkRestockBtn:disabled,
+.btn-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #ccc;
 }
 
 .btn-delete {
@@ -287,28 +319,49 @@ a i {
   box-shadow: none;
 }
 
-.table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 20px 0 15px 0;
-    padding: 10px 0;
+.show-variants-btn {
+  background-color: rgba(12, 203, 139, 0.412);
+  color: #036e4c;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
 }
 
+.btn-delete:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 15px 0;
+  padding: 10px 0;
+}
+
+.table-header-left,
 .productCount {
-    display: flex;
-    align-items: center;
-    padding: 18px 20px;
-    border-radius: 50px; 
-    border: 1px solid #ccc;
-    background-color: #ffb3ba;
-    color: white;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #ffb3ba;
+  color: white;
 }
 
 .productCount p {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* Modal background overlay */
@@ -321,7 +374,7 @@ a i {
   width: 100%;
   height: 100%;
   overflow: auto; /* Scroll if content is too tall */
-  background-color: rgba(0,0,0,0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -337,7 +390,7 @@ a i {
   max-width: 90%;
   max-height: 80%;
   overflow-y: auto;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   position: relative;
 }
 
@@ -404,20 +457,157 @@ a i {
   border: 1px solid #ccc;
 }
 
-/* Submit button */
-.btn-restock-submit {
-  margin-top: 15px;
-  padding: 10px 20px;
-  border: none;
-  background-color: #007bff;
-  color: #fff;
-  font-size: 1em;
+/* Modal Styling */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-product-item {
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+}
+
+.modal-product-item h4 {
+  color: #333;
+  margin-bottom: 15px;
+  padding-left: 10px;
+}
+
+.variant-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+
+.variant-item:hover {
+  background: #f1f1f1;
+}
+
+.variant-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
   border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.variant-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.variant-qty {
+  width: 80px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+
+.btn-restock-submit {
+  margin-top: 20px;
+  padding: 12px;
+  border: none;
+  background-color: #28a745; /* Success Green */
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.1em;
+  border-radius: 8px;
   cursor: pointer;
   width: 100%;
-  transition: background-color 0.2s ease;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.btn-restock-submit:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
 }
 
 .btn-restock-submit:hover {
-  background-color: #0056b3;
+  background-color: #218838;
+  transform: translateY(-1px);
 }
+
+.product-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.btn-remove-product {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+  transition: background 0.2s;
+}
+
+.btn-remove-product:hover {
+  background: #cc0000;
+}
+
+.variant-qty:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.error-msg {
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-delete-single {
+  color: rgb(2, 2, 2);
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 18px;
+  border: none;
+  background-color: white;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-delete-single:hover {
+  background-color: #d32f2f;
+  border-radius: 50%;
+  color: white;
+}
+

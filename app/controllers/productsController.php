@@ -16,6 +16,7 @@ class ProductController
 
     public function showAddProductForm()
     {
+
         $rawCategories = $this->productModel->getAllCategories();
         $rawVariants = $this->productModel->getAllVariants();
         $newProductId = $this->productModel->generateId('product', 'product_id', 'PR');
@@ -141,21 +142,18 @@ class ProductController
                 $minStock = $_POST['min_stock_levels'][$i] ?? 1;
                 $stockQty = $_POST['stock_qtys'][$i] ?? 1;
                 $stockStatus = ($stockQty == 0) ? 'out_of_stock' : (($stockQty <= $minStock) ? 'low_stock' : 'in_stock');
-
                 $variantId = $this->productModel->generateId('product_variant', 'product_variant_id', 'PV');
 
                 $imgFileName = null;
-                $imgFileName = null;
+                // Check if a file was uploaded for THIS specific variant index
                 if (!empty($_FILES['variant_images_group']['name'][$i])) {
                     $ext = pathinfo($_FILES['variant_images_group']['name'][$i], PATHINFO_EXTENSION);
                     $imgFileName = $variantId . "." . $ext;
                     $destination = $categoryFolder . $imgFileName;
-
-                    if (move_uploaded_file($_FILES['variant_images_group']['tmp_name'][$i], $destination)) {
-                        $variantsData[$i]['img_url'] = $imgFileName;
-                    }
+                    move_uploaded_file($_FILES['variant_images_group']['tmp_name'][$i], $destination);
                 }
 
+                // Single array entry per variant
                 $variantsData[] = [
                     'product_variant_id' => $variantId,
                     'min_stock_level' => $minStock,
@@ -185,10 +183,8 @@ class ProductController
             ]);
 
             $_SESSION['success_message'] = "Product and variants added successfully!";
-            return [
-                'success' => true,
-                'product_id' => $productId
-            ];
+            header("Location: productList.php");
+            exit();
         } catch (Exception $e) {
             $_SESSION['error_message'] = "Error saving product: " . $e->getMessage();
             return [
@@ -421,6 +417,7 @@ class ProductController
             exit();
         }
     }
+
     public function submitProductForm()
     {
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -444,16 +441,9 @@ class ProductController
                 }
             }
 
-            if (isset($_POST['ajax_validation'])) {
-                $result = $this->validateProductForm($_POST, $_FILES);
-                header('Content-Type: application/json');
-                echo json_encode($result);
-                exit();
-            }
-
             if (isset($_POST['final_submission'])) {
 
-                $isEdit = !empty($_POST['product_id']) && strpos($_POST['product_id'], 'PR') === 0;
+                $isEdit = !empty($_POST['is_edit']) && $_POST['is_edit'] === "1";
 
                 if ($isEdit) {
                     $result = $this->updateProductForm();
@@ -503,16 +493,6 @@ class ProductController
                     'success' => false,
                     'message' => "Product ID is required.",
                     'errors' => ['product_id' => 'Product ID is required.']
-                ];
-            }
-
-            // 1️⃣ Validate required fields
-            $validation = $this->validateProductForm($_POST, $_FILES);
-            if (!$validation['valid']) {
-                return [
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validation['errors']
                 ];
             }
 
@@ -610,12 +590,13 @@ class ProductController
                 'product' => $productData,
                 'variants' => $variantsData
             ]);
-
+            $_SESSION['flash_success'] = "Product updated successfully!";
             return [
                 'success' => true,
                 'message' => "Product updated successfully!"
             ];
         } catch (Exception $e) {
+            $_SESSION['flash_error'] = "Error updating product: " . $e->getMessage();
             return [
                 'success' => false,
                 'message' => "Error updating product: " . $e->getMessage(),
@@ -972,5 +953,47 @@ class ProductController
         $isCalled = $twilio->call($phone, $msg);
 
         return $isCalled;
+    }
+    public function handleDeleteProductVariantById(string $variantId)
+    {
+        if (empty($variantId)) return false;
+
+        try {
+            $result = $this->productModel->deleteVariantById($variantId);
+
+            if (!empty($variant['img_url'])) {
+                $images = explode(',', $variant['img_url']);
+                $categoryName = $variant['category_name'] ?? 'uncategorized';
+                $categoryFolder = "../../../public/images/" . $categoryName . "/";
+
+                foreach ($images as $img) {
+                    $file = $categoryFolder . trim($img);
+                    if (file_exists($file)) unlink($file);
+                }
+            }
+            if ($result) {
+                $_SESSION['flash_success'] = "Variant deleted successfully.";
+            } else {
+                $_SESSION['flash_error'] = "Failed to delete variant.";
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            $_SESSION['flash_error'] = "Error: " . $e->getMessage();
+            error_log("Failed to delete product variant $variantId: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getAllProductVariantsGrouped()
+    {
+        $variants = $this->productModel->getAllProductVariants();
+        $grouped = [];
+
+        foreach ($variants as $v) {
+            $grouped[$v['product_id']][] = $v;
+        }
+
+        return $grouped;
     }
 }

@@ -201,9 +201,11 @@ class ProductModel
     public function updateProduct($productId, $data)
     {
         try {
+            // Start Transaction using your existing query method
             $this->db->query("START TRANSACTION");
             $this->db->execute();
 
+            // 1. Update Main Product Table
             $this->db->query('
             UPDATE product SET 
                 product_name = :product_name,
@@ -216,15 +218,20 @@ class ProductModel
             WHERE product_id = :product_id
         ');
 
+            // Bind main product data explicitly
             $this->db->bind(':product_id', $productId);
-            foreach ($data['product'] as $key => $value) {
-                $this->db->bind(":$key", $value);
-            }
+            $this->db->bind(':product_name', $data['product']['product_name']);
+            $this->db->bind(':description', $data['product']['description']);
+            $this->db->bind(':cost_price', $data['product']['cost_price']);
+            $this->db->bind(':sale_price', $data['product']['sale_price']);
+            $this->db->bind(':category_id', $data['product']['category_id']);
+            $this->db->bind(':img_url', $data['product']['img_url']);
             $this->db->execute();
 
+            // 2. Update Variants
             foreach ($data['variants'] as $variant) {
-                // Check if variant exists
-                $this->db->query('SELECT * FROM product_variant WHERE product_variant_id = :id');
+                // Use your existing result() method to check if the variant exists
+                $this->db->query('SELECT product_variant_id FROM product_variant WHERE product_variant_id = :id');
                 $this->db->bind(':id', $variant['product_variant_id']);
                 $existing = $this->db->result();
 
@@ -242,20 +249,29 @@ class ProductModel
                     $this->db->query('
                     INSERT INTO product_variant
                         (product_variant_id, min_stock_level, stock_qty, stock_status, variant_id, product_id, img_url)
-                        VALUES (:product_variant_id, :min_stock_level, :stock_qty, :stock_status, :variant_id, :product_id, :img_url)
+                    VALUES 
+                        (:product_variant_id, :min_stock_level, :stock_qty, :stock_status, :variant_id, :product_id, :img_url)
                 ');
+                    $this->db->bind(':product_id', $productId);
                 }
 
-                foreach ($variant as $key => $value) {
-                    $this->db->bind(":$key", $value);
-                }
+                // CRITICAL: Only bind the fields used in the variant queries above
+                $this->db->bind(':product_variant_id', $variant['product_variant_id']);
+                $this->db->bind(':min_stock_level',    $variant['min_stock_level']);
+                $this->db->bind(':stock_qty',          $variant['stock_qty']);
+                $this->db->bind(':stock_status',       $variant['stock_status']);
+                $this->db->bind(':variant_id',         $variant['variant_id']);
+                $this->db->bind(':img_url',            $variant['img_url']);
+
                 $this->db->execute();
             }
 
+            // Commit using your existing query method
             $this->db->query("COMMIT");
             $this->db->execute();
             return true;
         } catch (Exception $e) {
+            // Rollback on error
             $this->db->query("ROLLBACK");
             $this->db->execute();
             throw new Exception("Failed to update product: " . $e->getMessage());
@@ -292,6 +308,7 @@ class ProductModel
             pv.stock_qty,
             pv.stock_status,
             pv.img_url,
+            p.product_id,
             p.product_name,
             p.category_id,
             cat.category_name
@@ -518,6 +535,43 @@ class ProductModel
 
         $this->db->bind(':keyword', $keyword);
         $this->db->bind(':limit', $limit);
+    }
+    public function deleteVariantById($variantId)
+    {
+
+        try {
+            $this->db->query("START TRANSACTION");
+            $this->db->execute();
+
+            $this->db->query("DELETE FROM product_variant WHERE product_variant_id = :variantId");
+            $this->db->bind(':variantId', $variantId);
+            $this->db->execute();
+
+            $this->db->query("COMMIT");
+            $this->db->execute();
+
+            return true;
+        } catch (Exception $e) {
+            $this->db->query("ROLLBACK");
+            $this->db->execute();
+            throw new Exception("Failed to delete product: " . $e->getMessage());
+        }
+    }
+
+    public function getAllProductVariants()
+    {
+        $this->db->query("
+        SELECT 
+            pv.product_variant_id,
+            pv.product_id,
+            v.variant_name,
+            pv.stock_qty,
+            pv.stock_status,
+            pv.img_url
+        FROM product_variant pv
+        LEFT JOIN variant v ON v.variant_id = pv.variant_id
+        ORDER BY pv.product_id
+    ");
 
         return $this->db->resultAll();
     }

@@ -25,11 +25,11 @@ function setupImagePreview(
     hiddenExistingInput = document.createElement("input");
     hiddenExistingInput.type = "hidden";
     hiddenExistingInput.name = inputElement.name.replace("[]", "_existing[]");
-    
+
     if (inputElement.name === "variant_images_group[]") {
       hiddenExistingInput.name = "variant_existing_images[]";
     }
-    
+
     inputElement.form.appendChild(hiddenExistingInput);
   }
 
@@ -38,9 +38,8 @@ function setupImagePreview(
   }
 
   function loadExistingImages(urls) {
-
     const urlsToLoad = urls.slice(0, maxImages);
-    
+
     previewContainer
       .querySelectorAll(".static-image-container")
       .forEach((el) => el.remove());
@@ -48,11 +47,11 @@ function setupImagePreview(
     urlsToLoad.forEach((url, index) => {
       const filename = url.split("/").pop().split("?")[0];
       staticImageNames.push(filename);
-      
+
       const div = createPreviewElement(url, filename, true);
-      previewContainer.appendChild(div); 
+      previewContainer.appendChild(div);
     });
-    
+
     updateHiddenInput();
   }
 
@@ -64,7 +63,7 @@ function setupImagePreview(
     } else {
       div.classList.add("dynamic-preview");
     }
-    
+
     div.style.cssText =
       "position: relative; display: inline-block; margin-right: 10px; margin-bottom: 10px;";
 
@@ -90,14 +89,14 @@ function setupImagePreview(
 
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      
+
       if (isStatic) {
         const nameIndex = staticImageNames.indexOf(identifier);
         if (nameIndex > -1) {
           staticImageNames.splice(nameIndex, 1);
           div.remove();
           updateHiddenInput();
-          
+
           if (staticImageNames.length + filesArray.length < maxImages) {
             inputElement.disabled = false;
           }
@@ -108,7 +107,7 @@ function setupImagePreview(
           filesArray.splice(fileIndex, 1);
           div.remove();
           updateInputFiles();
-          
+
           if (staticImageNames.length + filesArray.length < maxImages) {
             inputElement.disabled = false;
           }
@@ -143,7 +142,7 @@ function setupImagePreview(
     const dt = new DataTransfer();
     filesArray.forEach((f) => dt.items.add(f));
     inputElement.files = dt.files;
-    
+
     if (staticImageNames.length + filesArray.length >= maxImages) {
       inputElement.disabled = true;
     } else {
@@ -189,106 +188,222 @@ function setupImagePreview(
     loadExistingImages,
     updateInputFiles,
     getStaticCount: () => staticImageNames.length,
-    getDynamicCount: () => filesArray.length
+    getDynamicCount: () => filesArray.length,
   };
 }
 
 const addVariantBtn = document.getElementById("add-variant-btn");
 const variantTemplate = document.getElementById("variantTemplate");
-const activeVariantsContainer = document.getElementById("activeVariantsContainer");
+const activeVariantsContainer = document.getElementById(
+  "activeVariantsContainer"
+);
 
 function renumberVariants() {
   const allVariants = activeVariantsContainer.querySelectorAll(
     ".variant-section-basicInfo"
   );
-    
+
   allVariants.forEach((variant, index) => {
     const heading = variant.querySelector("h3");
     if (heading) {
       heading.textContent = `Variant ${index + 1}`;
     }
-    
+
     const hiddenInputs = variant.querySelectorAll(
       'input[type="hidden"][name^="variant_existing_images"]'
     );
-    
+
     hiddenInputs.forEach((input) => {
       input.name = `variant_existing_images[${index}]`;
     });
-    
-    const fileInput = variant.querySelector('input[name="variant_images_group[]"]');
+
+    const fileInput = variant.querySelector(
+      'input[name="variant_images_group[]"]'
+    );
     if (fileInput) {
       fileInput.name = "variant_images_group[]";
     }
   });
 }
 
+document
+  .querySelectorAll(".variant-section-basicInfo")
+  .forEach((section, index) => {
+    const initialImages = existingVariantImages[index] || [];
+    setupVariantSection(section, initialImages);
+  });
+
 function setupVariantSection(section, initialImages = []) {
-  
   const variantImageInput = section.querySelector(".variant-image-input");
   const variantPreview = section.querySelector(".variant-preview-container");
-  
-  let previewManager = null;
-  
-  if (variantImageInput && variantPreview) {
-    variantPreview.innerHTML = '';
-    
-    previewManager = setupImagePreview(
-      variantImageInput,
-      variantPreview,
-      1,
-      initialImages
-    );
-    
-    const hiddenInput = document.createElement("input");
+  const variantDropZone = section.querySelector(".variant-drop-zone");
+
+  if (!variantImageInput || !variantPreview) return;
+
+  let filesArray = [];
+  let staticImageNames = initialImages.map((url) => url.split("/").pop());
+
+  // Create hidden input
+  let hiddenInput = section.querySelector(
+    'input[name="variant_existing_images[]"]'
+  );
+  if (!hiddenInput) {
+    hiddenInput = document.createElement("input");
     hiddenInput.type = "hidden";
     hiddenInput.name = "variant_existing_images[]";
-    hiddenInput.value = initialImages.map(img => img.split("/").pop().split("?")[0]).join(",");
     section.appendChild(hiddenInput);
   }
+  hiddenInput.value = staticImageNames.join(",");
 
-  const removeBtn = section.querySelector(".remove-variant-btn");
-  if (removeBtn) {
-    removeBtn.addEventListener("click", () => {
-      if (previewManager && previewManager.getStaticCount() > 0) {
-        if (!confirm("This variant has existing images. Removing the variant will delete these images. Continue?")) {
-          return;
+  variantPreview.innerHTML = "";
+
+  // Load existing images
+  initialImages.forEach((url, idx) => {
+    const filename = staticImageNames[idx];
+    const div = createPreviewElement(url, filename, true);
+    variantPreview.appendChild(div);
+  });
+
+  function createPreviewElement(src, identifier, isStatic = false) {
+    const div = document.createElement("div");
+    div.classList.add("preview-image-container");
+    if (!isStatic) div.classList.add("dynamic-preview");
+
+    div.style.cssText =
+      "position: relative; display: inline-block; margin-right: 10px; margin-bottom: 10px;";
+
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.cssText =
+      "width:90px;height:90px;object-fit:cover;border-radius:6px;cursor:pointer;";
+    img.addEventListener("click", () => window.open(src, "_blank"));
+    div.appendChild(img);
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.innerHTML = "✖";
+    btn.style.cssText =
+      "position: absolute; top: -5px; right: -5px; background: red; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer;";
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      if (isStatic) {
+        const index = staticImageNames.indexOf(identifier);
+        if (index > -1) {
+          staticImageNames.splice(index, 1);
+          hiddenInput.value = staticImageNames.join(",");
+          div.remove();
+        }
+      } else {
+        const fileIndex = filesArray.findIndex((f) => f.name === identifier);
+        if (fileIndex > -1) {
+          filesArray.splice(fileIndex, 1);
+          updateInputFiles();
         }
       }
-      
-      section.remove();
-      renumberVariants();
+    });
+
+    div.appendChild(btn);
+    return div;
+  }
+
+  function updateInputFiles() {
+    variantPreview.innerHTML = ""; 
+
+    if (filesArray.length > 0) {
+      staticImageNames = [];
+      hiddenInput.value = "";
+
+      const file = filesArray[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        if (
+          variantPreview.querySelectorAll(".preview-image-container").length ===
+          0
+        ) {
+          const div = createPreviewElement(e.target.result, file.name, false);
+          variantPreview.appendChild(div);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    const dt = new DataTransfer();
+    filesArray.forEach((f) => dt.items.add(f));
+    variantImageInput.files = dt.files;
+  }
+  variantImageInput.addEventListener("change", (e) => {
+    const newFiles = Array.from(e.target.files);
+    const uniqueFiles = newFiles.filter(
+      (f) =>
+        !filesArray.some(
+          (existing) => existing.name === f.name && existing.size === f.size
+        )
+    );
+
+    filesArray = uniqueFiles.slice(0, 1);
+    updateInputFiles();
+  });
+
+  if (variantDropZone) {
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((event) => {
+      variantDropZone.addEventListener(event, (e) => e.preventDefault());
+    });
+
+    variantDropZone.addEventListener("dragover", () =>
+      variantDropZone.classList.add("drag-over")
+    );
+
+    variantDropZone.addEventListener("dragleave", () =>
+      variantDropZone.classList.remove("drag-over")
+    );
+
+    variantDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      variantDropZone.classList.remove("drag-over");
+
+      const droppedFiles = Array.from(e.dataTransfer.files);
+
+      const uniqueFiles = droppedFiles.filter(
+        (f) =>
+          !filesArray.some(
+            (existing) => existing.name === f.name && existing.size === f.size
+          )
+      );
+
+      filesArray = filesArray.concat(uniqueFiles).slice(0, 1);
+      updateInputFiles();
     });
   }
-  
-  return previewManager;
 }
 
 function addNewVariant() {
-  const clone = variantTemplate.content.cloneNode(true);
+  const template = document.getElementById("variantTemplate");
+  const clone = template.content.cloneNode(true);
   const section = clone.querySelector(".variant-section-basicInfo");
-  
-  if (section) {
-    setupVariantSection(section, []);
-    activeVariantsContainer.appendChild(section);
-    renumberVariants();
-  }
+
+  document.getElementById("activeVariantsContainer").appendChild(section);
+
+  setupVariantSection(section, []);
+  renumberVariants();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const existingVariants = activeVariantsContainer.querySelectorAll(
     ".variant-section-basicInfo"
   );
-    
+
   if (existingVariants.length > 0) {
-    existingVariants.forEach((variant, index) => {      
-      const variantImages = existingVariantImages && existingVariantImages[index] 
-        ? existingVariantImages[index] 
-        : [];
-    
+    existingVariants.forEach((variant, index) => {
+      const variantImages =
+        existingVariantImages && existingVariantImages[index]
+          ? existingVariantImages[index]
+          : [];
+
       setupVariantSection(variant, variantImages);
     });
-    
+
     renumberVariants();
   } else {
     addNewVariant();
@@ -297,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (addVariantBtn) {
     addVariantBtn.addEventListener("click", addNewVariant);
   }
-  
+
   setupFormSubmission();
 });
 
@@ -312,14 +427,17 @@ function setupFormSubmission() {
 
   function showModal() {
     modal.style.display = "block";
-    
-    const productName = form.querySelector('[name="product_name"]')?.value || "this product";
-    const isEdit = form.querySelector('[name="product_id"]')?.value?.startsWith('P');
-    
-    const message = isEdit 
+
+    const productName =
+      form.querySelector('[name="product_name"]')?.value || "this product";
+    const isEdit = form
+      .querySelector('[name="product_id"]')
+      ?.value?.startsWith("P");
+
+    const message = isEdit
       ? `Are you sure you want to update "${productName}"?`
       : `Are you sure you want to add "${productName}"?`;
-    
+
     document.getElementById("deleteMessage").textContent = message;
   }
 
@@ -328,30 +446,100 @@ function setupFormSubmission() {
   }
 
   function validateForm() {
-    document.querySelectorAll(".error-message").forEach(el => el.remove());
-    
+    document.querySelectorAll(".error-message").forEach((el) => el.remove());
     let isValid = true;
-    
-    const productName = form.querySelector('[name="product_name"]');
-    if (!productName || !productName.value.trim()) {
-      alert("Product name is required");
+
+    const showError = (inputName, message, isArray = false, index = null) => {
+      let selector = isArray
+        ? `[name="${inputName}[]"]`
+        : `[name="${inputName}"]`;
+      let inputs = document.querySelectorAll(selector);
+      let targetInput = index !== null ? inputs[index] : inputs[0];
+
+      if (targetInput) {
+        const errorSpan = document.createElement("span");
+        errorSpan.className = "error-message";
+        errorSpan.style.cssText =
+          "color: red; font-size: 0.8em; display: block; margin-top: 5px;";
+        errorSpan.textContent = message;
+        targetInput.parentNode.appendChild(errorSpan);
+        isValid = false;
+      }
+    };
+
+    const formData = new FormData(document.getElementById("productForm"));
+
+    if (!formData.get("product_name").trim())
+      showError("product_name", "Product name is required.");
+    if (!formData.get("description").trim())
+      showError("description", "Product description is required.");
+    if (!formData.get("category_id"))
+      showError("category_id", "Please select a category.");
+
+    const cost = parseFloat(formData.get("cost_price"));
+    const sales = parseFloat(formData.get("sales_price"));
+
+    if (isNaN(cost) || cost <= 0)
+      showError("cost_price", "Invalid cost price.");
+    if (isNaN(sales) || sales <= 0)
+      showError("sales_price", "Invalid sales price.");
+    if (sales < cost)
+      showError("sales_price", "Sales price cannot be less than cost price.");
+
+    const variantSections = document.querySelectorAll(
+      ".variant-section-basicInfo"
+    );
+    if (variantSections.length === 0) {
+      alert("At least one variant is required.");
       isValid = false;
+    } else {
+      variantSections.forEach((section, i) => {
+        const vId = section.querySelector('[name="variant_ids[]"]').value;
+        const minStock = section.querySelector(
+          '[name="min_stock_levels[]"]'
+        ).value;
+        const stockQty = section.querySelector('[name="stock_qtys[]"]').value;
+
+        if (!vId)
+          showError(
+            "variant_ids",
+            `Please select a variant for variant ${i + 1}.`,
+            true,
+            i
+          );
+
+        if (!minStock || minStock < 1) {
+          showError("min_stock_levels", "Must be more than 1", true, i);
+        }
+
+        if (!stockQty || stockQty < 1) {
+          showError("stock_qtys", "Must be more than 1.", true, i);
+        }
+      });
     }
-    
-    const variantCount = activeVariantsContainer.querySelectorAll(".variant-section-basicInfo").length;
-    if (variantCount === 0) {
-      alert("At least one variant is required");
-      isValid = false;
+
+    const isEdit = document.querySelector('[name="product_id"]')?.value;
+    const images = document.getElementById("product_images").files;
+    const existingImages = document.querySelectorAll(
+      ".static-image-container"
+    ).length;
+
+    if (!isEdit && images.length === 0 && existingImages === 0) {
+      showError("product_images", "Please upload at least one product image.");
     }
-    
+
     return isValid;
   }
 
   submitBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
       showModal();
+    } else {
+      const firstError = document.querySelector(".error-message");
+      if (firstError)
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   });
 
@@ -362,7 +550,7 @@ function setupFormSubmission() {
       finalSubmitInput.name = "final_submission";
       finalSubmitInput.value = "1";
       form.appendChild(finalSubmitInput);
-      
+
       form.submit();
     });
   }
@@ -378,23 +566,106 @@ function setupFormSubmission() {
   });
 }
 
-removeBtn.addEventListener("click", () => {
-  const hasExistingImages =
-    previewManager && previewManager.getStaticCount() > 0;
+document.addEventListener("DOMContentLoaded", () => {
+  const removeVariantsBtn = document.getElementById("removeVariants");
+  const activeVariantsContainer = document.getElementById(
+    "activeVariantsContainer"
+  );
+  const deleteVariantModal = document.getElementById("deleteVariantModal");
+  const variantCheckboxContainer = document.getElementById(
+    "variantCheckboxContainer"
+  );
+  const confirmDeleteVariants = document.getElementById(
+    "confirmDeleteVariants"
+  );
+  const cancelDeleteVariants = document.getElementById("cancelDeleteVariants");
+  const deleteInput = document.getElementById("delete_variant_ids");
+  const deleteForm = document.getElementById("deleteVariantsForm");
 
-  const hasVariantId =
-    section.querySelector('select[name="variant_ids[]"]')?.value;
-
-  if (IS_EDIT_MODE && (hasExistingImages || hasVariantId)) {
-    const confirmDelete = confirm(
-      "This variant already exists.\n\nRemoving it will permanently delete its data and images.\n\nDo you want to continue?"
+  removeVariantsBtn.addEventListener("click", () => {
+    const variantSections = activeVariantsContainer.querySelectorAll(
+      ".variant-section-basicInfo"
     );
 
-    if (!confirmDelete) return;
-  }
+    if (variantSections.length <= 1) {
+      alert(
+        "Cannot delete the only variant. A product must have at least one variant."
+      );
+      return;
+    }
 
-  section.remove();
-  renumberVariants();
+    variantCheckboxContainer.innerHTML = "";
+
+    variantSections.forEach((section, index) => {
+      const variantName = section.querySelector("select[name='variant_ids[]']")
+        .selectedOptions[0].text;
+      const variantId = section.querySelector(
+        "input[name='product_variant_ids[]']"
+      ).value;
+
+      const checkboxWrapper = document.createElement("div");
+      checkboxWrapper.style.marginBottom = "8px";
+      checkboxWrapper.innerHTML = `
+                <label>
+                    <input type="checkbox" name="variant_to_delete" value="${variantId}">
+                    Variant ${index + 1}: ${variantName}
+                </label>
+            `;
+      variantCheckboxContainer.appendChild(checkboxWrapper);
+    });
+
+    deleteVariantModal.style.display = "block";
+  });
+
+  cancelDeleteVariants.addEventListener("click", () => {
+    deleteVariantModal.style.display = "none";
+  });
+
+  confirmDeleteVariants.addEventListener("click", () => {
+    const checkedBoxes = variantCheckboxContainer.querySelectorAll(
+      "input[name='variant_to_delete']:checked"
+    );
+    if (checkedBoxes.length === 0) {
+      alert("Please select at least one variant to delete.");
+      return;
+    }
+
+    const variantIdsToDelete = Array.from(checkedBoxes).map((cb) => cb.value);
+    deleteInput.value = variantIdsToDelete.join(",");
+    deleteForm.submit();
+  });
 });
 
+function setupDragAndDrop(dropZone, fileInput, previewContainer, maxFiles = 5) {
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((event) => {
+    dropZone.addEventListener(event, (e) => e.preventDefault());
+  });
 
+  dropZone.addEventListener("dragover", () =>
+    dropZone.classList.add("drag-over")
+  );
+  dropZone.addEventListener("dragleave", () =>
+    dropZone.classList.remove("drag-over")
+  );
+
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.remove("drag-over");
+
+    const dt = new DataTransfer();
+    const droppedFiles = Array.from(e.dataTransfer.files);
+
+    droppedFiles.forEach((file) => dt.items.add(file));
+
+    fileInput.files = dt.files;
+    fileInput.dispatchEvent(new Event("change"));
+  });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const productDropZone = document.getElementById("productDropZone");
+  const productInput = document.getElementById("product_images");
+  const productPreview = document.getElementById("previewContainer");
+
+  setupDragAndDrop(productDropZone, productInput, productPreview, 5);
+});
