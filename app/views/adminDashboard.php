@@ -2,8 +2,8 @@
 $title = "Admin Dashboard";
 $pageCSS = "admindashboard.css";
 
-include 'adminheader.php';
-include  '../controllers/orderController.php';
+
+require_once __DIR__ . '/../controllers/orderController.php';
 
 $orderController = new OrderController();
 $topOrders = $orderController->getTopOrders();
@@ -105,7 +105,7 @@ function fillEmptyPeriods($data)
 }
 
 $fullOrderData = fillEmptyPeriods($orderData);
-
+require_once __DIR__ . '/adminheader.php';
 ?>
 
 <div class="dashboard">
