@@ -20,8 +20,10 @@ include  '../adminHeader.php';
 $orderController = new OrderController();
 
 $data = $orderController->index();
-$orders = $data["orders"];
-$pagination = $data["pagination"];
+if (!empty($data)) {
+  $orders = $data["orders"];
+  $pagination = $data["pagination"];
+}
 
 $statusOption = [
   'Pending',
