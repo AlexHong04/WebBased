@@ -127,7 +127,7 @@ require_once __DIR__ . '/adminheader.php';
     </div>
 
     <div class="card low-stock">
-      <a href="#" class="low-stock" onclick="window.location.href='/app/views/product/lowStockAlert.php'"></a>
+      <a href="/app/views/product/lowStockAlert.php" class="card-link"></a>
       <h3>Low Stock</h3>
       <p>&gt;</p>
     </div>

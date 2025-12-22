@@ -57,11 +57,19 @@
 }
 
 .card.low-stock {
+  position: relative;
   border-left: 6px solid #fc6a6a;
 }
 
-.card.low-stock a {
-  display: none;
+.card.low-stock .card-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  display: block;
+  text-decoration: none;
 }
 
 .chart-card-wrapper {
