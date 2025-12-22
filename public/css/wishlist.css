@@ -1,10 +1,48 @@
+:root {
+  --primary-pink: #fc84a3;
+  --primary-pink-hover: #f06b90;
+  --bg-body: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-toolbar: #f8f9fa;
+  --bg-input: #ffffff;
+  --bg-checkbox: #fcfcfc;
+  --text-main: #333333;
+  --text-gray: #888888;
+  --text-light: #555555;
+  --border-color: #e0e0e0;
+  --shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --success-green: #2ecc71;
+  --error-red: #e74c3c;
+  --warning-yellow: #ffcc00;
+  --wishlist-card-color:#e0e0e0;
+  --overlay-bg: rgba(255, 255, 255, 0.85);
+  --overlay-text: #555;
+}
+
+[data-theme="dark"] {
+  --bg-body: #0a0a0a;
+  --bg-card: #18181b;
+  --bg-toolbar: #18181b;
+  --bg-input: #27272a;
+  --bg-checkbox: #202023;
+  --text-main: #ffffff;
+  --text-gray: #a1a1aa;
+  --text-light: #d4d4d8;
+  --border-color: #27272a;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --primary-pink: #fc84a3;
+  --wishlist-card-color:#7a7a7a;
+  --overlay-bg: rgba(0, 0, 0, 0.7);
+  --overlay-text: #fff;
+}
+
 /* Header & Search Bar */
 .wishlist-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 10px;
 }
 
@@ -18,7 +56,7 @@
 .wishlist-search-icon {
   position: absolute;
   left: 15px;
-  color: #999;
+  color: var(--text-gray);
   font-size: 0.9rem;
   pointer-events: none;
   z-index: 10;
@@ -27,16 +65,16 @@
 .wishlist-search-wrapper input[type="text"] {
   width: 100%;
   padding: 10px 15px 10px 40px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 50px;
   outline: none;
   font-size: 0.9rem;
-  background-color: #fff;
+  background-color: var(--bg-input);
   transition: all 0.3s ease;
 }
 
 .wishlist-search-wrapper input[type="text"]:focus {
-  border-color: #fc84a3;
+  border-color: var(--primary-pink);
   box-shadow: 0 0 0 3px rgba(252, 132, 163, 0.1);
 }
 
@@ -47,8 +85,8 @@
   align-items: center;
   margin-bottom: 20px;
   padding: 15px;
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-toolbar);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
 }
 
@@ -58,20 +96,20 @@
   gap: 10px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #555;
+  color: var(--text-light);
   cursor: pointer;
 }
 
 .select-all-wrapper input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: #fc84a3;
+  accent-color: var(--primary-pink);
   cursor: pointer;
 }
 
 .btn-batch-delete {
-  background-color: #e0e0e0;
-  color: #999;
+  background-color: var(--border-color);
+  color: var(--text-gray);
   border: none;
   padding: 10px 20px;
   border-radius: 6px;
@@ -85,7 +123,7 @@
 }
 
 .btn-batch-delete.active {
-  background-color: #e74c3c;
+  background-color: var(--error-red);
   color: white;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
@@ -106,8 +144,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-card);
+  border: 1px solid var(--wishlist-card-color);
   border-radius: 12px;
   overflow: hidden;
   position: relative;
@@ -116,8 +154,8 @@
 }
 
 .wishlist-card:hover {
-  border-color: #fc84a3;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  border-color: var(--primary-pink);
+  box-shadow: var(--shadow);
 }
 
 .card-checkbox-wrapper {
@@ -126,14 +164,14 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  background-color: #fcfcfc;
-  border-right: 1px solid #f0f0f0;
+  background-color: var(--bg-checkbox);
+  border-right: 1px solid var(--border-color);
 }
 
 .wishlist-checkbox {
   width: 20px;
   height: 20px;
-  accent-color: #fc84a3;
+  accent-color: var(--primary-pink);
   cursor: pointer;
 }
 
@@ -143,7 +181,7 @@
   height: 100%;
   flex-shrink: 0;
   position: relative;
-  background-color: #fff;
+  background-color: var(--bg-card);
 }
 
 .wishlist-img-wrapper img {
@@ -158,12 +196,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  color: #555;
+  color: var(--overlay-text);
   text-transform: uppercase;
   letter-spacing: 1px;
   font-size: 0.9rem;
@@ -183,7 +221,7 @@
   margin: 0 0 5px 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -191,14 +229,14 @@
 
 .variant-name {
   font-size: 0.9rem;
-  color: #888;
+  color: var(--text-gray);
   margin: 0 0 10px 0;
 }
 
 .price {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #fc84a3;
+  color: var(--primary-pink);
 }
 
 /* Actions Section */
@@ -218,8 +256,8 @@
   justify-content: center !important;
   align-items: center !important;
   width: 100%;
-  background: #333;
-  color: #fff;
+  background: var(--text-main);
+  color: var(--bg-card);
   padding: 8px 0;
   border-radius: 6px;
   text-decoration: none;
@@ -229,20 +267,27 @@
   line-height: normal;
 }
 
+[data-theme="dark"] .btn-view {
+  background: var(--primary-pink);
+  color: white;
+}
+
 .btn-view:hover {
-  background: #fc84a3;
+  background: var(--primary-pink-hover);
+  color: white;
 }
 
 .btn-view.disabled {
-  background: #ccc;
+  background: var(--border-color);
   cursor: not-allowed;
   pointer-events: none;
+  color: var(--text-gray);
 }
 
 .btn-remove {
   background: transparent;
-  border: 1px solid #eee;
-  color: #999;
+  border: 1px solid var(--border-color);
+  color: var(--text-gray);
   cursor: pointer;
   font-size: 0.9rem;
   display: flex;
@@ -256,9 +301,9 @@
 }
 
 .btn-remove:hover {
-  background-color: #fff5f5;
-  color: #e74c3c;
-  border-color: #e74c3c;
+  background-color: var(--bg-body);
+  color: var(--error-red);
+  border-color: var(--error-red);
 }
 
 /* --- Pagination --- */
@@ -267,21 +312,21 @@
   justify-content: center;
   align-items: center;
   margin-top: 30px;
-  gap: 6px; 
+  gap: 6px;
 }
 
 .page-link {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 38px; 
-  height: 38px; 
-  padding: 0; 
+  width: 38px;
+  height: 38px;
+  padding: 0;
 
-  border: 1px solid #e0e0e0; 
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background-color: #fff;
-  color: #666;
+  background-color: var(--bg-card);
+  color: var(--text-gray);
 
   font-weight: 500;
   font-size: 0.95rem;
@@ -292,23 +337,23 @@
 }
 
 .page-link:hover {
-  border-color: var(--primary-color, #fc84a3);
-  color: var(--primary-color, #fc84a3);
-  background-color: #fff5f8; 
+  border-color: var(--primary-pink);
+  color: var(--primary-pink);
+  background-color: var(--bg-body);
 }
 
 .page-link.active {
-  background-color: var(--primary-color, #fc84a3);
+  background-color: var(--primary-pink);
   color: white;
-  border-color: var(--primary-color, #fc84a3);
-  box-shadow: 0 4px 10px rgba(252, 132, 163, 0.3); 
+  border-color: var(--primary-pink);
+  box-shadow: 0 4px 10px rgba(252, 132, 163, 0.3);
 }
 
 .page-link.disabled {
-  color: #ccc;
+  color: var(--text-gray);
   pointer-events: none;
-  border-color: #f0f0f0;
-  background: #fafafa;
+  border-color: var(--border-color);
+  background: var(--bg-body);
 }
 
 .page-ellipsis {
@@ -317,7 +362,7 @@
   align-items: flex-end;
   width: 30px;
   height: 38px;
-  color: #999;
+  color: var(--text-gray);
   font-weight: bold;
   letter-spacing: 2px;
   padding-bottom: 8px;
@@ -330,20 +375,20 @@
   justify-content: center;
   text-align: center;
   padding: 60px 20px;
-  background: #fff;
-  border: 1px dashed #ddd;
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
   border-radius: 12px;
   min-height: 300px;
 }
 
 .empty-wishlist i {
   font-size: 3rem;
-  color: #eee;
+  color: var(--border-color);
   margin-bottom: 15px;
 }
 
 .empty-wishlist p {
-  color: #777;
+  color: var(--text-gray);
   margin-bottom: 20px;
 }
 
@@ -352,7 +397,7 @@
   justify-content: center !important;
   align-items: center !important;
   line-height: 1 !important;
-  background: #fc84a3;
+  background: var(--primary-pink);
   color: white !important;
   border-radius: 50px;
   text-decoration: none !important;
@@ -365,7 +410,7 @@
   padding: 12px 25px;
 }
 .btn-shop:hover {
-  background: #f06b90;
+  background: var(--primary-pink-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(252, 132, 163, 0.3);
 }
@@ -393,7 +438,7 @@
 }
 
 .modal-content-wishlist {
-  background: white;
+  background: var(--bg-card);
   padding: 40px 30px;
   border-radius: 15px;
   width: 90%;
@@ -411,7 +456,7 @@
 
 .modal-icon-wishlist.warning {
   font-size: 3.5rem;
-  color: #ffcc00;
+  color: var(--warning-yellow);
   margin-bottom: 15px;
   display: flex;
   justify-content: center;
@@ -421,19 +466,19 @@
   font-family: "Times New Roman", Times, serif;
   font-size: 1.8rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text-main);
   margin-bottom: 10px;
 }
 
 .modal-text-wishlist {
-  color: #555;
+  color: var(--text-light);
   margin-bottom: 30px;
   font-size: 1rem;
   line-height: 1.5;
 }
 
 .modal-text-wishlist b {
-  color: #333;
+  color: var(--text-main);
 }
 
 .modal-actions-wishlist {
@@ -454,16 +499,16 @@
 }
 
 .cancel-btn-wishlist {
-  background-color: #f2f2f2;
-  color: #333;
+  background-color: var(--bg-body);
+  color: var(--text-main);
 }
 
 .cancel-btn-wishlist:hover {
-  background-color: #e6e6e6;
+  background-color: var(--border-color);
 }
 
 .confirm-delete-btn-wishlist {
-  background-color: #dc3545;
+  background-color: var(--error-red);
   color: white;
   box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
 }
@@ -477,7 +522,7 @@
   position: fixed;
   top: 80px;
   right: 20px;
-  background: white;
+  background: var(--bg-card);
   padding: 15px 25px;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
@@ -486,29 +531,29 @@
   gap: 12px;
   z-index: 9999;
   animation: slideIn 0.3s ease;
-  border-left: 5px solid #ccc;
+  border-left: 5px solid var(--text-main);
   min-width: 300px;
 }
 
 .toast-success {
-  border-left-color: #2ecc71;
+  border-left-color: var(--success-green);
 }
 .toast-success i {
-  color: #2ecc71;
+  color: var(--success-green);
 }
 
 .toast-error {
-  border-left-color: #e74c3c;
+  border-left-color: var(--error-red);
 }
 .toast-error i {
-  color: #e74c3c;
+  color: var(--error-red);
 }
 
 .toast-warning {
-  border-left-color: #f1c40f;
+  border-left-color: var(--warning-yellow);
 }
 .toast-warning i {
-  color: #f1c40f;
+  color: var(--warning-yellow);
 }
 
 .toast-content {
@@ -519,7 +564,7 @@
 }
 
 .toast-message {
-  color: #333;
+  color: var(--text-main);
   font-size: 0.95rem;
   font-weight: 500;
 }

@@ -1,3 +1,42 @@
+:root {
+  --primary-pink: #fc84a3;
+  --primary-pink-hover: #f06b90;
+  --bg-body: #f8f9fa; 
+  --bg-card: #ffffff; 
+  --bg-input: #ffffff;
+  --bg-hover: #ffd4e0;
+  
+  --text-main: #333333; 
+  --text-gray: #777777; 
+  --text-light: #555555;
+  
+  --border-color: #ddd; 
+  --border-pink: #dfb0bd;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  
+  --success-green: #2ecc71;
+  --error-red: #f44336;
+  --error-hover: #cd392e;
+}
+
+
+[data-theme="dark"] {
+  --bg-body: #0a0a0a;
+  --bg-card: #18181b; 
+  --bg-input: #27272a;
+  --bg-hover: #3d2a30;
+  
+  --text-main: #ffffff;
+  --text-gray: #a1a1aa;
+  --text-light: #d4d4d8;
+  
+  --border-color: #27272a;
+  --border-pink: #fc84a3;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  
+  --primary-pink: #fc84a3;
+}
+
 .order-cancellation-section {
   max-width: 900px;
   margin: 0 auto;
@@ -13,11 +52,11 @@
 }
 
 .order-card-wrapper {
-  border: 2px solid #ddd;
+  border: 2px solid var(--border-color); 
   border-radius: 8px;
   padding: 30px;
   margin-bottom: 24px;
-  background-color: #fff;
+  background-color: var(--bg-card);      
 }
 
 .order-card {
@@ -25,7 +64,7 @@
   grid-template-columns: 150px 2fr 80px 120px;
   gap: 16px;
   padding: 30px 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color); 
   align-items: center;
 }
 
@@ -51,13 +90,13 @@
 
 .col.info-col .description {
   font-size: 16px;
-  color: #555;
+  color: var(--text-light); 
   margin-bottom: 4px;
 }
 
 .col.info-col .variant {
   font-size: 14px;
-  color: #888;
+  color: var(--text-gray); 
 }
 
 .col.qty-col,
@@ -87,9 +126,9 @@
 
 .cancel-select .selected {
   padding: 10px 12px;
-  color: rgb(116, 116, 116);
-  border: 1px solid #dfb0bd;
-  background: #fff;
+  color: var(--text-gray); 
+  border: 1px solid var(--border-pink); 
+  background: var(--bg-input);          
   cursor: pointer;
   border-radius: 6px;
   display: flex;
@@ -111,10 +150,10 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border: 1px solid #dfb0bd;
+  border: 1px solid var(--border-pink); 
   border-top: none;
   border-bottom: none;
-  background: #fff;
+  background: var(--bg-input);          
   width: 100%;
   max-height: 0;
   overflow: hidden;
@@ -129,13 +168,13 @@
 .cancel-select.open .options {
   max-height: 250px;
   overflow-y: auto;
-  border-bottom: 1px solid #dfb0bd;
+  border-bottom: 1px solid var(--border-pink); 
 }
 
 .cancel-select .options li {
   padding: 10px 12px;
   cursor: pointer;
-  border-bottom: 1px solid #fce4eb;
+  border-bottom: 1px solid var(--border-color); 
   transition: background 0.15s ease;
 }
 
@@ -144,7 +183,7 @@
 }
 
 .cancel-select .options li:hover {
-  background: #ffd4e0;
+  background: var(--bg-hover); 
 }
 
 .cancel-select .options::-webkit-scrollbar {
@@ -152,7 +191,7 @@
 }
 
 .cancel-select .options::-webkit-scrollbar-thumb {
-  background: #fce4eb;
+  background: var(--border-pink); 
   border-radius: 6px;
 }
 
@@ -163,7 +202,7 @@
 
 .submit-btn button {
   padding: 10px 20px;
-  background-color: #f44336;
+  background-color: var(--error-red); 
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -173,7 +212,7 @@
 }
 
 .submit-btn button:hover {
-  background-color: #cd392e;
+  background-color: var(--error-hover); 
 }
 
 .successPopup,
@@ -181,10 +220,10 @@
   min-width: 250px;
   padding: 12px 20px;
   border-radius: 6px;
-  color: #333;
+  color: var(--text-main); 
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  background-color: #fff;
-  border: 2px solid transparent;
+  background-color: var(--bg-card); 
+  border: 2px solid transparent; 
   position: fixed;
   top: 50px;
   right: 20px;
@@ -208,7 +247,7 @@
   bottom: 0;
   height: 4px;
   width: 100%;
-  background-color: #4caf50;
+  background-color: var(--success-green);
   transform-origin: left; /* start scaling from left */
   transform: scaleX(0);
   animation: progress-bar 3s linear forwards;
@@ -221,7 +260,7 @@
   bottom: 0;
   height: 4px;
   width: 100%;
-  background-color: #ff0202;
+  background-color: var(--error-red);
   transform-origin: left; /* start scaling from left */
   transform: scaleX(0);
   animation: progress-bar 3s linear forwards;
@@ -248,7 +287,7 @@
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   justify-content: center;
   align-items: center;
   display: flex;
@@ -259,7 +298,7 @@
 }
 
 .modal-box {
-  background: #fff;
+  background: var(--bg-card); 
   padding: 20px 30px;
   border-radius: 10px;
   max-width: 400px;
@@ -288,11 +327,11 @@
 }
 
 .modal-actions .confirm-btn {
-  background-color: #ff0037;
+  background-color: var(--error-red); 
   color: #fff;
 }
 
 .modal-actions .cancel-btn {
-  background-color: #ccc;
-  color: #333;
+  background-color: var(--border-color);
+  color: var(--text-main);               
 }

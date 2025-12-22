@@ -1,24 +1,52 @@
 :root {
   --primary-pink: #fc84a3;
   --primary-pink-hover: #f06b90;
-  --text-dark: #333333;
+
+  --bg-body: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-input: #ffffff;
+
+  --text-main: #333333;
   --text-gray: #777777;
-  --bg-light: #f8f9fa;
-  --white: #ffffff;
+  --border-color: #e0e0e0;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+  --success-green: #2ecc71;
+  --error-red: #ff4d4d;
+  --warning-yellow: #f1c40f;
+
+  --bg-summary: #fff0f5;
+}
+
+[data-theme="dark"] {
+  --bg-body: #0a0a0a;
+  --bg-card: #18181b;
+  --bg-secondary: #27272a;
+  --bg-input: #27272a;
+
+  --text-main: #ffffff;
+  --text-gray: #a1a1aa;
+
+  --border-color: #27272a;
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+
+  --bg-summary: #2d1b20;
+
+  --primary-pink: #fc84a3;
 }
 
 body {
-  background-color: var(--bg-light);
+  background-color: var(--bg-body);
   margin: 0;
-  color: var(--text-dark);
+  color: var(--text-main);
   padding-bottom: 50px;
 }
 
 .main-cart-wrapper {
   max-width: 1300px;
   margin: 50px auto;
-  background-color: var(--white);
+  background-color: var(--bg-card);
   border-radius: 20px;
   padding: 20px;
   box-shadow: var(--shadow);
@@ -73,7 +101,7 @@ body {
   width: 100%;
   box-sizing: border-box;
   padding: 10px 15px 10px 40px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.95rem;
   outline: none;
@@ -82,8 +110,8 @@ body {
 }
 
 .cart-search-input:focus {
-  border-color: #333;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-pink);
+  box-shadow: 0 0 5px rgba(252, 132, 163, 0.3);
 }
 
 .cart-search-icon {
@@ -91,12 +119,12 @@ body {
   left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #aaa;
+  color: var(--text-gray);
   pointer-events: none;
 }
 
 .batch-delete-btn {
-  background-color: #ff4d4d;
+  background-color: var(--error-red);
   color: white;
   border: none;
   padding: 0 20px;
@@ -134,13 +162,13 @@ table.cart-table th {
   color: var(--text-gray);
   font-weight: 500;
   font-size: 0.85rem;
-  border-bottom: 2px solid var(--bg-light);
+  border-bottom: 2px solid var(--bg-secondary);
 }
 
 table.cart-table td {
   padding: 15px;
   vertical-align: middle;
-  border-bottom: 1px solid var(--bg-light);
+  border-bottom: 1px solid var(--bg-secondary);
 }
 
 table.cart-table th:nth-child(1) {
@@ -169,7 +197,7 @@ table.cart-table tbody tr:last-child td {
 
 /* Out of Stock Styling */
 .cart-row.out-of-stock {
-  background-color: #f4f4f4;
+  background-color: var(--bg-secondary);
   opacity: 0.6;
   pointer-events: none;
   position: relative;
@@ -178,12 +206,12 @@ table.cart-table tbody tr:last-child td {
 .cart-row.out-of-stock .delete-btn {
   pointer-events: auto;
   opacity: 1;
-  color: #ff4d4f;
+  color: var(--error-red);
   cursor: pointer;
 }
 
 .cart-row.out-of-stock .product-name {
-  color: #999;
+  color: var(--text-gray);
   text-decoration: line-through;
 }
 
@@ -194,7 +222,7 @@ table.cart-table tbody tr:last-child td {
 
 .oos-badge {
   display: inline-block;
-  background-color: #e74c3c;
+  background-color: var(--error-red);
   color: white;
   font-size: 0.75rem;
   padding: 2px 6px;
@@ -215,12 +243,14 @@ table.cart-table tbody tr:last-child td {
   object-fit: cover;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  background-color: var(--bg-secondary); 
+  border: 1px solid var(--border-color);
 }
 
 .product-name {
   font-weight: 600;
   font-size: 1rem;
-  color: var(--text-dark);
+  color: var(--text-main);
 }
 
 .unit-price {
@@ -244,15 +274,19 @@ input[type="checkbox"] {
 .qty-selector {
   display: flex;
   align-items: center;
-  background-color: var(--bg-light);
+  background-color: var(--bg-secondary);
   border-radius: 50px;
   padding: 5px;
   width: fit-content;
+  border: 1px solid transparent;
+}
+[data-theme="dark"] .qty-selector {
+  border-color: var(--border-color);
 }
 
 .qty-btn {
-  background-color: var(--white);
-  color: var(--text-dark);
+  background-color: var(--bg-card); /* 变量 */
+  color: var(--text-main); /* 变量 */
   border: none;
   width: 32px;
   height: 32px;
@@ -267,7 +301,7 @@ input[type="checkbox"] {
 
 .qty-btn:hover {
   background-color: var(--primary-pink);
-  color: var(--white);
+  color: white;
   transform: translateY(-2px);
 }
 
@@ -278,7 +312,7 @@ input[type="checkbox"] {
   border: none;
   background: transparent;
   font-weight: 600;
-  color: var(--text-dark);
+  color: var(--text-main);
   font-size: 1rem;
 }
 
@@ -293,7 +327,7 @@ input[type="checkbox"] {
 }
 
 .delete-btn {
-  color: #ccc;
+  color: var(--text-gray);
   cursor: pointer;
   font-size: 1.2em;
   border: none;
@@ -302,14 +336,14 @@ input[type="checkbox"] {
 }
 
 .delete-btn:hover {
-  color: #ff4d4f;
+  color: var(--error-red);
   transform: scale(1.1);
 }
 
 /* summary section */
 .cart-summary-section {
   flex: 1;
-  background: var(--white);
+  background: var(--bg-card);
   border-radius: 20px;
   padding: 30px;
   box-shadow: var(--shadow);
@@ -322,12 +356,12 @@ input[type="checkbox"] {
 
 .summary-header {
   text-align: left;
-  color: var(--text-dark);
+  color: var(--text-main);
   font-weight: 700;
   font-size: 1.3rem;
   margin-bottom: 25px;
   padding-bottom: 15px;
-  border-bottom: 2px solid var(--bg-light);
+  border-bottom: 2px solid var(--bg-secondary);
 }
 
 .summary-items-list {
@@ -342,7 +376,7 @@ input[type="checkbox"] {
 }
 
 .summary-items-list::-webkit-scrollbar-thumb {
-  background: #eee;
+  background: var(--border-color);
   border-radius: 10px;
 }
 
@@ -359,10 +393,11 @@ input[type="checkbox"] {
   flex: 1;
   padding-right: 15px;
   line-height: 1.4;
+  color: var(--text-main); 
 }
 
 .summary-item-qty {
-  color: #aaa;
+  color: var(--text-gray);
   font-size: 0.85em;
   display: block;
   margin-top: 4px;
@@ -372,12 +407,12 @@ input[type="checkbox"] {
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
-  color: var(--text-dark);
+  color: var(--text-main);
   font-size: 0.95rem;
 }
 
 .grand-total-area {
-  background-color: #fff0f5;
+  background-color: var(--bg-summary); 
   padding: 20px;
   border-radius: 15px;
   margin-top: 10px;
@@ -394,14 +429,14 @@ input[type="checkbox"] {
 }
 
 .grand-total-label {
-  color: var(--text-dark);
+  color: var(--text-main);
   font-size: 1.1rem;
 }
 
 .checkout-btn {
   width: 100%;
-  background: linear-gradient(135deg, #fc84a3 0%, #f55783 100%);
-  color: var(--white);
+  background: var(--primary-pink);
+  color: #fff;
   border: none;
   padding: 18px;
   font-size: 1.1em;
@@ -417,16 +452,18 @@ input[type="checkbox"] {
 }
 
 .checkout-btn:hover {
+  background-color: var(--primary-pink-hover);
   transform: translateY(-3px);
   box-shadow: 0 15px 25px rgba(252, 132, 163, 0.4);
 }
 
 .checkout-btn:disabled {
-  background: #e0e0e0;
-  color: #999;
+  background: var(--bg-secondary);
+  color: var(--text-gray);
   box-shadow: none;
   cursor: not-allowed;
   transform: none;
+  border: 1px solid var(--border-color);
 }
 
 /* empty cart section*/
@@ -440,14 +477,14 @@ input[type="checkbox"] {
 
 .empty-icon {
   font-size: 80px;
-  color: #e0e0e0;
+  color: var(--border-color);
   margin-bottom: 20px;
 }
 
 .empty-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-dark);
+  color: var(--text-main);
   margin-bottom: 10px;
 }
 
@@ -474,7 +511,7 @@ input[type="checkbox"] {
   box-shadow: 0 8px 20px rgba(252, 132, 163, 0.4);
 }
 
-/* modal and toast*/
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -491,20 +528,21 @@ input[type="checkbox"] {
 }
 
 .delete-modal-content {
-  background: white;
+  background: var(--bg-card);
   padding: 30px;
   border-radius: 16px;
   width: 90%;
   max-width: 400px;
   text-align: center;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
   transform: scale(0.9);
   animation: popIn 0.2s ease-out forwards;
+  border: 1px solid var(--border-color);
 }
 
 .modal-icon.warning {
   font-size: 3rem;
-  color: #ffcc00;
+  color: var(--warning-yellow);
   margin-bottom: 15px;
 }
 
@@ -512,11 +550,11 @@ input[type="checkbox"] {
   font-size: 1.4rem;
   font-weight: 700;
   margin-bottom: 10px;
-  color: #333;
+  color: var(--text-main);
 }
 
 .modal-text {
-  color: #666;
+  color: var(--text-gray);
   margin-bottom: 25px;
   font-size: 0.95rem;
   line-height: 1.5;
@@ -539,16 +577,17 @@ input[type="checkbox"] {
 }
 
 .cancel-btn {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: var(--bg-secondary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
 }
 
 .cancel-btn:hover {
-  background-color: #e0e0e0;
+  background-color: var(--border-color);
 }
 
 .confirm-delete-btn {
-  background-color: #dc3545;
+  background-color: var(--error-red);
   color: white;
   box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
 }
@@ -562,7 +601,7 @@ input[type="checkbox"] {
   position: fixed;
   top: 80px;
   right: 20px;
-  background: white;
+  background: var(--bg-card);
   padding: 15px 25px;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -571,7 +610,8 @@ input[type="checkbox"] {
   gap: 10px;
   z-index: 9999;
   animation: slideIn 0.3s ease;
-  border-left: 5px solid #333;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
 }
 
 .toast-content {
@@ -581,27 +621,27 @@ input[type="checkbox"] {
 }
 
 .toast-success {
-  border-left-color: #2ecc71;
+  border-left: 5px solid var(--success-green);
 }
 .toast-success i {
-  color: #2ecc71;
+  color: var(--success-green);
 }
 
 .toast-error {
-  border-left-color: #e74c3c;
+  border-left: 5px solid var(--error-red);
 }
 .toast-error i {
-  color: #e74c3c;
+  color: var(--error-red);
 }
 
 .toast-warning {
-  border-left-color: #f1c40f;
+  border-left: 5px solid var(--warning-yellow);
 }
 .toast-warning i {
-  color: #f1c40f;
+  color: var(--warning-yellow);
 }
 
-/* animations */
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;

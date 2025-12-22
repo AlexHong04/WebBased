@@ -91,7 +91,7 @@
 }
 
 /* 灰色副标题/说明文字 */
-[data-theme="dark"] p,
+/* [data-theme="dark"] p,
 [data-theme="dark"] span,
 [data-theme="dark"] small,
 [data-theme="dark"] .text,
@@ -102,7 +102,7 @@
 [data-theme="dark"] #profile-gender,
 [data-theme="dark"] .address-list-text span {
   color: var(--text-muted-dark) !important;
-}
+} */
 
 /* 链接颜色 */
 [data-theme="dark"] a {
@@ -291,11 +291,11 @@
    ========================================= */
 
 /* 通用图标变灰 */
-[data-theme="dark"] .input-icon, 
+/* [data-theme="dark"] .input-icon, 
 [data-theme="dark"] .icon,
 [data-theme="dark"] i {
   color: #888 !important;
-}
+} */
 
 /* 激活状态图标变亮 */
 [data-theme="dark"] .input-field:focus + .input-icon,

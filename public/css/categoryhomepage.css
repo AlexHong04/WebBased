@@ -1,3 +1,28 @@
+:root {
+  --primary-pink: #fc84a3;
+  --primary-pink-hover: #f06b90;
+  --bg-body: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-image: #ffffff;
+  --text-main: #333333;
+  --text-gray: #777777;
+  --border-color: #eee;
+  --shadow-card: 0 4px 10px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] {
+  --bg-body: #0a0a0a;
+  --bg-card: #18181b;
+  --bg-image: #000000;
+  --text-main: #ffffff;
+  --text-gray: #a1a1aa;
+  --border-color: #27272a;
+  --shadow-card: 0 10px 20px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 15px 30px rgba(252, 132, 163, 0.15);
+  --primary-pink: #fc84a3;
+}
+
 .category-container {
   display: flex;
   flex-direction: column;
@@ -15,8 +40,8 @@
 .category h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
-  color: #333;
-  border-left: 5px solid #f1a2b8;
+  color: var(--text-main);
+  border-left: 5px solid var(--primary-pink);
   padding-left: 10px;
 }
 
@@ -40,9 +65,9 @@
 }
 
 .productCard {
-  background-color: #fff;
+  background-color: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
@@ -55,7 +80,7 @@
 
 .productCard:hover {
   transform: translateY(-8px) scale(1.03);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-hover);
 }
 
 .productCard img {
@@ -68,18 +93,18 @@
 .productCard h3 {
   font-size: 1.2rem;
   margin: 12px 0 8px 0;
-  color: #222;
+  color: var(--text-main);
 }
 
 .productCard p {
   font-size: 0.95rem;
-  color: #555;
+  color: var(--text-gray);
   margin: 0 10px 10px 10px;
 }
 
 .productCard .price {
   font-weight: bold;
-  color: #ec5d86;
+  color: var(--primary-pink);
   margin-bottom: 12px;
   font-size: 1.1rem;
 }
@@ -107,7 +132,7 @@
   height: 40px;
   border-radius: 50%;
   border: none;
-  background-color: #ff859f;
+  background-color: var(--primary-pink);
   color: #fff;
   font-size: 24px;
   font-weight: bolder;
@@ -121,6 +146,20 @@
 }
 
 .next-btn:hover {
-  background-color: #eb7790;
+  background-color: var(--primary-pink-hover); /* 变量 */
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(252, 132, 163, 0.5);
+}
+
+[data-theme="dark"] .next-btn {
+  background-color: #1a1a1a;
+  color: var(--primary-pink);
+  border: 1px solid var(--primary-pink);
+}
+
+[data-theme="dark"] .next-btn:hover {
+  background-color: var(--primary-pink);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(252, 132, 163, 0.4);
   transform: scale(1.1);
 }

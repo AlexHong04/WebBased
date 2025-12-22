@@ -1,11 +1,43 @@
 :root {
   --primary-pink: #fc84a3;
-  /* --primary-pink-hover: #f06b90; */
-  --bg-pink-light: #fff0f5;
-  --bg-default-card: #fffbfc;
-  --text-dark: #333;
-  --text-gray: #888;
+  --primary-pink-hover: #f55783;
+  --bg-body: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-default-card: #fefff4;
+  --bg-icon: #fff0f5;
+  --bg-icon-default: #f9f5c6;
+  --text-main: #333333;
+  --text-gray: #888888;
+  --text-light: #555555;
   --border-color: #eee;
+  --border-default: #ffebf0;
+  --border-highlight: #ffe659;
+  --shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --success-green: #2ecc71;
+  --error-red: #dc3545;
+  --warning-yellow: #f1c40f;
+  --tag-bg: #ffe659;
+  --tag-text: #5c5202;
+}
+
+[data-theme="dark"] {
+  --bg-body: #0a0a0a;
+  --bg-card: #18181b;
+  --bg-input: #27272a;
+  --bg-default-card: #202023;
+  --bg-icon: #2d1b20;
+  --bg-icon-default: #2d2d30;
+  --text-main: #ffffff;
+  --text-gray: #a1a1aa;
+  --text-light: #d4d4d8;
+  --border-color: #27272a;
+  --border-default: #27272a;
+  --border-highlight: #ffe659;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --primary-pink: #fc84a3;
+  --tag-bg: #ffe659;
+  --tag-text: black;
 }
 
 .section-header {
@@ -18,10 +50,18 @@
 }
 
 .section-title {
-  font-size: 1.2rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--text-main);
+}
+
+.section-header > .section-title {
+  font-size: 1.8rem;
   font-weight: 600;
   margin: 0;
-  color: #333;
+  color: var(--text-main);
 }
 
 /* Add New Button */
@@ -56,7 +96,7 @@
   display: flex;
   align-items: flex-start;
   padding: 25px;
-  background: #fff;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   position: relative;
@@ -69,9 +109,9 @@
 
 .address-card.is-default {
   /* background-color: var(--bg-default-card); */
-  background-color: #fefff4;
-  border: 1px solid #ffebf0;
-  border-left: 6px solid #ffe659;
+  background-color: var(--bg-default-card);
+  border: 1px solid var(--border-default);
+  border-left: 6px solid var(--border-highlight);
 }
 
 /* Icon Styling */
@@ -79,7 +119,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background-color: var(--bg-pink-light);
+  background-color: var(--bg-icon);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,10 +133,10 @@
 }
 
 .address-card.is-default .card-icon {
-  background-color: #f9f5c6;
+  background-color: var(--bg-icon-default);
 }
 .address-card.is-default .card-icon i {
-  color: #ffdd00;
+  color: var(--border-highlight);
 }
 
 /* Content Styling */
@@ -112,7 +152,7 @@
 .card-name {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--text-dark);
+  color: var(--text-main);
   margin-right: 5px;
 }
 
@@ -123,11 +163,11 @@
 
 .default-tag {
   /* color: var(--primary-pink); */
-  color: #fdffdd;
+  color: var(--tag-text);
   font-size: 0.8rem;
   font-weight: 600;
   /* background: #ffeef5; */
-  background: #ffe659;
+  background: var(--tag-bg);
   padding: 2px 8px;
   border-radius: 4px;
   margin-left: 8px;
@@ -135,7 +175,7 @@
 }
 
 .card-address {
-  color: #555;
+  color: var(--text-light);
   font-size: 0.95rem;
   line-height: 1.5;
   margin-top: 5px;
@@ -175,7 +215,7 @@
 }
 
 .action-icon {
-  color: #ccc;
+  color: var(--text-gray);
   font-size: 1.1rem;
   cursor: pointer;
   transition: color 0.2s;
@@ -184,13 +224,13 @@
 
 .action-icon:hover {
   color: var(--primary-pink);
-  background: #ffeef5;
+  background: var(--bg-icon);
   border-radius: 50%;
 }
 
 .action-icon.delete:hover {
-  color: #dc3545;
-  background: #fff5f5;
+  color: var(--error-red);
+  background: var(--bg-icon);
 }
 
 /* Modal Styles */
@@ -210,7 +250,7 @@
 }
 
 .modal-content {
-  background: #fff;
+  background: var(--bg-card);
   padding: 30px;
   border-radius: 15px;
   width: 90%;
@@ -223,7 +263,7 @@
   margin-top: 0;
   margin-bottom: 20px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-main);
 }
 
 .form-group {
@@ -240,7 +280,7 @@
 .form-control {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.95rem;
 }
@@ -252,18 +292,18 @@
 }
 
 .error-message {
-  color: #dc3545;
+  color: var(--error-red);
   font-size: 0.8rem;
   margin-top: 4px;
   display: none;
 }
 
 .form-control.is-invalid {
-  border-color: #dc3545;
+  border-color: var(--error-red);
 }
 
 .general-error {
-  color: #dc3545;
+  color: var(--error-red);
   display: none;
   margin-bottom: 10px;
   text-align: center;
@@ -275,9 +315,9 @@
   gap: 10px;
   margin-top: 25px;
 }
-
+/* Save Button */
 .btn-save {
-  background: linear-gradient(135deg, #fc84a3 0%, #f55783 100%);
+  background: var(--primary-pink);
   color: #fff;
   border: none;
   padding: 10px 25px;
@@ -287,13 +327,14 @@
   transition: 0.2s;
 }
 .btn-save:hover {
+  background: var(--primary-pink-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .btn-cancel {
-  background: #f0f0f0;
-  color: #333;
+  background: var(--border-color);
+  color: var(--text-main);
   border: none;
   padding: 10px 25px;
   border-radius: 8px;
@@ -301,7 +342,7 @@
   font-weight: 500;
 }
 .btn-cancel:hover {
-  background: #e0e0e0;
+  background: var(--text-gray);
 }
 
 /* Feedback & Confirmation Modal Styles */
@@ -316,13 +357,13 @@
   margin-bottom: 15px;
 }
 .modal-icon.success {
-  color: #2ecc71;
+  color: var(--success-green);
 }
 .modal-icon.warning {
-  color: #f1c40f;
+  color: var(--warning-yellow);
 }
 .modal-icon.danger {
-  color: #e74c3c;
+  color: var(--error-red);
 }
 
 .modal-title.centered {
@@ -330,7 +371,7 @@
   margin-bottom: 10px;
 }
 .modal-message {
-  color: #666;
+  color: var(--text-gray);
   margin: 0 0 25px;
   font-size: 1rem;
   line-height: 1.5;
@@ -344,13 +385,14 @@
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #999;
+  color: var(--text-gray);
 }
 
 .empty-state i {
   font-size: 3rem;
   margin-bottom: 15px;
   opacity: 0.3;
+  color: var(--text-gray);
 }
 
 @keyframes fadeIn {

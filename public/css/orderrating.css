@@ -1,3 +1,35 @@
+:root {
+  --primary-pink: #ff859f;
+  --primary-pink-hover: #eb7790;
+  --bg-body: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-upload: #f0f8ff;
+  --text-main: #333333;
+  --text-gray: #777777;
+  --text-light: #555555;
+  --border-color: #ddd;
+  --border-dashed: #ccc;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --star-filled: #ffca28;
+  --star-empty: #ccc;
+  --error-red: #ff4d4d;
+}
+
+[data-theme="dark"] {
+  --bg-body: #0a0a0a;
+  --bg-card: #18181b;
+  --bg-input: #27272a;
+  --bg-upload: #2d2d30;
+  --text-main: #ffffff;
+  --text-gray: #a1a1aa;
+  --text-light: #d4d4d8;
+  --border-color: #27272a;
+  --border-dashed: #444;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --primary-pink: #fc84a3;
+}
+
 .order-rating-section {
   max-width: 900px;
   margin: 0 auto;
@@ -7,7 +39,7 @@
 }
 
 .order-rating-header {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 15px;
   display: flex;
   align-items: center;
@@ -18,7 +50,7 @@
 .order-rating-header h1 {
   font-size: 30px;
   font-weight: 700;
-  color: #000;
+  color: var(--text-main);
   margin: 0;
   position: absolute;
   left: 50%;
@@ -28,7 +60,7 @@
 }
 
 .back-link {
-  color: var(--color-light-text);
+  color: var(--text-gray);
   text-decoration: none;
   font-size: 30px;
 }
@@ -39,14 +71,14 @@
 }
 
 .order-card {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 20px;
   padding: 40px 30px;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-card);
+  box-shadow: 0 2px 6px var(--shadow);
 }
 
 .orderCard {
@@ -89,7 +121,7 @@
 
 .orderCard .info-col .description,
 .reviewOrderCard .info-col .description {
-  color: #555;
+  color: var(--text-light);
   margin-bottom: 5px;
 }
 
@@ -97,7 +129,7 @@
 .orderCard .info-col .payment,
 .reviewOrderCard .info-col .variant,
 .reviewOrderCard .info-col .payment {
-  color: #777;
+  color: var(--text-gray);
 }
 
 .orderCard .qty-col,
@@ -116,7 +148,7 @@
 .review-btn,
 .submit-btn button {
   padding: 10px 20px;
-  background-color: #ff859f;
+  background-color: var(--primary-pink);
   color: #fff;
   font-weight: bold;
   border: none;
@@ -129,8 +161,8 @@
 }
 
 .review-btn:hover,
-.subnit-btn:hover {
-  background-color: #eb7790;
+.submit-btn button:hover {
+  background-color: var(--primary-pink-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -209,19 +241,19 @@
 .star {
   font-size: 30px;
   cursor: pointer;
-  color: #ccc;
+  color: var(--star-empty);
   transition: color 0.2s;
   display: flex;
   gap: 5px;
 }
 
-.star.filled {
-  color: gold;
+[data-theme="dark"] .star {
+  color: #555;
 }
 
 .star.filled,
 .star.hover {
-  color: #ffca28;
+  color: var(--star-filled);
 }
 
 .close {
@@ -235,7 +267,7 @@
   height: 120px;
   padding: 10px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   resize: vertical;
   margin-top: 10px;
 }
@@ -249,8 +281,12 @@
   height: 24px;
 }
 
+[data-theme="dark"] .camera-icon {
+    filter: invert(1) brightness(2);
+}
+
 .drop-zone {
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--border-dashed);
   padding: 30px;
   text-align: center;
   line-height: 1.5;
@@ -260,8 +296,8 @@
 }
 
 .drop-zone.drag-over {
-  background: #f0f8ff;
-  border-color: #007bff;
+  background: var(--bg-upload);
+  border-color: var(--primary-pink);
 }
 
 .preview {
@@ -314,17 +350,17 @@
 /* The 'X' button stays on the right */
 .remove-btn {
   right: -8px;
-  background: red;
+  background: var(--error-red);
 }
 
 /* The Pencil button goes to the left of the 'X' */
 .edit-icon-btn {
   right: 22px; /* Adjusted to sit next to the X */
-  background: #ff859f; /* Blue for editing */
+  background: var(--primary-pink); /* Blue for editing */
 }
 
 .edit-icon-btn:hover {
-  background: #cd677d;
+  background: var(--primary-pink-hover);
 }
 
 .remove-btn:hover {
@@ -354,10 +390,10 @@
 }
 
 .center-popup {
-  background: #fff;
+  background: var(--bg-card);
   padding: 40px 60px;
   border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px var(--shadow);
   text-align: center;
   z-index: 1000;
   min-width: 300px;
@@ -372,7 +408,7 @@
   margin-top: 10px;
   display: inline-block;
   padding: 12px 25px;
-  background-color: #ff859f;
+  background-color: var(--primary-pink);
   color: #fff;
   font-size: 16px;
   font-weight: bold;
@@ -383,7 +419,7 @@
 }
 
 .center-popup button:hover {
-  background: #eb7790;
+  background: var(--primary-pink-hover);
 }
 
 .rating-popup-overlay .center-popup h3 {
@@ -450,7 +486,7 @@
   border-radius: 8px;
   overflow: hidden;
   cursor: crosshair; /* Crosshair indicates drawing mode */
-  border: 2px solid #ddd;
+  border: 2px solid var(--border-color);
   display: flex;
   justify-content: center;
 }
@@ -492,18 +528,18 @@
 }
 
 .btn-confirm {
-  background: #ff859f; /* Your theme color */
+  background: var(--primary-pink);
   color: white;
 }
 
 .btn-cancel {
-  background: #ececec;
-  color: #666;
+  background: var(--border-color);
+  color: var(--text-main);
 }
 
 .btn-confirm:hover {
-  background: #ff6b8b;
+  background: var(--primary-pink-hover);
 }
 .btn-cancel:hover {
-  background: #ddd;
+  background: var(--text-gray);
 }
