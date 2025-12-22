@@ -4,7 +4,7 @@ $pageCSS = "productList.css";
 
 include '../../controllers/productsController.php';
 
-$controller = new ProductController();
+$controller = new ProductsController();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 

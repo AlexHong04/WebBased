@@ -1,7 +1,7 @@
 <?php
 include '../../controllers/productsController.php';
 
-$controller = new ProductController();
+$controller = new ProductsController();
 $products = $controller->getAllProductVariant('', '', 'lowStock');
 
 header('Content-Type: text/csv');

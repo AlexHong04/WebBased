@@ -5,7 +5,7 @@ $pageCSS = "categoryhomepage.css";
 include  '../header.php';
 include  '../../controllers/productsController.php';
 
-$controller = new ProductController();
+$controller = new ProductsController();
 $products = $controller->index();
 $categories = $controller->fetchAllCategories();
 ?>

@@ -1,6 +1,6 @@
 <?php
 require_once '../../controllers/productsController.php';
-$controller = new ProductController();
+$controller = new ProductsController();
 $current_sort = $_GET['sort'] ?? 'product_variant_id';
 $current_order = $_GET['order'] ?? 'asc';
 $products = $controller->getAllProductVariant($current_sort, $current_order, "lowStock");

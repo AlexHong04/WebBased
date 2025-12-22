@@ -16,7 +16,7 @@ require_once __DIR__ . '/../../helpers/validation.php';
 
 $id = get('id', 'P00001');
 
-$controller = new productController();
+$controller = new productsController();
 $product = $controller->getProductDetails($id);
 
 if (!$product) {

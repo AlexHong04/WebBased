@@ -1,7 +1,7 @@
 <?php
 include '../../controllers/productsController.php';
 
-$controller = new ProductController();
+$controller = new ProductsController();
 $controller->submitProductForm();
 $title = "Add Single Products";
 $pageCSS = "addSingleProduct.css";

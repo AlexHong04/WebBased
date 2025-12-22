@@ -38,7 +38,7 @@ function renderTemplate($templateText, $customer, $item)
     return str_replace(array_keys($replacements), array_values($replacements), $templateText);
 }
 
-$controller = new ProductController();
+$controller = new ProductsController();
 $wishlistItems = $controller->getAllUserWishlist($current_sort, $current_order);
 
 $demandCounts = [];
