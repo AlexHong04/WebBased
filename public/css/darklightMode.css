@@ -1,0 +1,359 @@
+/* =========================================
+   1. 基础变量 (Light Mode - 保持原样)
+   ========================================= */
+:root {
+  /* Dark Mode 专用变量 */
+  --bg-body-dark: #121212;
+  --bg-card-dark: #1e1e1e;
+  --bg-input-dark: #2a2a2a;
+  --bg-hover-dark: #333333;
+  --text-main-dark: #e4e6eb;
+  --text-muted-dark: #b0b3b8;
+  --border-dark: #3e4042;
+  
+  /* 品牌色 */
+  --primary-pink: #f1a2b8; 
+  --btn-dark-bg: #d88a98;
+  --btn-dark-hover: #c67585;
+}
+
+/* =========================================
+   2. 全局深色模式核心 (Global Overrides)
+   ========================================= */
+
+/* 强制 HTML 和 Body 变黑，防止刷新闪白 */
+[data-theme="dark"],
+[data-theme="dark"] body {
+  background-color: var(--bg-body-dark) !important;
+  color: var(--text-main-dark) !important;
+}
+
+/* --- 滚动条美化 (Chrome/Safari/Edge) --- */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 12px;
+}
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--bg-body-dark); 
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background-color: #444; 
+  border-radius: 6px; 
+  border: 3px solid var(--bg-body-dark); 
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background-color: #666; 
+}
+
+/* --- 鼠标选中文本的颜色 --- */
+[data-theme="dark"] ::selection {
+  background-color: var(--primary-pink) !important;
+  color: #fff !important;
+}
+
+/* =========================================
+   3. 卡片与容器 (Cards & Containers)
+   ========================================= */
+
+/* 强制所有白色容器变黑 */
+[data-theme="dark"] .card,
+[data-theme="dark"] .form-box,
+[data-theme="dark"] .popup-box,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .product-card, 
+[data-theme="dark"] .profile-container,
+[data-theme="dark"] .step-container {
+  background: var(--bg-card-dark) !important;
+  /* 深色阴影，更有质感 */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+  border-color: var(--border-dark) !important;
+  color: var(--text-main-dark) !important;
+}
+
+/* =========================================
+   4. 文字颜色修复 (Typography)
+   ========================================= */
+
+/* 亮色标题 */
+[data-theme="dark"] h1, 
+[data-theme="dark"] h2, 
+[data-theme="dark"] h3, 
+[data-theme="dark"] h4, 
+[data-theme="dark"] h5, 
+[data-theme="dark"] strong,
+[data-theme="dark"] b,
+[data-theme="dark"] .field-label,
+[data-theme="dark"] .top h2,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .product-name,
+[data-theme="dark"] .modal-title,
+[data-theme="dark"] #profile-name {
+  color: #ffffff !important;
+}
+
+/* 灰色副标题/说明文字 */
+[data-theme="dark"] p,
+[data-theme="dark"] span,
+[data-theme="dark"] small,
+[data-theme="dark"] .text,
+[data-theme="dark"] .footer-description,
+[data-theme="dark"] .form-text,
+[data-theme="dark"] .check-text,
+[data-theme="dark"] .price-old,
+[data-theme="dark"] #profile-gender,
+[data-theme="dark"] .address-list-text span {
+  color: var(--text-muted-dark) !important;
+}
+
+/* 链接颜色 */
+[data-theme="dark"] a {
+  color: var(--primary-pink);
+}
+[data-theme="dark"] a:hover {
+  color: #fff;
+}
+
+/* =========================================
+   5. 表单与输入框 (Forms & Inputs)
+   ========================================= */
+
+/* 输入框本体 */
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="search"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] input[type="tel"],
+[data-theme="dark"] textarea,
+[data-theme="dark"] select,
+[data-theme="dark"] .input-field,
+[data-theme="dark"] .form-control {
+  background-color: var(--bg-input-dark) !important;
+  border: 1px solid var(--border-dark) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+/* 占位符颜色 (Placeholder) */
+[data-theme="dark"] ::placeholder {
+  color: #666 !important;
+  opacity: 1;
+}
+
+/* 输入框聚焦 */
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] .input-field:focus,
+[data-theme="dark"] .form-control:focus {
+  background-color: #333 !important;
+  border-color: var(--primary-pink) !important;
+}
+
+/* 只读输入框 */
+[data-theme="dark"] input[readonly],
+[data-theme="dark"] .form-control[readonly] {
+  background-color: #1a1a1a !important;
+  color: #888 !important;
+  cursor: default;
+}
+
+/* 修复 Select 下拉菜单在部分浏览器背景变白的问题 */
+[data-theme="dark"] select option {
+  background-color: var(--bg-card-dark);
+  color: #fff;
+}
+
+/* Checkbox 说明文字 */
+[data-theme="dark"] .two-col, 
+[data-theme="dark"] .two-col .text {
+  color: var(--text-muted-dark) !important;
+}
+
+/* =========================================
+   6. 按钮系统 (Buttons)
+   ========================================= */
+
+/* 主要实心按钮 (Submit, Save, Primary) */
+[data-theme="dark"] .submit,
+[data-theme="dark"] .save-btn,
+[data-theme="dark"] .place-order-btn,
+[data-theme="dark"] .primary-btn,
+[data-theme="dark"] .btn-info,
+[data-theme="dark"] .modal-btn.btn-success,
+[data-theme="dark"] .modal-btn.btn-danger {
+  background: var(--btn-dark-bg) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4) !important;
+}
+
+/* 悬停变亮 */
+[data-theme="dark"] .submit:hover,
+[data-theme="dark"] .save-btn:hover,
+[data-theme="dark"] .place-order-btn:hover,
+[data-theme="dark"] .primary-btn:hover,
+[data-theme="dark"] .btn-info:hover {
+  background: var(--btn-dark-hover) !important;
+  transform: translateY(-2px);
+}
+
+/* Google 登录按钮 (特殊处理) */
+[data-theme="dark"] .btn-google {
+  background-color: var(--bg-input-dark) !important;
+  border-color: var(--border-dark) !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .btn-google:hover {
+  background-color: var(--bg-hover-dark) !important;
+}
+
+/* 次要/取消按钮 (描边或透明) */
+[data-theme="dark"] .cancel-btn,
+[data-theme="dark"] .modal-btn.btn-secondary {
+  background: transparent !important;
+  border: 1px solid var(--border-dark) !important;
+  color: var(--text-muted-dark) !important;
+}
+[data-theme="dark"] .cancel-btn:hover {
+  background: var(--bg-hover-dark) !important;
+  color: #fff !important;
+  border-color: #666 !important;
+}
+
+/* 添加地址按钮 */
+[data-theme="dark"] .add-address-link {
+  background: var(--bg-input-dark) !important;
+  border-color: var(--border-dark) !important;
+  color: var(--text-main-dark) !important;
+}
+[data-theme="dark"] .add-address-link:hover {
+  border-color: var(--primary-pink) !important;
+  color: var(--primary-pink) !important;
+}
+
+/* =========================================
+   7. Header, Footer & Sidebar
+   ========================================= */
+
+/* Header */
+[data-theme="dark"] header {
+  background-color: #1a1a1a !important;
+  border-bottom: 1px solid #333 !important;
+}
+
+/* Header 里的 Dropdown Menu */
+[data-theme="dark"] .dropdown-menu {
+  background-color: var(--bg-card-dark) !important;
+  border: 1px solid var(--border-dark) !important;
+}
+[data-theme="dark"] .dropdown-menu a {
+  color: var(--text-main-dark) !important;
+}
+[data-theme="dark"] .dropdown-menu a:hover {
+  background-color: var(--bg-hover-dark) !important;
+}
+
+/* Header Search Button */
+[data-theme="dark"] .header-search button {
+  background: transparent !important;
+  color: #fff !important;
+}
+
+/* Sidebar (Profile Page) */
+[data-theme="dark"] .profile-sidebar {
+  background-color: #181818 !important; 
+  border-right: 1px solid var(--border-dark) !important;
+}
+
+/* Sidebar Links */
+[data-theme="dark"] .profile-nav a {
+  color: var(--text-muted-dark) !important;
+}
+[data-theme="dark"] .profile-nav a:hover {
+  background-color: var(--bg-hover-dark) !important;
+  color: var(--primary-pink) !important;
+}
+[data-theme="dark"] .profile-nav a.active {
+  background: var(--primary-pink) !important;
+  color: #fff !important;
+}
+
+/* Footer */
+[data-theme="dark"] .footer {
+  background-color: #121212 !important;
+}
+[data-theme="dark"] .footer-bottom {
+  background-color: #000000 !important;
+}
+
+/* =========================================
+   8. 图标与图片细节 (Icons & Images)
+   ========================================= */
+
+/* 通用图标变灰 */
+[data-theme="dark"] .input-icon, 
+[data-theme="dark"] .icon,
+[data-theme="dark"] i {
+  color: #888 !important;
+}
+
+/* 激活状态图标变亮 */
+[data-theme="dark"] .input-field:focus + .input-icon,
+[data-theme="dark"] .form-control:focus + .input-icon {
+  color: var(--primary-pink) !important;
+}
+
+/* 购物车图标 */
+[data-theme="dark"] .cart-icon {
+  color: #fff !important;
+}
+
+/* 降低图片亮度防止刺眼 (可选，如果不需要可删除) */
+[data-theme="dark"] img {
+  filter: brightness(0.9); 
+}
+/* 头像和特定图片保持原亮 */
+[data-theme="dark"] .profile-avatar img,
+[data-theme="dark"] .logo img {
+  filter: none !important;
+}
+
+#themeToggle {
+  /* 1. 基础重置：去掉按钮默认边框和背景，使其透明 */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  
+  /* 2. 字体与颜色：模仿 header_footer.css 中的 nav a */
+  color: white !important;      /* 默认白色，适应粉色 Header */
+  font-family: inherit;
+  font-weight: 500;             /* 保持一致的字重 */
+  font-size: 1rem;              /* 字体大小 */
+  
+  /* 3. 布局与间距 */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;                     /* 图标和文字的间距 */
+  padding: 0.5rem 0;            /* 上下内边距 */
+  margin: 0 1rem;               /* 左右外边距，模仿 nav li 的间距 */
+  cursor: pointer;
+  
+  /* 4. 动画效果 */
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+#themeToggle:hover {
+  transform: scale(1.1);
+  background: transparent !important; /* 确保悬停也没背景 */
+}
+
+.theme-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* Dark Mode 切换按钮本身 */
+[data-theme="dark"] #themeToggle {
+  color: #e0e0e0 !important;    /* 深色模式下的文字颜色 */
+}

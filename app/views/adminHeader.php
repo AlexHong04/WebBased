@@ -32,10 +32,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
       <div class="logo">Lo<span>vine</span></div>
       <nav>
         <ul>
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Member</a></li>
-          <li><a href="#">Order</a></li>
-          <li><a href="#">Product</a></li>
+          <li><a href="/app/views/adminDashboard.php">Home</a></li>
+          <li><a href="/app/views/member/memberListing.php">Member</a></li>
+          <li><a href="/app/views/order/adminOrderListing.php">Order</a></li>
+          <li><a href="/app/views/product/productList.php">Product</a></li>
         </ul>
       </nav>
 
