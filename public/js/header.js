@@ -22,29 +22,37 @@ scanBtn.addEventListener("click", (e) => {
     aspectRatio: 1.0,
   };
 
-  qrScanner.start(
-    {
-      facingMode: "environment",
-    },
-    config,
-    (decodedText) => {
-      // SUCCESS
-      console.log("QR Code:", decodedText);
+  qrScanner
+    .start(
+      { facingMode: "environment" },
+      config,
+      (decodedText) => {
+        console.log("QR Code:", decodedText);
 
-      qrScanner.stop().then(() => {
-        qrPopup.classList.remove("active");
+        stopScannerAndClose();
 
         if (decodedText.includes("http")) {
           window.location.href = decodedText;
         } else {
-          window.location.href = `adminOrderDetails.php?id=${decodedText}`;
+          window.location.href = `/app/views/admin/adminOrderDetails.php?id=${decodedText}`;
         }
-      });
-    },
-    (error) => {
-      // Ignore failures
-    }
-  );
+      },
+      (error) => {
+      }
+    )
+    .then(() => {
+      isScannerRunning = true;
+    })
+    .catch((err) => {
+      console.error("Camera start failed:", err);
+      isScannerRunning = false;
+
+      qrPopup.classList.remove("active");
+
+      alert(
+        "Camera permission is required to scan QR codes. Please allow access and try again."
+      );
+    });
 });
 
 qrCancel.addEventListener("click", () => {
