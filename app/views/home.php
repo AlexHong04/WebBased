@@ -22,7 +22,7 @@ $productController = new ProductController();
 // exit();
 // array (replace with DB queries)
 
-// $data = $productController->displayProducts();
+$data = $productController->displayProducts();
 $top_selling = $data['topSelling'];
 $new_arrivals = $data['newArrivals'];
 
