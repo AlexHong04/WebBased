@@ -65,8 +65,13 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
 <body>
     <header>
         <div class="header-container">
-            <div class="logo">Lo<span>vine</span></div>
-            <nav>
+            <div class="logo">
+                <a href="/app/views/home.php">
+                    <img src="/public/images/lovine_logo.png" alt="Lovine Logo" class="logo-image" />
+                </a>
+            </div>
+
+            <nav class="main-nav">
                 <ul>
                     <li><a href="/app/views/home.php">Home</a></li>
                     <li class="dropdown">
@@ -84,8 +89,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                 </ul>
             </nav>
 
-
-            <nav>
+            <nav class="right-nav">
                 <ul>
                     <form class="header-search" action="/search.php" method="get" role="search" aria-label="Site search" style="position: relative;">
                         <input type="search" id="searchInput" name="q" placeholder="Search" aria-label="Search" autocomplete="off" />
@@ -121,8 +125,9 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                         </a>
                     </li>
 
-                    <button id="themeToggle"></button>
-
+                    <li>
+                        <button id="themeToggle"></button>
+                    </li>
 
                     <?php if (isset($_SESSION['customerId']) || isset($_SESSION['adminId'])): ?>
                         <li class="dropdown">

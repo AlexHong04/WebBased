@@ -335,7 +335,7 @@
   align-items: center;
   gap: 8px;                     /* 图标和文字的间距 */
   padding: 0.5rem 0;            /* 上下内边距 */
-  margin: 0 1rem;               /* 左右外边距，模仿 nav li 的间距 */
+  /*margin: 0 1rem;*/               /* 左右外边距，模仿 nav li 的间距 */
   cursor: pointer;
   
   /* 4. 动画效果 */
