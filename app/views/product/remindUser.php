@@ -48,8 +48,15 @@ if (isset($_GET['action']) && $_GET['action'] === 'systemCall' && isset($_GET['p
     header("Location: $current_page?call_active=true&called_num=" . urlencode($phone) . "&cname=" . urlencode($cname));
     exit;
 }
-$wishlistItems = $controller->getAllUserWishlist($current_sort, $current_order);
+$wishlistItems = $controller->getAllUserWishlist($current_sort, $current_order) ?: [];
 
+$demandCounts = [];
+if (is_iterable($wishlistItems)) {
+    foreach ($wishlistItems as $item) {
+        $v_id = $item['product_variant_id'];
+        $demandCounts[$v_id] = ($demandCounts[$v_id] ?? 0) + 1;
+    }
+}
 $demandCounts = [];
 foreach ($wishlistItems as $item) {
     $v_id = $item['product_variant_id'];
