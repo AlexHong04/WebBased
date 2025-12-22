@@ -3,11 +3,11 @@ $title = "Category Home Page";
 $pageCSS = "categoryhomepage.css";
 
 include  '../header.php';
-include  '../../controllers/productController.php';
+include  '../../controllers/productsController.php';
 
 $controller = new ProductController();
 $products = $controller->index();
-$categories = $controller->getAllCategories();
+$categories = $controller->fetchAllCategories();
 ?>
 
 <div class="category-container">

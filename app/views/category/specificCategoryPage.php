@@ -3,7 +3,7 @@ $title = "Category Specific Page";
 $pageCSS = "categorypage.css";
 
 include '../header.php';
-include '../../controllers/productController.php';
+include '../../controllers/productsController.php';
 
 $controller = new ProductController();
 $products = $controller->getProductsByCategoryId();
