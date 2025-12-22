@@ -5,7 +5,7 @@ require_once __DIR__ . '/../helpers/request.php';
 require_once __DIR__ . '/../helpers/mail.php';
 require_once __DIR__ . '/../lib/TwilioSMS.php';
 
-class ProductController
+class ProductsController
 {
     private $productModel;
 
@@ -912,7 +912,7 @@ class ProductController
         try {
             $results = $this->productModel->searchProductsByName($keyword);
 
-            foreach ($results as &$item) {
+            foreach ($results ?? [] as &$item) {
                 $catName = $item['category_name'] ?? 'Uncategorized';
                 $safeCatName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $catName);
 
