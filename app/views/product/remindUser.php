@@ -1,7 +1,5 @@
 <?php
 $title = "Product Maintenance";
-
-include '../header.php';
 include '../../controllers/productsController.php';
 
 $current_sort = $_GET['sort'] ?? 'customer_id';
@@ -39,6 +37,13 @@ function renderTemplate($templateText, $customer, $item)
 }
 
 $controller = new ProductsController();
+if (isset($_GET['action']) && $_GET['action'] === 'systemCall' && isset($_GET['phone'])) {
+    $phone = $_GET['phone'];
+    $controller->systemCall($phone);
+    $current_page = strtok($_SERVER["REQUEST_URI"], '?');
+    header("Location: $current_page");
+    exit;
+}
 $wishlistItems = $controller->getAllUserWishlist($current_sort, $current_order);
 
 $demandCounts = [];
@@ -62,6 +67,7 @@ foreach ($wishlistItems as $item) {
     $customers[$customer_id]['items'][] = $item;
 }
 $customerCount = count($customers);
+include '../header.php';
 ?>
 
 <head>
@@ -139,68 +145,73 @@ $customerCount = count($customers);
                     <tr>
                         <td><?php echo htmlspecialchars($customer['customer_id']); ?></td>
                         <td><strong><?php echo htmlspecialchars($customer['firstname'] . ' ' . $customer['lastname']); ?></strong></td>
-                        <td><?php echo htmlspecialchars($customer['phone']); ?>
-                        </div>
-                        <a href="tel:14199241697 ?>" class="phone-link" aria-label="Call Customer">
-                            <svg class="phone-icon" xmlns="http://www.w3.org/2000/svg" class="input-icon" viewBox="0 0 512 512" width="16" height="16" fill="currentColor">
-                                <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" />
-                            </svg>
-                        </a>
+                        <td>
+                            <?php echo htmlspecialchars($customer['phone']); ?>
+
+                            <a href="<?php echo $_SERVER['PHP_SELF']; ?>?action=systemCall&phone=<?php echo urlencode($customer['phone']); ?>"
+                                class="phone-link"
+                                aria-label="System Call"
+                                onclick="return confirm('Initiate Twilio system call to <?php echo $customer['phone']; ?>?')">
+
+                                <svg class="phone-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16" fill="currentColor">
+                                    <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" />
+                                </svg>
+                            </a>
                         </td>
-                    <td>
-        <div class="nested-product-container">
-            <?php foreach ($customer['items'] as $item):
-                        $v_id = $item['product_variant_id'];
-                        $stock = $item['stock_qty'];
-                        $waiting = $demandCounts[$v_id] ?? 0;
+                        <td>
+                            <div class="nested-product-container">
+                                <?php foreach ($customer['items'] as $item):
+                                    $v_id = $item['product_variant_id'];
+                                    $stock = $item['stock_qty'];
+                                    $waiting = $demandCounts[$v_id] ?? 0;
 
-                        $priorityClass = $controller->getPriorityClass($waiting, $stock);
+                                    $priorityClass = $controller->getPriorityClass($waiting, $stock);
 
-                        $img_url = $item['img_url'] ?? '';
-                        $display_img = "../../../public/images/{$item['category_name']}/{$img_url}";
-            ?>
-                <div class="product-item-row <?php echo $priorityClass; ?>">
-                    <img src="<?php echo $display_img; ?>" class="thumb-img" alt="Product">
-                    <div class="product-details">
-                        <span class="p-name"><?php echo htmlspecialchars($item['product_name']); ?></span>
-                        <span class="p-id">
-                            ID: <?php echo htmlspecialchars($v_id); ?> |
-                            Stock: <?php echo $stock; ?> |
-                            <strong>Waiting: <?php echo $waiting; ?></strong>
-                        </span>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+                                    $img_url = $item['img_url'] ?? '';
+                                    $display_img = "../../../public/images/{$item['category_name']}/{$img_url}";
+                                ?>
+                                    <div class="product-item-row <?php echo $priorityClass; ?>">
+                                        <img src="<?php echo $display_img; ?>" class="thumb-img" alt="Product">
+                                        <div class="product-details">
+                                            <span class="p-name"><?php echo htmlspecialchars($item['product_name']); ?></span>
+                                            <span class="p-id">
+                                                ID: <?php echo htmlspecialchars($v_id); ?> |
+                                                Stock: <?php echo $stock; ?> |
+                                                <strong>Waiting: <?php echo $waiting; ?></strong>
+                                            </span>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </td>
+
+                        <td class="action-cell">
+                            <div class="action-wrapper">
+                                <textarea class="templatePreview" rows="10" readonly><?php echo htmlspecialchars($messageText); ?></textarea>
+
+                                <div class="button-group">
+                                    <a href="<?php echo $wa_link; ?>"
+                                        target="_blank"
+                                        class="notify-btn js-send-btn"
+                                        data-customer-id="<?php echo $customer['customer_id']; ?>">
+                                        Send WhatsApp
+                                    </a>
+
+                                    <span class="sent-status" id="status-<?php echo $customer['customer_id']; ?>"></span>
+                                </div>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <div class="cancel">
+            <button onclick="localStorage.removeItem('wa_sent_log'); location.reload();" class="btn-clear">
+                Reset All "Sent" Badges
+            </button>
         </div>
-    </td>
 
-    <td class="action-cell">
-        <div class="action-wrapper">
-            <textarea class="templatePreview" rows="10" readonly><?php echo htmlspecialchars($messageText); ?></textarea>
-
-            <div class="button-group">
-                <a href="<?php echo $wa_link; ?>"
-                    target="_blank"
-                    class="notify-btn js-send-btn"
-                    data-customer-id="<?php echo $customer['customer_id']; ?>">
-                    Send WhatsApp
-                </a>
-
-                <span class="sent-status" id="status-<?php echo $customer['customer_id']; ?>"></span>
-            </div>
-    </td>
-    </tr>
-<?php endforeach; ?>
-</tbody>
-</table>
-<div class="cancel">
-    <button onclick="localStorage.removeItem('wa_sent_log'); location.reload();" class="btn-clear">
-        Reset All "Sent" Badges
-    </button>
-</div>
-
-<div id="paginationControls" class="pagination-controls-bar"></div>
-</div>
-<script src="/public/js/remindUser.js"></script>
+        <div id="paginationControls" class="pagination-controls-bar"></div>
+    </div>
+    <script src="/public/js/remindUser.js"></script>
 </body>
 <?php include '../footer.php'; ?>
