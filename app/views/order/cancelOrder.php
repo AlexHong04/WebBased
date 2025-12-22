@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($orderId && $reason) {
     $orderController->cancelOrder($orderId, $reason);
     $orderController->sendCancelRequestEmail($orderId);
-    $_SESSION['flash_success'] = "Order cancellation request submitted successfully!";
+    $_SESSION['success_message'] = "Order cancellation request submitted successfully!";
     echo "success";
     exit;
   }
@@ -27,7 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="order-cancellation-section">
-  <h1>Order Cancellation</h1>
+  <div class="order-cancel-header">
+    <a href="#" class="back-link" onclick="history.back(); return false;">&#x293A;</a>
+    <h1>Order Cancellation</h1>
+  </div>
 
   <div id="errorPopup" class="customPopup"></div>
 
