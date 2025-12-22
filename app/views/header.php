@@ -65,8 +65,13 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
 <body>
     <header>
         <div class="header-container">
-            <div class="logo">Lo<span>vine</span></div>
-            <nav>
+            <div class="logo">
+                <a href="/app/views/home.php">
+                    <img src="/public/images/lovine_logo_circle.png" alt="Lovine Logo" class="logo-image" />
+                </a>
+            </div>
+
+            <nav class="main-nav">
                 <ul>
                     <li><a href="/app/views/home.php">Home</a></li>
                     <li class="dropdown">
@@ -84,8 +89,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                 </ul>
             </nav>
 
-
-            <nav>
+            <nav class="right-nav">
                 <ul>
                     <form class="header-search" action="/search.php" method="get" role="search" aria-label="Site search" style="position: relative;">
                         <input type="search" id="searchInput" name="q" placeholder="Search" aria-label="Search" autocomplete="off" />
@@ -121,8 +125,9 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                         </a>
                     </li>
 
-                    <button id="themeToggle"></button>
-
+                    <li>
+                        <button id="themeToggle"></button>
+                    </li>
 
                     <?php if (isset($_SESSION['customerId']) || isset($_SESSION['adminId'])): ?>
                         <li class="dropdown">
@@ -135,7 +140,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                             <ul class="dropdown-menu" style="right: 0; left: auto; min-width: 150px;">
                                 <li>
                                     <!-- <a href="/app/views/userProfile/profile.php" style="display: flex; align-items: center; gap: 10px;"> -->
-                                    <a href="/app/views/userProfile/profile.php<?= $currentId ?>" style="display: flex; align-items: center; gap: 10px;">
+                                    <a href="/app/views/userProfile/profile.php?id=<?= $currentId ?>" style="display: flex; align-items: center; gap: 10px;">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="currentColor">
                                             <path d="M384 112L384 128C384 145.7 369.7 160 352 160L288 160C270.3 160 256 145.7 256 128L256 112L192 112C183.2 112 176 119.2 176 128L176 512C176 520.8 183.2 528 192 528L448 528C456.8 528 464 520.8 464 512L464 128C464 119.2 456.8 112 448 112L384 112zM128 128C128 92.7 156.7 64 192 64L448 64C483.3 64 512 92.7 512 128L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 128zM288 384L352 384C396.2 384 432 419.8 432 464C432 472.8 424.8 480 416 480L224 480C215.2 480 208 472.8 208 464C208 419.8 243.8 384 288 384zM264 288C264 257.1 289.1 232 320 232C350.9 232 376 257.1 376 288C376 318.9 350.9 344 320 344C289.1 344 264 318.9 264 288z" />
                                         </svg>
