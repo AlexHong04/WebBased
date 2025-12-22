@@ -89,6 +89,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <button type="submit">Submit Review</button>
         </div>
       </form>
+      <div id="cropperModal" class="rating-popup-overlay">
+        <div class="center-popup" style="max-width: 600px;">
+          <h3>Crop Image</h3>
+          <div class="canvas-container" style="position: relative; overflow: hidden; background: #333;">
+            <canvas id="cropCanvas" style="max-width: 100%; cursor: crosshair;"></canvas>
+          </div>
+          <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+            <button type="button" id="cropCancel" class="back-btn" style="background: #ccc;">Cancel</button>
+            <button type="button" id="cropConfirm" class="back-btn">Crop & Save</button>
+          </div>
+        </div>
+      </div>
     </div>
   <?php else: ?>
     <p class="no-order">No order details found.</p>
@@ -115,99 +127,238 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     const previewDiv = document.querySelector(".media-upload-container .preview");
     const reviewForm = document.getElementById("reviewForm");
     const ratingError = document.querySelector(".rating-error");
-    let selectedFiles = [];
 
-    // Star rating
+    const cropperModal = document.getElementById('cropperModal');
+    const canvas = document.getElementById('cropCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let selectedFiles = [];
+    let currentImg = new Image();
+    let originalFile;
+    let isDrawing = false;
+    let startX, startY;
+    let selection = {
+      x: 0,
+      y: 0,
+      w: 0,
+      h: 0
+    };
+    let editingIndex = -1; // Track if we are editing an existing image
+
+    // --- Star Rating ---
     stars.forEach(star => {
       star.addEventListener("click", () => {
         const value = star.dataset.value;
         ratingInput.value = value;
-        stars.forEach((s, i) => {
-          s.classList.toggle("filled", i < value);
-        });
+        stars.forEach((s, i) => s.classList.toggle("filled", i < value));
       });
     });
 
-    // 📂 Click to open file dialog
+    // --- File Handling ---
     dropZone.addEventListener("click", () => mediaInput.click());
+    ["dragenter", "dragover", "dragleave", "drop"].forEach(e => dropZone.addEventListener(e, ev => ev.preventDefault()));
 
-    // 🚫 Prevent default drag behavior
-    ["dragenter", "dragover", "dragleave", "drop"].forEach(event => {
-      dropZone.addEventListener(event, e => e.preventDefault());
-    });
-
-    // 🎨 Visual feedback
-    dropZone.addEventListener("dragover", () => dropZone.classList.add("drag-over"));
-    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
     dropZone.addEventListener("drop", (e) => {
-      dropZone.classList.remove("drag-over");
-      handleFiles(e.dataTransfer.files);
+      const files = Array.from(e.dataTransfer.files);
+      handleNewFiles(files);
     });
 
-    // 📁 File input change
-    mediaInput.addEventListener("change", () => handleFiles(mediaInput.files));
+    mediaInput.addEventListener("change", () => {
+      const files = Array.from(mediaInput.files);
+      handleNewFiles(files);
+    });
 
-    function handleFiles(files) {
-      const newFiles = Array.from(files);
-
-      newFiles.forEach(file => {
-        const exists = selectedFiles.some(
-          f => f.name === file.name && f.size === file.size
-        );
-        if (!exists) {
+    function handleNewFiles(files) {
+      files.forEach(file => {
+        if (file.type.startsWith('video/')) {
+          selectedFiles.push(file);
+        } else if (file.type.startsWith('image/')) {
+          // For new uploads, we add them directly first, 
+          // then user can click them to crop if they want.
           selectedFiles.push(file);
         }
       });
-
       renderPreviews();
     }
 
+    // --- Open Cropper for Specific File ---
+    function openCropper(file, index) {
+      editingIndex = index;
+      originalFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentImg = new Image();
+        currentImg.onload = () => {
+          // Set canvas to dynamic size based on image and screen
+          const maxWidth = window.innerWidth * 0.9;
+          const maxHeight = window.innerHeight * 0.7;
+          let width = currentImg.width;
+          let height = currentImg.height;
+
+          const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
+          canvas.width = width * ratio;
+          canvas.height = height * ratio;
+
+          selection = {
+            x: 0,
+            y: 0,
+            w: 0,
+            h: 0
+          };
+          drawCanvas();
+          cropperModal.classList.add('show');
+        };
+        currentImg.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // --- Selection Logic ---
+    // --- Updated Selection Logic ---
+    canvas.onmousedown = (e) => {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+
+      // Calculate the scale between the CSS size and the internal canvas size
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      // Multiply the mouse position by the scale to get accurate coordinates
+      startX = (e.clientX - rect.left) * scaleX;
+      startY = (e.clientY - rect.top) * scaleY;
+    };
+
+    canvas.onmousemove = (e) => {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      let curX = (e.clientX - rect.left) * scaleX;
+      let curY = (e.clientY - rect.top) * scaleY;
+
+      selection.w = curX - startX;
+      selection.h = curY - startY;
+      selection.x = startX;
+      selection.y = startY;
+
+      drawCanvas();
+    };
+
+    canvas.onmouseup = () => isDrawing = false;
+
+    function drawCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(currentImg, 0, 0, canvas.width, canvas.height);
+      if (selection.w !== 0) {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(selection.x, selection.y, selection.w, selection.h);
+        ctx.clip();
+        ctx.drawImage(currentImg, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+        ctx.strokeStyle = "#fff";
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(selection.x, selection.y, selection.w, selection.h);
+      }
+    }
+
+    // --- Finalize Crop ---
+    document.getElementById('cropConfirm').addEventListener('click', () => {
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      const scaleX = currentImg.width / canvas.width;
+      const scaleY = currentImg.height / canvas.height;
+
+      let finalX, finalY, finalW, finalH;
+      if (Math.abs(selection.w) < 5) {
+        finalX = 0;
+        finalY = 0;
+        finalW = currentImg.width;
+        finalH = currentImg.height;
+      } else {
+        finalW = Math.abs(selection.w) * scaleX;
+        finalH = Math.abs(selection.h) * scaleY;
+        finalX = (selection.w < 0 ? selection.x + selection.w : selection.x) * scaleX;
+        finalY = (selection.h < 0 ? selection.y + selection.h : selection.y) * scaleY;
+      }
+
+      tempCanvas.width = finalW;
+      tempCanvas.height = finalH;
+      tempCtx.drawImage(currentImg, finalX, finalY, finalW, finalH, 0, 0, finalW, finalH);
+
+      tempCanvas.toBlob((blob) => {
+        const croppedFile = new File([blob], originalFile.name, {
+          type: 'image/jpeg'
+        });
+        // Replace the old file with the cropped one
+        selectedFiles[editingIndex] = croppedFile;
+        renderPreviews();
+        cropperModal.classList.remove('show');
+      }, 'image/jpeg', 0.95);
+    });
+
+    document.getElementById('cropCancel').addEventListener('click', () => {
+      cropperModal.classList.remove('show');
+    });
+
+    // --- Render Previews ---
     function renderPreviews() {
       previewDiv.innerHTML = "";
-
       const dataTransfer = new DataTransfer();
 
       selectedFiles.forEach((file, index) => {
-        const type = file.type.split("/")[0];
-        let elem;
-
-        if (type === "image") {
-          elem = document.createElement("img");
-        } else if (type === "video") {
-          elem = document.createElement("video");
-          elem.controls = true;
-        } else return;
-
-        const fileURL = URL.createObjectURL(file);
-        elem.src = fileURL;
-
-        // 🔗 Open media in new tab
-        elem.style.cursor = "pointer";
-        elem.addEventListener("click", () => {
-          window.open(fileURL, "_blank");
-        });
-
         const wrapper = document.createElement("div");
         wrapper.classList.add("media-preview-item");
+        const fileURL = URL.createObjectURL(file);
+        const type = file.type.split("/")[0];
 
+        // 1. Remove Button (The 'X')
         const removeBtn = document.createElement("span");
         removeBtn.classList.add("remove-btn");
         removeBtn.innerHTML = "&times;";
-        removeBtn.onclick = () => removeFile(index);
+        removeBtn.onclick = (e) => {
+          e.stopPropagation();
+          selectedFiles.splice(index, 1);
+          renderPreviews();
+        };
+
+        // 2. Edit Button (The Pencil - Only for images)
+        if (type === "image") {
+          const editBtn = document.createElement("span");
+          editBtn.classList.add("edit-icon-btn");
+          // Inline SVG Pencil Icon
+          editBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>`;
+          editBtn.onclick = (e) => {
+            e.stopPropagation();
+            openCropper(file, index);
+          };
+          wrapper.appendChild(editBtn);
+        }
+
+        // 3. Media Element (Img or Video)
+        const elem = document.createElement(type === "image" ? "img" : "video");
+        elem.src = fileURL;
+        if (type === "video") elem.controls = true;
+
+        // NEW LOGIC: Clicking the image opens in a NEW TAB
+        elem.onclick = () => {
+          window.open(fileURL, '_blank');
+        };
 
         wrapper.appendChild(removeBtn);
         wrapper.appendChild(elem);
         previewDiv.appendChild(wrapper);
-
         dataTransfer.items.add(file);
       });
-
       mediaInput.files = dataTransfer.files;
-    }
-
-    function removeFile(index) {
-      selectedFiles.splice(index, 1);
-      renderPreviews();
     }
 
     // Review form validation
