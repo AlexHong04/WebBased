@@ -175,6 +175,11 @@ function displayValue($value)
                 onclick="window.location.href='/app/views/shoppingCart/payment.php?order_id=<?= $order_id ?>'">
                 Pay Now
               </button>
+              <button type="button"
+                class="order-action-btn view-order"
+                onclick="window.location.href='customerOrderDetails.php?id=<?= $order_id ?>'">
+                View Order
+              </button>
             <?php elseif ($orderData['order_status'] == "Paid" || $orderData['order_status'] == "Packing"): ?>
               <button type="button"
                 class="order-action-btn cancel-order"
