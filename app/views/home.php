@@ -13,7 +13,7 @@ require_once __DIR__ . '/../helpers/html.php';
 // var_dump($_COOKIE['remember_token']);
 
 $userController = new userController();
-$productController = new ProductController();
+$productController = new ProductsController();
 // Fetch data for sections
 // $top_selling = $userController->getTopSalesData();
 // echo "<pre>";
