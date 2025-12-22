@@ -51,26 +51,85 @@ document.addEventListener("DOMContentLoaded", function () {
     updateButtons();
   }
 
-  // Custom select handling
+  // Get current filter values from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentActive = urlParams.get("activeStatus") || "";
+  const currentBlock = urlParams.get("blockStatus") || "";
+
+  // Initialize dropdowns
   document.querySelectorAll(".custom-select").forEach((select) => {
     const selected = select.querySelector(".selected");
+    const hiddenInput = select.querySelector("input");
     const options = select.querySelector(".options");
 
+    // Set initial value based on URL
+    if (select.id === "activeSelect" && currentActive) {
+      selected.textContent =
+        currentActive === "Yes"
+          ? "Active"
+          : currentActive === "No"
+          ? "Inactive"
+          : "All Active Status";
+      hiddenInput.value = currentActive;
+    }
+    if (select.id === "blockedSelect" && currentBlock) {
+      selected.textContent =
+        currentBlock === "Yes"
+          ? "Blocked"
+          : currentBlock === "No"
+          ? "Not Blocked"
+          : "All Blocked Status";
+      hiddenInput.value = currentBlock;
+    }
+
+    // Open/close dropdown
     selected.addEventListener("click", () => select.classList.toggle("open"));
 
+    // Option click
     options.querySelectorAll("li").forEach((option) => {
       option.addEventListener("click", () => {
         selected.textContent = option.textContent;
-        select.querySelector("input").value = option.dataset.value;
+        hiddenInput.value = option.dataset.value;
         select.classList.remove("open");
-        filterTable();
+
+        // Update URL params separately for each dropdown
+        const params = new URLSearchParams(window.location.search);
+        if (select.id === "activeSelect") {
+          params.set("activeStatus", option.dataset.value);
+        } else if (select.id === "blockedSelect") {
+          params.set("blockStatus", option.dataset.value);
+        }
+        params.set("page", 1); // reset to page 1 on filter change
+        window.location.search = params.toString();
       });
     });
 
+    // Close if click outside
     document.addEventListener("click", (e) => {
       if (!select.contains(e.target)) select.classList.remove("open");
     });
   });
+
+  // Custom select handling
+  // document.querySelectorAll(".custom-select").forEach((select) => {
+  //   const selected = select.querySelector(".selected");
+  //   const options = select.querySelector(".options");
+
+  //   selected.addEventListener("click", () => select.classList.toggle("open"));
+
+  //   options.querySelectorAll("li").forEach((option) => {
+  //     option.addEventListener("click", () => {
+  //       selected.textContent = option.textContent;
+  //       select.querySelector("input").value = option.dataset.value;
+  //       select.classList.remove("open");
+  //       filterTable();
+  //     });
+  //   });
+
+  //   document.addEventListener("click", (e) => {
+  //     if (!select.contains(e.target)) select.classList.remove("open");
+  //   });
+  // });
 
   document.getElementById("viewBtn").addEventListener("click", function () {
     const checkboxes = document.querySelectorAll(".dataCheckbox:checked");

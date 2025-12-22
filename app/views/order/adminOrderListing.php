@@ -93,22 +93,23 @@ $fields = [
     </div>
   </div>
 
-  <?php if (!empty($orders)): ?>
-    <table class='data'>
-      <thead>
-        <tr class="thead">
-          <th>Select</th>
-          <?php table_headers($fields, $sort, $dir, $href); ?>
-          <!-- <th>Order Id</th>
+  <table class='data'>
+    <thead>
+      <tr class="thead">
+        <th>Select</th>
+        <?php table_headers($fields, $sort, $dir, $href); ?>
+        <!-- <th>Order Id</th>
         <th>Customer Id</th>
         <th>Created At</th>
         <th>Item Quantity</th>
         <th>Total Amount (RM)</th>
         <th>Redeemed Point</th> -->
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php if (!empty($orders)): ?>
+
         <?php foreach ($orders as $index => $o): ?>
           <tr>
             <td>
@@ -127,11 +128,14 @@ $fields = [
             <td class="order-status"><?= $o['order_status'] ?></td>
           </tr>
         <?php endforeach ?>
-      </tbody>
-    </table>
-  <?php else: ?>
-    <p class="no-order" style="font-size: 16px;font-weight: normal;">No orders found.</p>
-  <?php endif; ?>
+      <?php else: ?>
+        <tr>
+          <td colspan="8">No orders found.</td>
+        </tr>
+      <?php endif; ?>
+    </tbody>
+  </table>
+
 
   <!-- Status Update Popup -->
   <div id="statusPopup" class="popup-overlay">

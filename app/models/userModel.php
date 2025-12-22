@@ -338,18 +338,81 @@ class userModel
         return $this->db->resultAll();
     }
 
-    public function countMembers()
+    // public function countMembers()
+    // {
+    //     $this->db->query("SELECT COUNT(*) AS total FROM customer");
+    //     $result = $this->db->result();
+    //     return $result["total"];
+    // }
+
+    // public function getMembers($offset, $limit)
+    // {
+    //     $this->db->query("SELECT * FROM customer LIMIT $offset, $limit");
+    //     return $this->db->resultAll();
+    // }
+
+    public function countMembers($activeStatus = '', $blockStatus = '')
     {
-        $this->db->query("SELECT COUNT(*) AS total FROM customer");
+        $sql = "SELECT COUNT(*) AS total FROM customer WHERE 1";
+
+        // Active filter
+        if ($activeStatus === 'Yes') {
+            $sql .= " AND isActive = 1";
+        } elseif ($activeStatus === 'No') {
+            $sql .= " AND isActive = 0";
+        }
+
+        // Blocked filter
+        if ($blockStatus === 'Yes') {
+            $sql .= " AND isBlocked = 1";
+        } elseif ($blockStatus === 'No') {
+            $sql .= " AND isBlocked = 0";
+        }
+
+        $this->db->query($sql);
         $result = $this->db->result();
-        return $result["total"];
+        return (int)($result["total"] ?? 0);
     }
 
-    public function getMembers($offset, $limit)
+
+    public function getMembers($offset, $limit, $activeStatus = '', $blockStatus = '', $sort = 'customer_id', $dir = 'asc')
     {
-        $this->db->query("SELECT * FROM customer LIMIT $offset, $limit");
+        $allowedSort = ['customer_id', 'email', 'phone', 'lastName', 'firstName', 'created_at', 'updated_at', 'rewardPoint'];
+        if (!in_array($sort, $allowedSort)) {
+            $sort = 'customer_id';
+        }
+
+        $dir = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
+
+        // FORCE integers (prevents SQL injection)
+        $offset = (int)$offset;
+        $limit  = (int)$limit;
+
+        $sql = "SELECT * FROM customer";
+        $conditions = [];
+
+        if ($activeStatus !== '' && $activeStatus == 'Yes') {
+            $conditions[] = "isActive = 1";
+        } elseif ($activeStatus !== '' && $activeStatus == 'No') {
+            $conditions[] = "isActive = 0";
+        }
+
+        if ($blockStatus !== '' && $blockStatus == 'Yes') {
+            $conditions[] = "isBlocked = 1";
+        } elseif ($blockStatus !== '' && $blockStatus == 'No') {
+            $conditions[] = "isBlocked = 0";
+        }
+
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        $sql .= " ORDER BY $sort $dir LIMIT $offset, $limit";
+
+        $this->db->query($sql);
         return $this->db->resultAll();
     }
+
 
     public function getSpecificMember($custID)
     {

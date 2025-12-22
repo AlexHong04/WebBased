@@ -537,24 +537,52 @@ class userController
     }
 
     // zq
+    // public function index()
+    // {
+    //     // Count total records
+    //     $total = $this->userModel->countMembers();
+
+    //     // Get current page
+    //     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+    //     // Create pagination object
+    //     $pagination = new Pagination($total, 10, $page); // 10 rows per page
+
+    //     // Fetch paginated members
+    //     $members = $this->userModel->getMembers($pagination->offset, $pagination->recordsPerPage);
+
+    //     return [
+    //         "members" => $members,
+    //         "pagination" => $pagination
+    //     ];
+    // }
+
     public function index()
     {
+        $filters = [
+            'page'   => $_GET['page'] ?? 1,
+            'activeStatus' => $_GET['activeStatus'] ?? '',
+            'blockStatus' => $_GET['blockStatus'] ?? '',
+            'sort'   => $_GET['sort'] ?? 'customer_id',
+            'dir'    => $_GET['dir'] ?? 'asc'
+        ];
 
-        // Count total records
-        $total = $this->userModel->countMembers();
+        $total = $this->userModel->countMembers($filters['activeStatus'], $filters['blockStatus']);
+        $pagination = new Pagination($total, 10, $filters['page']);
 
-        // Get current page
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-
-        // Create pagination object
-        $pagination = new Pagination($total, 10, $page); // 10 rows per page
-
-        // Fetch paginated members
-        $members = $this->userModel->getMembers($pagination->offset, $pagination->recordsPerPage);
+        $members = $this->userModel->getMembers(
+            $pagination->offset,
+            $pagination->recordsPerPage,
+            $filters['activeStatus'],
+            $filters['blockStatus'],
+            $filters['sort'],
+            $filters['dir']
+        );
 
         return [
-            "members" => $members,
-            "pagination" => $pagination
+            'members'     => $members,
+            'pagination' => $pagination,
+            'filters'    => $filters
         ];
     }
 

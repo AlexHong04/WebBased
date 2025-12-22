@@ -111,8 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .closest("tr")
       .querySelector(".order-status")
       .textContent.trim();
-    console.log("Current Status identified as:", currentStatus);
-    selectedCount.innerHTML = `You selected ${checkedBoxes.length} order(s).<br><br>Current status: ${currentStatus}`;
+    selectedCount.innerHTML = `You selected ${checkedBoxes.length} order(s).<br><br>Current status: <b>${currentStatus}</b>`;
 
     // Filter popup options: only allow next statuses
     options.forEach((option) => {

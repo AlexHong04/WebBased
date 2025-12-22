@@ -37,12 +37,35 @@ $title = "Member Listing Page";
 $pageCSS = "datalisting.css";
 
 include  '../adminHeader.php';
-// include  '../../controllers/memberController.php';
 
 $memberController = new UserController();
 $data = $memberController->index();
-$members = $data["members"];
-$pagination = $data["pagination"];
+// $members = $data["members"];
+// $pagination = $data["pagination"];
+
+$filters    = $data['filters'];
+$members     = $data['members'];
+$pagination = $data['pagination'];
+
+$sort = $filters['sort'] ?? 'customer_id';
+$dir  = $filters['dir'] ?? 'asc';
+$activeStatus = $_GET['activeStatus'] ?? '';
+$blockStatus = $_GET['blockStatus'] ?? '';
+$activeSelectedText = $activeStatus !== '' ? $activeStatus : 'All';
+$blockSelectedText = $blockStatus !== '' ? $blockStatus : 'All';
+
+$baseQuery = http_build_query([
+  'activeStatus' => $activeStatus,
+  'blockStatus' => $blockStatus,
+  'sort'   => $filters['sort'],
+  'dir'    => $filters['dir']
+]);
+
+$href = http_build_query([
+  'page'   => $filters['page'],
+  'activeStatus' => $filters['activeStatus'],
+  'blockStatus' => $filters['blockStatus'],
+]);
 
 function displayValue($value)
 {
@@ -75,24 +98,6 @@ $fields = [
   'updated_at' => 'Updated At',
   'rewardPoint' => 'Reward Point'
 ];
-
-$page = $_GET['page'] ?? 1;
-$sort = $_GET['sort'] ?? 'customer_id';
-$dir  = $_GET['dir'] ?? 'asc';
-$href = "page=$page";
-
-usort($members, function ($a, $b) use ($sort, $dir) {
-  $valA = is_object($a) ? $a->$sort : $a[$sort];
-  $valB = is_object($b) ? $b->$sort : $b[$sort];
-
-  if ($valA == $valB) return 0;
-
-  if ($dir === 'asc') {
-    return ($valA < $valB) ? -1 : 1;
-  } else {
-    return ($valA > $valB) ? -1 : 1;
-  }
-});
 ?>
 
 <div class='dataListing'>
@@ -127,7 +132,7 @@ usort($members, function ($a, $b) use ($sort, $dir) {
       </div>
 
       <div class="pagination-container">
-        <?= $pagination->render(); ?>
+        <?= $pagination->render($baseQuery); ?>
       </div>
 
       <div id="actionButtons">
