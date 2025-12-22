@@ -152,4 +152,19 @@ class productModel
 
     return $this->db->resultAll();
   }
+
+    public function searchProductsByName($keyword, $limit = 5)
+  {
+    $keyword = "%{$keyword}%";
+    $this->db->query("SELECT product_id, product_name, img_url, sale_price 
+                          FROM product 
+                          WHERE product_name LIKE :keyword 
+                          ORDER BY product_name ASC 
+                          LIMIT :limit");
+
+    $this->db->bind(':keyword', $keyword);
+    $this->db->bind(':limit', $limit);
+
+    return $this->db->resultAll();
+  }
 }

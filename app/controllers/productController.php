@@ -228,4 +228,41 @@ class productController
     $categoryID = $_GET['id'];
     return $this->productModel->getCategory($categoryID);
   }
+
+  public function getSearchSuggestions()
+  {
+    header('Content-Type: application/json');
+
+    $keyword = $_GET['q'] ?? '';
+
+    if (strlen($keyword) < 2) {
+      echo json_encode([]);
+      exit;
+    }
+
+    try {
+      $results = $this->productModel->searchProductsByName($keyword);
+
+      foreach ($results as &$item) {
+        $catName = $item['category_name'] ?? 'Uncategorized';
+        $safeCatName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $catName);
+
+        $images = explode(',', $item['img_url']);
+        if (count($images) === 1) {
+          $images = explode('，', $item['img_url']);
+        }
+        $display_img = trim($images[0]);
+
+        $item['image'] = empty($display_img)
+          ? '/public/images/default.png'
+          : "/public/images/$safeCatName/$display_img";
+      }
+
+      echo json_encode($results);
+    } catch (Exception $e) {
+      echo json_encode(['error' => $e->getMessage()]);
+    }
+
+    exit;
+  }
 }
