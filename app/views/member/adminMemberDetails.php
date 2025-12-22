@@ -4,8 +4,7 @@ $pageCSS = "adminmember.css";
 
 session_start();
 
-include '../adminHeader.php';
-// include '../../controllers/userController.php';
+include '../../controllers/userController.php';
 
 $controller = new UserController();
 $data = $controller->getMembers();
@@ -15,6 +14,8 @@ $addresses = $controller->getMemberAddress();
 
 $controller->updateMember();
 
+include '../adminHeader.php';
+
 function displayValue($value)
 {
   return empty($value) && $value !== "0" ? "-" : $value;
@@ -23,7 +24,7 @@ function displayValue($value)
 
 <section class="member-profile-section">
   <div class="memberProfileHeader">
-    <a href="#" class="back-link" onclick="history.back(); return false;">&#x293A;</a>
+    <a href="/app/views/member/memberListing.php" class="back-link">&#x293A;</a>
     <h1>Member Details</h1>
   </div>
 
