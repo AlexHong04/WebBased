@@ -178,7 +178,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           elem.controls = true;
         } else return;
 
-        elem.src = URL.createObjectURL(file);
+        const fileURL = URL.createObjectURL(file);
+        elem.src = fileURL;
+
+        // 🔗 Open media in new tab
+        elem.style.cursor = "pointer";
+        elem.addEventListener("click", () => {
+          window.open(fileURL, "_blank");
+        });
 
         const wrapper = document.createElement("div");
         wrapper.classList.add("media-preview-item");
