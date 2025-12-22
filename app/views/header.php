@@ -34,7 +34,19 @@ if (file_exists($cronPath)) {
     $cron = new cronController();
     $cron->runOrderCleanup();
 }
-// $controller->getSearchSuggestions();
+
+if (isset($_GET['ajax_action']) && $_GET['ajax_action'] === 'search_suggestions') {
+    if (ob_get_length()) ob_clean();
+    $controller->getSearchSuggestions();
+    exit;
+}
+
+$query = $_GET['q'] ?? '';
+$products = [];
+
+if (!empty($query)) {
+    $products = $controller->search($query);
+}
 $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
 ?>
 
@@ -87,12 +99,6 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                                     </li>
                                 <?php endforeach; ?>
                             <?php endif; ?>
-                            <!-- <li><a href="product/product_details.php?id=<?php echo $categories['category_id']; ?>">Bracelet</a></li>
-                            <li><a href="#">Ring</a></li>
-                            <li><a href="#">Necklace</a></li>
-                            <li><a href="#">Earring</a></li>
-                            <li><a href="#">Hairclaw</a></li> -->
-
                         </ul>
                     </li>
                     <li><a href="#">Order</a></li>
@@ -101,8 +107,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
 
             <nav class="right-nav">
                 <ul>
-                    <form class="header-search" action="/search.php" method="get" role="search" aria-label="Site search" style="position: relative;">
-                        <input type="search" id="searchInput" name="q" placeholder="Search" aria-label="Search" autocomplete="off" />
+                    <form class="header-search" action="/app/views/product/product_details.php" method="get" role="search" aria-label="Site search" style="position: relative;"> <input type="search" id="searchInput" name="q" placeholder="Search" aria-label="Search" autocomplete="off" />
                         <button type="submit" aria-label="Search">
                             <div class="cart-link">
                                 <svg class="cart-icon" viewBox="0 0 640 640" width="24" height="24">

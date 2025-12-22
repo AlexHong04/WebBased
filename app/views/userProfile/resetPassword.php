@@ -125,7 +125,7 @@ require_once __DIR__ . '/../header.php';
     </div>
     </div>
 </section>
-
+<?php showToast(); ?>
 <script src="/public/js/validation.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {

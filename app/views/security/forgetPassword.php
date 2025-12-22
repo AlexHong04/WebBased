@@ -137,7 +137,7 @@ require_once __DIR__ . '/../header.php';
 
     </div>
 </div>
-
+<?php showToast(); ?>
 <script src="/public/js/validation.js"></script>
 <script src="/public/js/forgetPassword.js"></script>
 <?php require_once __DIR__ . '/../footer.php'; ?>

@@ -931,39 +931,25 @@ class ProductsController
 
     public function getSearchSuggestions()
     {
-        header('Content-Type: application/json');
+        $query = $_GET['q'] ?? '';
 
-        $keyword = $_GET['q'] ?? '';
-
-        if (strlen($keyword) < 2) {
+        if (empty($query)) {
             echo json_encode([]);
-            exit;
+            return;
         }
+        $products = $this->productModel->searchAllProducts($query);
 
-        try {
-            $results = $this->productModel->searchProductsByName($keyword);
-
-            foreach ($results ?? [] as &$item) {
-                $catName = $item['category_name'] ?? 'Uncategorized';
-                $safeCatName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $catName);
-
-                $images = explode(',', $item['img_url']);
-                if (count($images) === 1) {
-                    $images = explode('，', $item['img_url']);
-                }
-                $display_img = trim($images[0]);
-
-                $item['image'] = empty($display_img)
-                    ? '/public/images/default.png'
-                    : "/public/images/$safeCatName/$display_img";
-            }
-
-            echo json_encode($results);
-        } catch (Exception $e) {
-            echo json_encode(['error' => $e->getMessage()]);
-        }
-
+        header('Content-Type: application/json');
+        echo json_encode($products);
         exit;
+    }
+
+    public function search($keyword)
+    {
+        if (empty($keyword)) {
+            return [];
+        }
+        return $this->productModel->searchAllProducts($keyword);
     }
 
     public function systemCall($phone, $firstname = 'Customer', $productName = 'your item')

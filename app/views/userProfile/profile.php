@@ -171,7 +171,7 @@ include __DIR__ . '/../header.php';
     </form>
 </section>
 
+<?php showToast(); ?>
 <?php include '../footer.php' ?>
-
 <script src="/public/js/validation.js"></script>
 <script src="/public/js/profile.js"></script>

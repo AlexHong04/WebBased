@@ -555,17 +555,19 @@ class ProductModel
         return $this->db->resultAll();
     }
 
-    public function searchProductsByName($keyword, $limit = 5)
+    public function searchAllProducts($keyword)
     {
-        $keyword = "%{$keyword}%";
-        $this->db->query("SELECT product_id, product_name, img_url, sale_price 
-                          FROM product 
-                          WHERE product_name LIKE :keyword 
-                          ORDER BY product_name ASC 
-                          LIMIT :limit");
+        // Search by name or description
+        $this->db->query("SELECT p.*, c.category_name 
+                          FROM product p
+                          LEFT JOIN category c ON p.category_id = c.category_id
+                          WHERE p.product_name LIKE :keyword 
+                          OR p.description LIKE :keyword
+                          ORDER BY p.product_name ASC");
 
-        $this->db->bind(':keyword', $keyword);
-        $this->db->bind(':limit', $limit);
+        $this->db->bind(':keyword', "%$keyword%");
+
+        return $this->db->resultAll();
     }
     public function deleteVariantById($variantId)
     {

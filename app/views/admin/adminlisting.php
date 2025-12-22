@@ -211,26 +211,22 @@ require_once __DIR__ . '/../adminHeader.php';
 </div>
 
 <div id="toast-container"></div>
+<?php showToast(); ?>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // --- POPUP LOGIC ---
         const modal = document.getElementById("addStaffModal");
         const openBtn = document.getElementById("openAddModalBtn");
         const closeBtns = document.querySelectorAll(".close-modal");
 
-        // 打开弹窗
         if (openBtn) {
             openBtn.addEventListener("click", (e) => {
                 e.preventDefault();
 
-                // 1. 获取表单并重置 (清空所有输入)
                 const form = modal.querySelector('form');
                 if (form) {
                     form.reset();
-                    // 还需要手动清空 value 属性，以防 PHP 渲染了旧值
                     const inputs = form.querySelectorAll('input');
                     inputs.forEach(input => {
-                        // 不清空 hidden input (如 action)
                         if (input.type !== 'hidden') {
                             input.value = '';
                         }
@@ -241,22 +237,18 @@ require_once __DIR__ . '/../adminHeader.php';
                 modal.style.setProperty('display', 'flex', 'important');
             });
         }
-        // 关闭弹窗
         const closeModal = () => {
             modal.style.display = "none";
         };
 
         closeBtns.forEach(btn => btn.addEventListener("click", closeModal));
 
-        // 点击空白处关闭
         window.addEventListener("click", (e) => {
             if (e.target === modal) {
                 closeModal();
             }
         });
 
-        // --- FILTER & UI LOGIC (保留你原有的功能) ---
-        // Custom Select
         const customSelects = document.querySelectorAll(".custom-select");
         customSelects.forEach((select) => {
             const selected = select.querySelector(".selected");

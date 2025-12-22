@@ -50,6 +50,7 @@ class userController
             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
             // save user to database
             $isCreated = $this->userModel->createUser($firstName, $lastName, $email, $gender, $hashed_password);
+            $_SESSION['flash_success'] = "Account created successfully! Please check your email to activate your account.";
             if ($isCreated) {
                 $loginLink = base('app/views/security/signIn.php?action=activate&email=' . $email);
                 sendWelcomeEmail($email, $firstName . ' ' . $lastName, $loginLink);
@@ -265,7 +266,7 @@ class userController
                 exit;
             }
 
-            $_SESSION['user_id'] = $existingUser['customer_id'];
+            $_SESSION['customerId'] = $existingUser['customer_id'];
             $_SESSION['user_name'] = $existingUser->firstName;
             $_SESSION['user_email'] = $existingUser->email;
             $_SESSION['role'] = 'member';
@@ -274,7 +275,7 @@ class userController
             $newUserId = $this->userModel->registerGoogleUser($email, $firstName, $lastName, $picture);
 
             if ($newUserId) {
-                $_SESSION['user_id'] = $newUserId;
+                $_SESSION['customerId'] = $newUserId;
                 $_SESSION['user_name'] = $firstName;
                 $_SESSION['user_email'] = $email;
                 $_SESSION['role'] = 'member';
@@ -285,7 +286,7 @@ class userController
                 exit;
             }
         }
-        $_SESSION['success_message'] = "Login Successful! Welcome " . $_SESSION['user_name'];
+        $_SESSION['flash_success']['login'] = "Login successful.";
         redirect('../home.php');
         exit;
     }
@@ -399,7 +400,7 @@ class userController
 
                 // Call Model to update
                 $this->userModel->updateUser($updateData);
-
+                $_SESSION['flash_success'] = "Profile updated successfully!";
                 redirect('profile.php');
             } else {
                 redirect('signIn.php');
@@ -441,6 +442,7 @@ class userController
 
         $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
         $this->userModel->changePassword($customerId, $hashedNewPassword);
+        $_SESSION['flash_success'] = "Password reset successfully!";
         redirect('resetPassword.php');
     }
 
@@ -470,7 +472,7 @@ class userController
         $message = "Your OTP is {$otp}. Do not share this code.";
 
         $isSent = $twilio->sendSMS($phone, $message);
-
+        $_SESSION['flash_success'] = "OTP sent successfully!";
         if ($isSent) {
             $_SESSION['last_otp_sent'] = time();
             return $otp;
@@ -495,8 +497,10 @@ class userController
 
         // compare OTP
         if ($userInputOtp == $_SESSION['otp']) {
+            $_SESSION['flash_success'] = "OTP verified successfully!";
             return ['success' => true];
         } else {
+            $_SESSION['flash_error'] = "Invalid OTP. Please try again.";
             return ['success' => false, 'message' => 'Invalid OTP. Please try again.'];
         }
     }
@@ -524,9 +528,10 @@ class userController
             unset($_SESSION['otp']);
             unset($_SESSION['otp_expire']);
             unset($_SESSION['reset_phone']);
-
+            $_SESSION['flash_success'] = "Password reset successfully!";
             return ['success' => true];
         } else {
+            $_SESSION['flash_error'] = "Failed to update password. Database error.";
             return ['success' => false, 'message' => 'Failed to update password. Database error.'];
         }
     }

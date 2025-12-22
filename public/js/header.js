@@ -122,11 +122,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     debounceTimer = setTimeout(() => {
-      fetch(`/app/api/search_suggestions.php?q=${encodeURIComponent(query)}`)
+      const searchUrl =
+        window.location.pathname +
+        `?ajax_action=search_suggestions&q=${encodeURIComponent(query)}`;
+
+      fetch(searchUrl)
         .then((response) => response.json())
         .then((data) => {
           if (data.length > 0) {
-            renderSuggestions(data);
+            renderSuggestions(data, query);
           } else {
             suggestionsBox.style.display = "none";
           }
@@ -138,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function renderSuggestions(products) {
     let html = "";
     products.forEach((p) => {
-      const link = `/app/views/product/productDetails.php?id=${p.product_id}`;
+      const link = `/app/views/product/product_details.php?id=${p.product_id}`;
       html += `
                 <a href="${link}" class="search-item">
                     <div class="search-item-info">
