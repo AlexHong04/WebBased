@@ -941,10 +941,10 @@ class ProductsController
         $phone = preg_replace('/\D/', '', $phone);
 
         if (str_starts_with($phone, '0')) {
-            $phone = '6' . ltrim($phone, '0');
+            $phone = '60' . ltrim($phone, '0');
         }
         if (!str_starts_with($phone, '6')) {
-            $phone = '6' . $phone;
+            $phone = '60' . $phone;
         }
         $phone = '+' . $phone;
 
