@@ -2,7 +2,6 @@
 $title = "Product Maintenance";
 $pageCSS = "productList.css";
 
-include '../header.php';
 include '../../controllers/productsController.php';
 
 $controller = new ProductController();
@@ -47,6 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+include '../header.php';
+
 $current_sort = $_GET['sort'] ?? 'product_id';
 $current_order = $_GET['order'] ?? 'asc';
 
@@ -114,19 +115,23 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
                     </div>
                 </div>
                 <div class="table-header">
-                    <div class="productCount">
-                        <p>Total Products: <?php echo $productsCount; ?></p>
+                    <div class="table-header-left">
+                        <div class="product-count">
+                            <p>Total Products: <?php echo $productsCount; ?></p>
+                        </div>
                     </div>
-                    <button type="button" id="bulkRestockBtn" class="btn-restock">
-                        📦 Bulk Restock Selected
-                    </button>
 
-                    <div class="table-actions">
-                        <button type="submit" name="delete_selected" class="btn-delete">
-                            🗑 Delete Product
+                    <div class="table-header-right">
+                        <button type="button" id="bulkRestockBtn" class="btn btn-restock">
+                            📦 Bulk Restock Selected
+                        </button>
+
+                        <button type="submit" name="delete_selected" class="btn btn-delete">
+                            🗑 Delete Selected
                         </button>
                     </div>
                 </div>
+
                 <div class="table_overview">
                     <table>
                         <thead>
@@ -189,6 +194,13 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
                                     <a href="addSingleProduct.php?product_id=' . $product['product_id'] . '">
                                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
                                     </a>
+                                     <form method="POST" action="productList.php" class="delete-single-form" style="display:inline;">
+                                        <input type="hidden" name="delete_selected" value="1">
+                                        <input type="hidden" name="product_ids[]" value="' . $product['product_id'] . '">
+                                        <button type="submit" class="btn btn-delete-single" onclick="return confirm(\'Delete this product?\');">
+                                            🗑
+                                        </button>
+                                    </form>
                                 </div>
 
                             </td>';
@@ -215,7 +227,7 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
                     <!-- Dynamic content will be inserted here -->
                 </div>
                 <input type="hidden" name="restock_selected" value="1">
-                <button type="submit" class="btn-restock-submit">Update Stock</button>
+                <button type="submit" class="btn-restock-submit" disabled>Update Stock</button>
             </form>
         </div>
     </div>

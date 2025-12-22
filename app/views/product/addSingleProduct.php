@@ -1,15 +1,16 @@
 <?php
+include '../../controllers/productsController.php';
+
+$controller = new ProductController();
+$controller->submitProductForm();
 $title = "Add Single Products";
 $pageCSS = "addSingleProduct.css";
 
 include_once '../../helpers/html.php';
 include_once '../../helpers/validation.php';
-include '../header.php';
-include '../../controllers/productsController.php';
-
-$controller = new ProductController();
-
-$isEdit = isset($_GET['product_id']);
+$productId = $_GET['product_id'] ?? null;
+$draftKey = $_GET['draft_key'] ?? null;
+$isEdit = ($productId && $productId !== 'new' && !$draftKey);
 $product = null;
 
 if ($isEdit) {
@@ -38,14 +39,23 @@ $viewData = $controller->showAddProductForm();
 if (is_array($viewData)) {
     extract($viewData);
 }
-$controller->submitProductForm();
 
-$errors = $_SESSION['form_errors'] ?? [];
-$form_data = $_SESSION['form_data'] ?? [];
-unset($_SESSION['form_errors']);
-unset($_SESSION['form_data']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_variants_submit'])) {
+    $variantIdsRaw = $_POST['delete_variant_ids'] ?? '';
+    $variantIds = !empty($variantIdsRaw) ? explode(',', $variantIdsRaw) : [];
+
+    if (!empty($variantIds)) {
+        foreach ($variantIds as $variantId) {
+            $controller->handleDeleteProductVariantById($variantId);
+        }
+    }
+    header("Location: addSingleProduct.php?product_id=" . $product_id);
+    exit;
+}
+
+include '../header.php';
+showToast();
 ?>
-
 
 <template id="variantTemplate">
     <div class="variant-section-basicInfo">
@@ -58,36 +68,31 @@ unset($_SESSION['form_data']);
                 // New variant starts empty (null value)
                 html_select('variant_ids[]', $variants, 'Select a variant', null);
                 ?>
-                <?php err('variant_id'); ?>
             </div>
 
             <div class="field">
                 <label for="min_stock_level">Minimum Threshold</label>
                 <?php html_number('min_stock_levels[]', '1', '20', '1', 'step="1"', ''); ?>
-                <?php err('min_stock_level'); ?>
             </div>
 
             <div class="field">
                 <label for="stock_qty">Stock Quantity</label>
                 <?php html_number('stock_qtys[]', '1', '50', '1', 'step="1"', ''); ?>
-                <?php err('stock_qty'); ?>
             </div>
         </div>
 
         <div class="variant-image-upload-section">
             <div class="field">
                 <label class="custom-file-upload">
-                    <div class="upload-dropzone">
+                    <div class="upload-dropzone variant-drop-zone">
                         <p class="upload-text">Click or drag your image files here</p>
                         <p class="upload-note">Accepted formats: JPG, PNG, WEBP</p>
                     </div>
                     <input type="file"
-                        name="variant_images_group[__INDEX__]"
+                        name="variant_images_group[]"
                         class="variant-image-input"
                         accept="image/*"
-                        multiple
                         style="display:none;">
-                    <?php err('variant_images'); ?>
                 </label>
             </div>
 
@@ -105,10 +110,16 @@ unset($_SESSION['form_data']);
 
 
 <form id="productForm" method="POST" enctype="multipart/form-data">
-    <?php if ($isEdit): ?>
-        <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
-    <?php endif; ?>
+    <input type="hidden" name="is_edit" value="<?= $isEdit ? '1' : '0' ?>">
     <div class="container">
+        <?php if ($isEdit): ?>
+            <div class="form-header-actions">
+                <a href="#" class="back-link" onclick="history.back(); return false;">&#x293A;</a>
+                <button type="button" id="removeVariants" class="removeVariantsBtn">
+                    <i class="fa-solid fa-trash"></i> Remove Variants
+                </button>
+            </div>
+        <?php endif; ?>
         <div class="basicInfo">
             <h3>Product Basic Information</h3>
 
@@ -118,9 +129,8 @@ unset($_SESSION['form_data']);
                     <?php html_text(
                         'product_id',
                         "maxlength='6' readonly",
-                        $isEdit ? $product['product_id'] : $newProductId
+                        ($isEdit && isset($product['product_id'])) ? $product['product_id'] : ($newProductId ?? '')
                     ); ?>
-                    <?php err('product_id'); ?>
                 </div>
                 <div class="form-column">
                     <label for="product_name">Product Name</label>
@@ -129,7 +139,6 @@ unset($_SESSION['form_data']);
                         "maxlength='25'",
                         $product['product_name'] ?? ''
                     ); ?>
-                    <?php err('product_name'); ?>
                 </div>
             </div>
 
@@ -145,7 +154,6 @@ unset($_SESSION['form_data']);
                         $product['category_id'] ?? null,
                         '' // $attr
                     ); ?>
-                    <?php err('category_id'); ?>
                 </div>
                 <div class="form-column">
                     <label for="description">Description</label>
@@ -154,7 +162,6 @@ unset($_SESSION['form_data']);
                         "maxlength='50' placeholder='Enter description (eg. 18k Gold, 10cm long)'",
                         $product['description'] ?? ''
                     ); ?>
-                    <?php err('description'); ?>
                 </div>
             </div>
 
@@ -162,25 +169,22 @@ unset($_SESSION['form_data']);
                 <div class="form-column">
                     <label for="cost_price">Cost Price</label>
                     <?php html_number('cost_price', '0.01', '99999.99', '0.01', 'step="0.01"', $product['cost_price'] ?? ''); ?>
-                    <?php err('cost_price'); ?>
                 </div>
                 <div class="form-column">
                     <label for="sales_price">Sales Price</label>
                     <?php html_number('sales_price', '0.01', '99999.99', '0.01', 'step="0.01"', $product['sale_price'] ?? ''); ?>
-                    <?php err('sales_price'); ?>
                 </div>
             </div>
 
             <div class="form-row-group">
                 <div class="form-column">
                     <label for="product_images" class="custom-file-upload">
-                        <div class="upload-dropzone">
+                        <div class="upload-dropzone" id="productDropZone">
                             <p class="upload-text">Click or drag your image files here</p>
                             <p class="upload-note">Accepted formats: JPG, PNG, WEBP</p>
                         </div>
                     </label>
                     <input type="file" name="product_images[]" id="product_images" accept="image/*" multiple style="display: none;">
-                    <?php err('product_images'); ?>
                 </div>
 
                 <div class="form-column">
@@ -201,8 +205,18 @@ unset($_SESSION['form_data']);
                 <?php if (!empty($variantsData)): ?>
                     <?php foreach ($variantsData as $index => $variant): ?>
                         <div class="variant-section-basicInfo">
-                            <h3>Variant <?= $index + 1 ?></h3>
-                            <!-- Add hidden field for variant ID -->
+                            <div class="variantStatus">
+                                <h3>Variant <?= $index + 1 ?></h3>
+                                <?php if ($isEdit):
+                                    $stockClass = strtolower(str_replace(' ', '_', $variant['stock_status']));
+                                ?>
+                                    <span class="stock-status <?= $stockClass ?>">
+                                        <?= $variant['stock_status'] ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <br>
+
                             <input type="hidden" name="product_variant_ids[]" value="<?= $variant['product_variant_id'] ?>">
 
                             <!-- Add hidden field for existing variant image -->
@@ -216,31 +230,28 @@ unset($_SESSION['form_data']);
                                         'Select a variant',
                                         $variant['variant_id']
                                     ); ?>
-                                    <?php err('variant_id'); ?>
                                 </div>
 
                                 <div class="field">
                                     <label for="min_stock_level">Minimum Threshold</label>
                                     <?php html_number('min_stock_levels[]', '1', '20', '1', 'step="1"', $variant['min_stock_level']); ?>
-                                    <?php err('min_stock_level'); ?>
                                 </div>
 
                                 <div class="field">
                                     <label for="stock_qty">Stock Quantity</label>
                                     <?php html_number('stock_qtys[]', '1', '50', '1', 'step="1"', $variant['stock_qty']); ?>
-                                    <?php err('stock_qty'); ?>
                                 </div>
                             </div>
 
                             <div class="variant-image-upload-section">
                                 <div class="field">
                                     <label class="custom-file-upload">
-                                        <div class="upload-dropzone">
+                                        <div class="upload-dropzone variant-drop-zone">
                                             <p class="upload-text">Click or drag your image files here</p>
                                             <p class="upload-note">Accepted formats: JPG, PNG, WEBP</p>
                                         </div>
-                                        <input type="file" name="variant_images_group[]" class="variant-image-input" accept="image/*" multiple style="display:none;">
-                                        <?php err('variant_images'); ?>
+                                        <input type="file" name="variant_images_group[]" class="variant-image-input" accept="image/*" style="display:none;">
+
                                     </label>
                                 </div>
 
@@ -261,34 +272,42 @@ unset($_SESSION['form_data']);
 
         </div>
 
-        <div class="button-container">
+        <br>
+        <div class="form-footer-actions">
+            <button type="button" class="confirm-btn">
+                <?= $isEdit ? 'Update Product' : 'Add Product' ?>
+            </button>
         </div>
-        <button type="submit" class="confirm-btn">
-            <?= $isEdit ? 'Update Product' : 'Add Product' ?>
-        </button>
-    </div>
-    <div id="submitModal" class="modal">
-        <div class="modal-content">
-            <h3>Submit Product</h3>
-            <p id="deleteMessage">Are you sure want to add this item?</p>
 
-            <div class="modal-buttons">
-                <button class="cancel-btn" id="cancelSubmit">Cancel</button>
-                <button type="submit" class="confirm-btn" id="confirmSubmit">Submit</button>
+    </div>
+    <div id="submitModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
+        <div style="background-color:#fff; margin:15% auto; padding:20px; border-radius:8px; width:400px; text-align:center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+            <h2 style="margin-top:0;">Confirm Action</h2>
+            <p id="deleteMessage">Are you sure you want to proceed?</p>
+            <div style="display:flex; justify-content: space-around; margin-top:20px;">
+                <button id="confirmSubmit" style="background-color:#28a745; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">Confirm</button>
+                <button id="cancelSubmit" style="background-color:#dc3545; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">Cancel</button>
             </div>
         </div>
     </div>
 </form>
-<?php if ($isEdit): ?>
-    <form id="deleteProductForm" method="POST">
-        <input type="hidden" name="delete_product" value="1">
-        <input type="hidden" name="final_deletion" value="1">
-        <input type="hidden" name="product_id" value="<?= $product['product_id'] ?>">
-        <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this product?')">Delete</button>
-    </form>
-<?php endif; ?>
 
+<div id="deleteVariantModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
+    <div style="background-color:#fff; margin:10% auto; padding:20px; border-radius:8px; width:400px; max-height:70%; overflow-y:auto; text-align:center; box-shadow:0 4px 8px rgba(0,0,0,0.2);">
+        <h2 style="margin-top:0;">Delete Variants</h2>
+        <p>Select the variants you want to delete:</p>
+        <form id="deleteVariantsForm" method="POST" action="addSingleProduct.php?product_id=<?= $product_id ?>">
+            <input type="hidden" name="delete_variant_ids" id="delete_variant_ids">
 
+            <div id="variantCheckboxContainer" style="text-align:left; margin-top:15px;"></div>
+
+            <div style="display:flex; justify-content: space-around; margin-top:20px;">
+                <button type="button" id="cancelDeleteVariants" style="background-color:#6c757d; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">Cancel</button>
+                <button type="submit" name="delete_variants_submit" value="1" id="confirmDeleteVariants" style="background-color:red; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
 <script>
     const existingProductImages = <?php
                                     echo json_encode(
