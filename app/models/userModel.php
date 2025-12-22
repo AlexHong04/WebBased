@@ -347,29 +347,66 @@ class userModel
         return $this->db->execute();
     }
 
+    // public function updateMember($data)
+    // {
+    //     $this->db->query("UPDATE customer SET 
+    //                 firstName = :firstName,
+    //                 lastName = :lastName,
+    //                 phone = :phone,
+    //                 email = :email,
+    //                 updated_at = NOW(),
+    //                 isBlocked = :isBlocked,
+    //                 rewardPoint = :rewardPoint,
+    //                 img_url = :img_url
+    //             WHERE customer_id = :customer_id");
+    //     $this->db->bind(':firstName', $data['firstName']);
+    //     $this->db->bind(':lastName', $data['lastName']);
+    //     $this->db->bind(':phone', $data['phone']);
+    //     $this->db->bind(':email', $data['email']);
+    //     $this->db->bind(':isBlocked', $data['isBlocked']);
+    //     $this->db->bind(':rewardPoint', $data['rewardPoint']);
+    //     $this->db->bind(':img_url', $data['img_url']);
+    //     $this->db->bind(':customer_id', $data['customer_id']);
+
+    //     return $this->db->execute();
+    // }
+
     public function updateMember($data)
     {
-        $this->db->query("UPDATE customer SET 
-                    firstName = :firstName,
-                    lastName = :lastName,
-                    phone = :phone,
-                    email = :email,
-                    updated_at = NOW(),
-                    isBlocked = :isBlocked,
-                    rewardPoint = :rewardPoint,
-                    img_url = :img_url
-                WHERE customer_id = :customer_id");
+        $sql = "
+        UPDATE customer SET
+            firstName = :firstName,
+            lastName = :lastName,
+            phone = :phone,
+            email = :email,
+            isBlocked = :isBlocked,
+            rewardPoint = :rewardPoint
+    ";
+
+        if (isset($data['img_url'])) {
+            $sql .= ", img_url = :img_url";
+        }
+
+        $sql .= " WHERE customer_id = :customer_id";
+
+        $this->db->query($sql);
+
+        // 🔑 Bind parameters
+        $this->db->bind(':customer_id', $data['customer_id']);
         $this->db->bind(':firstName', $data['firstName']);
         $this->db->bind(':lastName', $data['lastName']);
         $this->db->bind(':phone', $data['phone']);
         $this->db->bind(':email', $data['email']);
         $this->db->bind(':isBlocked', $data['isBlocked']);
         $this->db->bind(':rewardPoint', $data['rewardPoint']);
-        $this->db->bind(':img_url', $data['img_url']);
-        $this->db->bind(':customer_id', $data['customer_id']);
+
+        if (isset($data['img_url'])) {
+            $this->db->bind(':img_url', $data['img_url']);
+        }
 
         return $this->db->execute();
     }
+
 
     public function updateAddress($address_id, $addressData)
     {

@@ -573,7 +573,7 @@ class userController
             // Move uploaded file
             if (move_uploaded_file($file['tmp_name'], $targetPath)) {
                 // Save relative path to DB
-                $img_url = $fileName;
+                $memberData['img_url'] = $fileName;
             } else {
                 $_SESSION['error_message'] = "Failed to upload image.";
                 return false;
@@ -588,8 +588,7 @@ class userController
             'phone'       => $_POST['phone'] ?? '',
             'email'       => $_POST['email'] ?? '',
             'isBlocked'   => $_POST['isBlocked'] ?? 0,
-            'rewardPoint' => $_POST['rewardPoint'] ?? 0,
-            'img_url' => $img_url ?? null
+            'rewardPoint' => $_POST['rewardPoint'] ?? 0
         ];
 
         // Update member in database
