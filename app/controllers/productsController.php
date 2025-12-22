@@ -938,31 +938,39 @@ class ProductsController
     public function systemCall($phone)
     {
         // Remove non-digits
-        $phone = preg_replace('/\D/', '', $phone); // 假设输入 0123456789 -> 0123456789
+        $phone = preg_replace('/\D/', '', $phone);
 
-        // Malaysia format
         if (str_starts_with($phone, '0')) {
-            $phone = '6' . ltrim($phone, '0'); // -> 6123456789
+            $phone = '6' . ltrim($phone, '0');
         }
-
         if (!str_starts_with($phone, '6')) {
             $phone = '6' . $phone;
         }
+        $phone = '+' . $phone;
 
-        $phone = '+' . $phone; // -> +6123456789
-
-        // DEBUG: confirm number
-        error_log("Calling number: $phone");
+        echo "<h1>Debug Mode</h1>";
+        echo "Attempting to call: <strong>" . htmlspecialchars($phone) . "</strong><br>";
 
         $twilio = new TwilioSMS(
             'AC691f78ade95d9649a59a8e5c7a431e7a',
             '242e93ca44f709be3f93cd4ea0bd012a',
-            '+14199241697' // MUST be voice-enabled
+            '+14199241697'
         );
 
         $msg = "Hi Wei Xin. How about today !!!";
 
-        return $twilio->call($phone, $msg);
+        $result = $twilio->call($phone, $msg);
+
+        echo "<pre>";
+        print_r($result);
+        echo "</pre>";
+
+        if ($result['success'] === false) {
+            echo "<h2 style='color:red'>FAILED! Check the error message above.</h2>";
+        } else {
+            echo "<h2 style='color:green'>SUCCESS! Phone should ring.</h2>";
+        }
+        die("Script stopped for debugging.");
     }
 
 
