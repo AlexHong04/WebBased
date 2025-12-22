@@ -60,6 +60,10 @@
   border-left: 6px solid #fc6a6a;
 }
 
+.card.low-stock a {
+  display: none;
+}
+
 .chart-card-wrapper {
   display: flex;
   gap: 20px;

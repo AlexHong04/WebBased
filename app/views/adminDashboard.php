@@ -125,9 +125,11 @@ require_once __DIR__ . '/adminheader.php';
       <h3>Cancellation Requests</h3>
       <p><?= $cancellationRequests ?></p>
     </div>
+
     <div class="card low-stock">
-      <h3>Low Stock Alerts</h3>
-      <p>></p>
+      <a href="#" class="low-stock" onclick="window.location.href='/app/views/product/lowStockAlert.php'"></a>
+      <h3>Low Stock</h3>
+      <p>&gt;</p>
     </div>
   </div>
 
