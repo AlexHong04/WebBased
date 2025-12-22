@@ -3,6 +3,7 @@ require_once __DIR__ . '/../models/productsModel.php';
 require_once __DIR__ . '/../models/wishlistModel.php';
 require_once __DIR__ . '/../helpers/request.php';
 require_once __DIR__ . '/../helpers/mail.php';
+require_once __DIR__ . '/../lib/TwilioSMS.php';
 
 class ProductController
 {
@@ -698,7 +699,6 @@ class ProductController
             ];
         }
     }
-
     const IMG_BASE_URL = '/public/';
     const REVIEW_IMG_BASE_PATH = '/public/images/review/';
 
@@ -952,5 +952,25 @@ class ProductController
         }
 
         exit;
+    }
+    public function systemCall($phone)
+    {
+        $phone = preg_replace('/\D/', '', $phone);
+        if (str_starts_with($phone, '0')) {
+            $phone = '+6' . $phone;
+        }
+
+        $twilio = new TwilioSMS(
+            'AC691f78ade95d9649a59a8e5c7a431e7a',
+            '242e93ca44f709be3f93cd4ea0bd012a',
+            '+14199241697'
+        );
+
+        $msg = "Hi Wei Xin. How about today !!!";
+
+
+        $isCalled = $twilio->call($phone, $msg);
+
+        return $isCalled;
     }
 }
