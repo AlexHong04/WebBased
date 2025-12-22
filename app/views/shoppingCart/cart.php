@@ -170,7 +170,7 @@ include '../header.php';
         <div class="empty-icon"><i class="fas fa-shopping-basket"></i></div>
         <h2 class="empty-title">Your cart is currently empty</h2>
         <p class="empty-text">Looks like you haven't made your choice yet.</p>
-        <a href="" class="continue-shopping-btn">
+        <a href="/app/views/category/categoryHomePage.php" class="continue-shopping-btn">
             <div style="margin-left: 30px;"><i class="fas fa-arrow-left"></i>&nbsp Start Shopping</div>
         </a>
     </div>
