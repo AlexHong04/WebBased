@@ -3,8 +3,11 @@ require_once __DIR__ . '/../models/userModel.php';
 require_once __DIR__ . '/../helpers/request.php';
 require_once __DIR__ . '/../helpers/mail.php';
 require_once __DIR__ . '/../helpers/validation.php';
+require_once __DIR__ . '/../helpers/captcha.php';
 require_once __DIR__ . '/../helpers/auth.php';
+require_once __DIR__ . '/../helpers/googleCallback.php';
 require_once __DIR__ . '/../lib/Pagination.php';
+require_once __DIR__ . '/../lib/TwilioSMS.php';
 class userController
 {
     private $userModel;
@@ -27,11 +30,15 @@ class userController
             $confirm_password = post('confirm_password');
             // validate form data
             $errors = [];
-            if (empty($firstName) || empty($lastName)) $errors['name'] = "Name is required.";
-            if (empty($email) || !is_email($email)) $errors['email'] = "Valid email is required.";
-            if (empty($password)) $errors['password'] = "Password is required.";
-            if ($password !== $confirm_password) $errors['confirm_password'] = "Passwords do not match.";
-            if (empty($gender)) $errors['gender'] = "Gender is required.";
+            // if (empty($firstName) || empty($lastName)) $errors['name'] = "Name is required.";
+            if ($this->userModel->getIsEmailExists($email) || $this->userModel->getIsStaffEmailExists($email)) {
+                $errors['email'] = "This Email is already registered.";
+            } else if (!isValidEmailDomain($email)) {
+                $errors['email'] = "Email domain does not exist.";
+            }
+            // if (empty($password)) $errors['password'] = "Password is required.";
+            // if ($password !== $confirm_password) $errors['confirm_password'] = "Passwords do not match.";
+            // if (empty($gender)) $errors['gender'] = "Gender is required.";
             if (!empty($errors)) {
                 $_SESSION['flash_error'] = $errors;
                 $_SESSION['old'] = $_POST;
@@ -73,91 +80,31 @@ class userController
         // Destroy the session
         session_unset();
         session_destroy();
+
+        if (isset($_COOKIE['remember_token'])) {
+            setcookie("remember_token", "", time() - 3600, "/", "", false, true);
+            // unset($_COOKIE['remember_token']);
+        }
+
         // Redirect to home or login page
         redirect('../views/home.php');
     }
 
     // handle user sign in
-    // public function signIn()
-    // {
-    //     if (is_post() && post('action') === 'login') {
-    //         $email = $_POST['email'];
-    //         $password = $_POST['password'];
-    //         $remember = isset($_POST['remember']); // checkbox
-
-    //         if (isset($_SESSION['flash_error'])) {
-    //             unset($_SESSION['flash_error']);
-    //         }
-
-    //         // fetch user by email only
-    //         $user = $this->userModel->getUser($email);
-    //         $staff = $this->userModel->getStaff($email);
-
-    //         if ($user['isActive'] != 1) {
-    //             $_SESSION['flash_error']['login'] = "Account is not activated. Please check your email for the activation link.";
-    //             redirect('signIn.php');
-    //             return;
-    //         }
-
-    //         // verify password
-    //         if ((!$user || !password_verify($password, $user['password'])) && (!$staff || !password_verify($password, $staff['password']))) {
-    //             $_SESSION['flash_error']['login'] = "Invalid email or password.";
-    //             redirect('signIn.php');
-    //             return;
-    //         }
-
-    //         // Create JWT
-    //         $secret = 'Lovine';
-    //         $payload = [
-    //             'customerId' => $user['customer_id'],
-    //             'email' => $user['email'],
-    //             'exp' => time() + (60 * 60) // 1 hour
-    //         ];
-    //         $token = createJWT($payload, $secret);
-
-    //         // save in session
-    //         $_SESSION['token'] = $token;
-
-    //         // ---- Remember Me ----
-    //         if ($remember) {
-    //             setcookie(
-    //                 "remember_token",
-    //                 $token,
-    //                 time() + (60 * 60 * 24 * 30), // 30 days
-    //                 "/",
-    //                 "",
-    //                 false,
-    //                 true
-    //             );
-    //         }
-
-    //         // check staff id == AD direct to admin dashboard else direct to user home
-
-    //         if ($staff) {
-    //             // store staff id in session
-    //             $_SESSION['adminId'] = $staff['admin_id'];
-    //             $_SESSION['email'] = $staff['email'];
-    //             $_SESSION['flash_success']['login'] = "Login successful.";
-    //             redirect('');
-    //             return;
-    //         } else {
-    //             // proceed with user login
-    //             // store user id in session
-    //             $_SESSION['customerId'] = $user['customer_id'];
-    //             $_SESSION['email'] = $user['email'];
-    //             $_SESSION['flash_success']['login'] = "Login successful.";
-    //             redirect('../home.php');
-    //         }
-    //     }
-    // }
-
-    // handle user sign in
     public function signIn()
     {
         if (is_post() && post('action') === 'login') {
+            $secretKey = "6Ld81TEsAAAAAJsuOwHaPEL0WHyMYPIhisH8CUmX";
+            if (!verifyRecaptcha($secretKey)) {
+                $_SESSION['flash_error']['login'] = "CAPTCHA verification failed. Please try again.";
+                $_SESSION['old']['email'] = $_POST['email'];
+
+                redirect('signIn.php');
+                return;
+            }
             $email = $_POST['email'];
             $password = $_POST['password'];
-            $remember = isset($_POST['remember']); // checkbox
+            $remember = !empty($_POST['remember']); // checkbox
 
             if (isset($_SESSION['flash_error'])) {
                 unset($_SESSION['flash_error']);
@@ -174,6 +121,11 @@ class userController
                 $_SESSION['flash_error']['login'] = "Your account has been blocked. Please contact support.";
                 redirect('signIn.php');
                 return;
+            }
+            if ($this->userModel->getIsEmailExists($email) || $this->userModel->getIsStaffEmailExists($email)) {
+                $errors['email'] = "This Email is already registered.";
+            } else if (!isValidEmailDomain($email)) {
+                $errors['email'] = "Email domain does not exist.";
             }
 
             if ($staff && password_verify($password, $staff['password'])) {
@@ -239,6 +191,11 @@ class userController
             //  Remember Me 
             if ($remember) {
                 setcookie("remember_token", $token, time() + (60 * 60 * 24 * 30), "/", "", false, true);
+            } else {
+                if (isset($_COOKIE['remember_token'])) {
+                    setcookie("remember_token", "", time() - 3600, "/", "", false, true);
+                    unset($_COOKIE['remember_token']);
+                }
             }
             $prefix = strtoupper(substr($loggedInId, 0, 2));
 
@@ -261,15 +218,88 @@ class userController
             }
         }
     }
+    public function loginWithGoogle()
+    {
+        $client_id = '129399541762-kulgn2g9c3cp5gpdt18sgopu2u1volcg.apps.googleusercontent.com';
+        $redirect_uri = 'http://localhost/app/views/security/signIn.php?action=googleCallback';
 
-    public function checkUserMultipleLogin() {}
+        $params = [
+            'response_type' => 'code',
+            'client_id' => $client_id,
+            'redirect_uri' => $redirect_uri,
+            'scope' => 'email profile',
+            'access_type' => 'online'
+        ];
+
+        $url = 'https://accounts.google.com/o/oauth2/auth?' . http_build_query($params);
+
+        redirect($url);
+        exit;
+    }
+
+    public function handleGoogleLogin()
+    {
+        $client_id = '129399541762-kulgn2g9c3cp5gpdt18sgopu2u1volcg.apps.googleusercontent.com';
+        $client_secret = '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';
+        $redirect_uri = 'http://localhost/app/views/security/signIn.php?action=googleCallback';
+
+        $userInfo = handleGoogleCallback($client_id, $client_secret, $redirect_uri);
+
+        if (isset($userInfo['error'])) {
+            $_SESSION['error_message'] = "Google Login Failed: " . $userInfo['error'];
+            redirect("signIn.php");
+            exit;
+        }
+
+        $email = $userInfo['email'];
+        $firstName = $userInfo['given_name'];
+        $lastName = $userInfo['family_name'];
+        $picture = $userInfo['picture'];
+
+        $existingUser = $this->userModel->getUser($email);
+
+        if ($existingUser) {
+            if ($existingUser->isBlocked == 1) {
+                $_SESSION['error_message'] = "Account is blocked. Please contact support.";
+                redirect("signIn.php");
+                exit;
+            }
+
+            $_SESSION['user_id'] = $existingUser['customer_id'];
+            $_SESSION['user_name'] = $existingUser->firstName;
+            $_SESSION['user_email'] = $existingUser->email;
+            $_SESSION['role'] = 'member';
+            $_SESSION['img_url'] = $existingUser->img_url;
+        } else {
+            $newUserId = $this->userModel->registerGoogleUser($email, $firstName, $lastName, $picture);
+
+            if ($newUserId) {
+                $_SESSION['user_id'] = $newUserId;
+                $_SESSION['user_name'] = $firstName;
+                $_SESSION['user_email'] = $email;
+                $_SESSION['role'] = 'member';
+                $_SESSION['img_url'] = $picture;
+            } else {
+                $_SESSION['error_message'] = "Registration failed. Please try again.";
+                redirect("signIn.php");
+                exit;
+            }
+        }
+        $_SESSION['success_message'] = "Login Successful! Welcome " . $_SESSION['user_name'];
+        redirect('../home.php');
+        exit;
+    }
 
     public function getProfile()
     {
         if (isset($_SESSION['customerId'])) {
             $customerId = $_SESSION['customerId'];
             return $this->userModel->getUserById($customerId);
+        } elseif (isset($_SESSION['adminId'])) {
+            $adminId = $_SESSION['adminId'];
+            return $this->userModel->getAdminById($adminId);
         }
+        return null;
     }
 
     public function updateProfile()
@@ -277,6 +307,7 @@ class userController
         if (is_post()) {
             if (isset($_SESSION['customerId'])) {
                 $customerId = $_SESSION['customerId'];
+                $currentUserData = $this->userModel->getUserById($customerId);
                 $firstName = post('firstName');
                 $lastName = post('lastName');
                 $phone = post('phone');
@@ -286,8 +317,28 @@ class userController
                 $city = post('city');
                 $state = post('state');
                 $postcode = post('postcode');
+                if ($email != $currentUserData['email']) {
+                    if ($this->userModel->getIsEmailExists($email) || $this->userModel->getIsStaffEmailExists($email)) {
+                        $errors['email'] = "This Email is already registered.";
+                    } else if (!isValidEmailDomain($email)) {
+                        $errors['email'] = "Email domain does not exist.";
+                    }
+                }
 
-                $result = $this->userModel->updateUser($firstName, $lastName, $phone, $email, $customerId, $addressLine, $city, $state, $postcode);
+                if ($phone != $currentUserData['phone']) {
+                    if ($this->userModel->getIsPhoneExists($phone) || $this->userModel->getIsStaffPhoneExists($phone)) {
+                        $errors['phone'] = "This phone number is already registered.";
+                    }
+                }
+
+                if (!empty($errors)) {
+                    $_SESSION['flash_error'] = $errors;
+                    $_SESSION['old'] = $_POST;
+                    // redirect('profile.php');
+                    return;
+                }
+
+                $this->userModel->updateUser($firstName, $lastName, $phone, $email, $customerId, $addressLine, $city, $state, $postcode);
 
                 redirect('profile.php');
             } else {
@@ -341,35 +392,44 @@ class userController
     // }
 
 
-    public function forgetPasswordSendOTP($email)
+    public function forgetPasswordSendOTP($phone)
     {
-        $user = $this->userModel->getUser($email);
-        $staff = null;
-
-        if (!$user) {
-            $staff = $this->userModel->getStaff($email);
-        }
-        if (!$user && !$staff) {
+        if (!$this->userModel->getIsPhoneExists($phone)) {
             return false;
         }
-        $name = "User";
-        if ($user) {
-            $name = $user['firstName'] . ' ' . $user['lastName'];
-        } elseif ($staff) {
-            $name = $staff['firstName'] . ' ' . $staff['lastName'];
+
+        if (isset($_SESSION['last_otp_sent']) && (time() - $_SESSION['last_otp_sent'] < 60)) {
+            return false;
         }
 
-        // crate OTP and send email
-        $otp = rand(100000, 999999);
+        // Normalize MY phone: 017-6265778 → 60176265778
+        $phone = preg_replace('/\D/', '', $phone);
+        if (str_starts_with($phone, '01')) {
+            $phone = '6' . $phone;
+        }
+        $phone = '+' . $phone;
+        // Generate secure OTP
+        $otp = random_int(100000, 999999);
 
-        // send email
-        $isSent = sendOtpEmail($email, $name, $otp);
+        // Twilio credentials
+        $sid   = 'AC691f78ade95d9649a59a8e5c7a431e7a';
+        $token = '242e93ca44f709be3f93cd4ea0bd012a';
+        $from  = '+14199241697'; // Twilio phone number
+
+        // Create Twilio object
+        $twilio = new TwilioSMS($sid, $token, $from);
+
+        // Send SMS
+        $message = "Your OTP is {$otp}. Do not share this code.";
+
+        $isSent = $twilio->sendSMS($phone, $message);
 
         if ($isSent) {
+            $_SESSION['last_otp_sent'] = time(); // Record time
             return $otp;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     public function checkOTP($userInputOtp)
@@ -395,11 +455,11 @@ class userController
     }
     public function resetNewPassword($newPassword, $confirmPassword)
     {
-        if (!isset($_SESSION['reset_email'])) {
+        if (!isset($_SESSION['reset_phone'])) {
             return ['success' => false, 'message' => 'Session expired. Please start over.'];
         }
 
-        $email = $_SESSION['reset_email'];
+        $phone = $_SESSION['reset_phone'];
 
         if (strlen($newPassword) < 8) {
             return ['success' => false, 'message' => 'Password must be at least 8 characters.'];
@@ -411,12 +471,12 @@ class userController
 
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
 
-        $result = $this->userModel->updatePasswordByEmail($email, $hashedPassword);
+        $result = $this->userModel->updatePasswordByPhone($phone, $hashedPassword);
 
         if ($result) {
             unset($_SESSION['otp']);
             unset($_SESSION['otp_expire']);
-            unset($_SESSION['reset_email']);
+            unset($_SESSION['reset_phone']);
 
             return ['success' => true];
         } else {

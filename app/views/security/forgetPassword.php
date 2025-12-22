@@ -8,20 +8,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $controller = new userController();
 
     if ($_POST['action'] === 'sendOtp') {
-        $email = trim($_POST['email'] ?? '');
 
-        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            echo json_encode(['success' => false, 'message' => 'Valid email required']);
+        
+        $phone = trim($_POST['phone'] ?? '');
+
+        if (empty($phone) || !preg_match('/^\+?6?01[0-9]{8}$/', $phone)) {
+            echo json_encode(['success' => false, 'message' => 'Valid phone number required']);
             exit;
         }
-        $otp = $controller->forgetPasswordSendOTP($email);
+        $otp = $controller->forgetPasswordSendOTP($phone);
         if ($otp !== false) {
             $_SESSION['otp'] = $otp;
             $_SESSION['otp_expire'] = time() + 300; // 5 minutes expiry
-            $_SESSION['reset_email'] = $email;
+            $_SESSION['reset_phone'] = $phone;
             echo json_encode(['success' => true]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Email not found or send failed']);
+            echo json_encode(['success' => false, 'message' => 'Phone not found or send failed']);
         }
         exit;
     }
@@ -70,11 +72,11 @@ require_once __DIR__ . '/../header.php';
             </div>
             <form id="form-step-1">
                 <div class="input-box">
-                    <input type="email" id="email" class="input-field" placeholder="Email Address">
+                    <input type="phone" id="phone" class="input-field" placeholder="Phone Number">
                     <svg xmlns="http://www.w3.org/2000/svg" class="input-icon" viewBox="0 0 512 512" width="20" height="20" fill="currentColor">
                         <path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z" />
                     </svg>
-                    <small id="emailError" class="error-message"></small>
+                    <small id="phoneError" class="error-message"></small>
                 </div>
                 <div class="input-box">
                     <input type="submit" class="submit" value="Send Code">
@@ -102,7 +104,7 @@ require_once __DIR__ . '/../header.php';
                     <input type="submit" class="submit" value="Verify">
                 </div>
                 <div class="top">
-                    <span><a href="#" onclick="backToStep1(event)">Wrong Email? Go Back</a></span>
+                    <span><a href="#" onclick="backToStep1(event)">Wrong Phone? Go Back</a></span>
                 </div>
             </form>
         </div>

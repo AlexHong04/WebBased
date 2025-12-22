@@ -4,12 +4,12 @@
 $_err = [];
 
 // Generate <span class='err'>
-function err($key) {
+function err($key)
+{
     global $_err;
     if ($_err[$key] ?? false) {
         echo "<span class='err'>$_err[$key]</span>";
-    }
-    else {
+    } else {
         echo '<span></span>';
     }
 }
@@ -18,11 +18,6 @@ function err($key) {
 function is_money($value)
 {
     return preg_match('/^\-?\d+(\.\d{1,2})?$/', $value);
-}
-
-function is_email($value)
-{
-    return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
 }
 
 function is_date($value, $format = 'Y-m-d')
@@ -66,7 +61,8 @@ function root($path = '')
 {
     return "$_SERVER[DOCUMENT_ROOT]/$path";
 }
-function base($path = '') {
+function base($path = '')
+{
     return "http://$_SERVER[HTTP_HOST]/$path";
 }
 
@@ -77,4 +73,17 @@ function array_all($arr, $fn)
     return true;
 }
 
+function isValidEmailDomain($email)
+{
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return false;
+    }
+    $domain = substr(strrchr($email, "@"), 1);
+    return checkdnsrr($domain, "MX");
+}
 
+function isValidMalaysiaPhone($phone)
+{
+    $phone = preg_replace('/[\s\-]/', '', $phone);
+    return preg_match('/^(\+?6?01)[0-9]{8,9}$/', $phone);
+}

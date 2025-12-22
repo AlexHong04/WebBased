@@ -2,12 +2,14 @@
 $title = "Register Page";
 $pageCSS = "signUp.css";
 
-include  '../header.php';
-require_once __DIR__ . '/../../helpers/html.php';
+
 require_once __DIR__ . '/../../controllers/userController.php';
 
 $controller = new userController();
 $controller->signUp();
+
+require_once __DIR__ . '/../header.php';
+require_once __DIR__ . '/../../helpers/html.php';
 ?>
 
 <div class="wrapper">

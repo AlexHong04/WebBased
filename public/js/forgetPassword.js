@@ -6,14 +6,14 @@ function validateStep1Form() {
   const form = document.getElementById("form-step-1");
   clearErrors(form);
 
-  const email = document.getElementById("email");
+  const phone = document.getElementById("phone");
   let isValid = true;
 
-  if (isEmpty(email.value)) {
-    showError("email", "Email Address is required");
+  if (isEmpty(phone.value)) {
+    showError("phone", "Phone Number is required");
     isValid = false;
-  } else if (!isValidEmail(email.value)) {
-    showError("email", "Please enter a valid email address");
+  } else if (!/^\+?6?01[0-9]{8}$/.test(phone.value)) {
+    showError("phone", "Please enter a valid phone number");
     isValid = false;
   }
   return isValid;
@@ -102,7 +102,7 @@ document.getElementById("form-step-1").addEventListener("submit", function (e) {
   const btn = this.querySelector(".submit");
   const oldText = btn.value;
 
-  const emailVal = document.getElementById("email").value;
+  const phoneVal = document.getElementById("phone").value;
 
   btn.value = "Sending...";
   btn.disabled = true;
@@ -112,7 +112,7 @@ document.getElementById("form-step-1").addEventListener("submit", function (e) {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: "action=sendOtp&email=" + encodeURIComponent(emailVal),
+    body: "action=sendOtp&phone=" + encodeURIComponent(phoneVal),
   })
     .then((res) => res.text())
     .then((text) => {

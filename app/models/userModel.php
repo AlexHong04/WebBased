@@ -40,6 +40,14 @@ class userModel
         return $this->db->result();
     }
 
+    // get admin by id
+    public function getAdminById($id)
+    {
+        $this->db->query("SELECT * FROM admin WHERE admin_id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->result();
+    }
+
     // create new user
     public function createUser($firstName, $lastName, $email, $gender, $password)
     {
@@ -53,6 +61,30 @@ class userModel
         $this->db->bind(':gender', $gender);
         $this->db->bind(':password', $password);
         return $this->db->execute();
+    }
+
+    public function registerGoogleUser($email, $firstName, $lastName, $picture)
+    {
+        $customerId = $this->db->generateId('customer', 'customer_id', 'CU');
+        $randomPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
+        $this->db->query("INSERT INTO customer 
+                          (customer_id, firstName, lastName, email, password, gender, img_url, created_at, isActive, isBlocked) 
+                          VALUES 
+                          (:id, :fname, :lname, :email, :pass, :gender, :img, NOW(), 1, 0)");
+
+        $this->db->bind(':id', $customerId);
+        $this->db->bind(':fname', $firstName);
+        $this->db->bind(':lname', $lastName);
+        $this->db->bind(':email', $email);
+        $this->db->bind(':pass', $randomPassword);
+        $this->db->bind(':gender', 'U');
+        $this->db->bind(':img', $picture);
+
+        if ($this->db->execute()) {
+            return $customerId;
+        } else {
+            return false;
+        }
     }
 
     public function createStaff($firstName, $lastName, $email, $position, $password, $phone)
@@ -71,14 +103,14 @@ class userModel
 
     public function getUser($email)
     {
-        $this->db->query("SELECT customer_id,firstName,lastName,email,password,isActive,isBlocked FROM customer WHERE email = :email");
+        $this->db->query("SELECT customer_id,firstName,lastName,email,phone,password,isActive,isBlocked FROM customer WHERE email = :email");
         $this->db->bind(':email', $email);
         return $this->db->result();
     }
 
     public function getStaff($email)
     {
-        $this->db->query("SELECT admin_id,firstName,lastName,email,password,position FROM admin WHERE email = :email");
+        $this->db->query("SELECT admin_id,firstName,lastName,email,phone,password,position FROM admin WHERE email = :email");
         $this->db->bind(':email', $email);
         return $this->db->result();
     }
@@ -191,6 +223,57 @@ class userModel
         $this->db->bind(':email', $email);
 
         return $this->db->execute();
+    }
+
+    public function updatePasswordByPhone($phone, $newHashedPassword)
+    {
+        // Update Customer Table
+        $this->db->query("UPDATE customer SET password = :pass WHERE phone = :phone");
+        $this->db->bind(':pass', $newHashedPassword);
+        $this->db->bind(':phone', $phone);
+
+        if ($this->db->execute()) {
+            if ($this->db->rowCount() > 0) return true;
+        }
+
+        // Update Admin Table (if applicable)
+        $this->db->query("UPDATE admin SET password = :pass WHERE phone = :phone");
+        $this->db->bind(':pass', $newHashedPassword);
+        $this->db->bind(':phone', $phone);
+
+        return $this->db->execute();
+    }
+
+    public function getIsEmailExists($email)
+    {
+        $this->db->query("SELECT email FROM customer WHERE email = :email");
+        $this->db->bind(':email', $email);
+        $this->db->execute();
+        return $this->db->rowCount() > 0;
+    }
+
+    public function getIsPhoneExists($phone)
+    {
+        $this->db->query("SELECT phone FROM customer WHERE phone = :phone");
+        $this->db->bind(':phone', $phone);
+        $this->db->execute();
+        return $this->db->rowCount() > 0;
+    }
+
+    public function getIsStaffEmailExists($email)
+    {
+        $this->db->query("SELECT email FROM admin WHERE email = :email");
+        $this->db->bind(':email', $email);
+        $this->db->execute();
+        return $this->db->rowCount() > 0;
+    }
+
+    public function getIsStaffPhoneExists($phone)
+    {
+        $this->db->query("SELECT phone FROM admin WHERE phone = :phone");
+        $this->db->bind(':phone', $phone);
+        $this->db->execute();
+        return $this->db->rowCount() > 0;
     }
 
     // // home
