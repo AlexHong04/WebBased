@@ -203,9 +203,11 @@ function calSubtotal($subtotal, $tax)
             <?php if ($orderData['order_status'] != "Cancel Requested" && $orderData['order_status'] != "Cancelled" && $orderData['order_status'] != "Refunded" && $orderData['order_status'] != "Completed"): ?>
               <div class="btn-container">
                 <?php if ($orderData['order_status'] == "Pending"): ?>
-                  <button class="order-action-btn pay-now"
-                    onclick="window.location.href='/id=<?= $order_id ?>'">Pay Now</button>
-
+                  <button type="button"
+                    class="order-action-btn pay-now"
+                    onclick="window.location.href='/app/views/shoppingCart/payment.php?order_id=<?= $order_id ?>'">
+                    Pay Now
+                  </button>
                 <?php elseif ($orderData['order_status'] == "Paid" || $orderData['order_status'] == "Packing"): ?>
                   <button class="order-action-btn cancel-order"
                     onclick="window.location.href='cancelOrder.php?id=<?= $order_id ?>'">Cancel</button>
