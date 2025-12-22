@@ -176,7 +176,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
     </div>
 
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="../../public/js/header.js"></script>
+    <script src="/public/js/header.js"></script>
     <script>
         // const scanBtn = document.getElementById("scanQrBtn");
         // const qrPopup = document.getElementById("qrPopup");
