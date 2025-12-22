@@ -184,13 +184,11 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
         </div>
     </header>
 
-    <div id="qrPopup" class="popup-overlay">
+   <div id="qrPopup" class="popup-overlay">
         <div class="popup-box">
             <h3>Scan QR Code</h3>
             <p>Point your camera at an order QR code</p>
-
             <div id="qr-reader"></div>
-
             <button id="qrCancel">Cancel Scan</button>
         </div>
     </div>
