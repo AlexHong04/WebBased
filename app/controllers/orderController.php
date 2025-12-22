@@ -123,11 +123,11 @@ class OrderController
     }
 
     if ($newStatus === "Packing") {
-      return $this->orderModel->createShipment($orderId, $newStatus);
+      $this->orderModel->createShipment($orderId, $newStatus);
     }
 
     if ($newStatus === "Out for Delivery" || $newStatus === "Delivered") {
-      return $this->orderModel->updateShipment($orderId, $newStatus);
+      $this->orderModel->updateShipment($orderId, $newStatus);
     }
 
     if ($newStatus === "Cancelled") {
