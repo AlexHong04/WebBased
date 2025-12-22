@@ -230,3 +230,15 @@ img {
   object-fit: cover;
   border-radius: 6px;
 }
+
+.back-link {
+  color: var(--color-light-text);
+  text-decoration: none;
+  font-size: 30px;
+}
+
+.backInStock-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

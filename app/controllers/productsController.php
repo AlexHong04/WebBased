@@ -111,7 +111,8 @@ class ProductsController
     public function addProduct()
     {
         $productId = $this->productModel->generateId('product', 'product_id', 'PR');
-        $categoryId = $_POST['category_id'];
+
+        $categoryId = $_POST['category_id'] ?? null;
         $category = $this->productModel->getCategoryById($categoryId);
         $categoryName = $category['category_name'] ?? 'uncategorized';
         $categoryNameSafe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $categoryName);
@@ -128,32 +129,51 @@ class ProductsController
 
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
                 $newName = $productId . "_img" . ($i + 1) . "." . $ext;
-                $destination = $categoryFolder . $newName;
 
-                if (move_uploaded_file($_FILES['product_images']['tmp_name'][$i], $destination)) {
+                if (move_uploaded_file(
+                    $_FILES['product_images']['tmp_name'][$i],
+                    $categoryFolder . $newName
+                )) {
                     $productImages[] = $newName;
                 }
             }
         }
 
         $variantsData = [];
+
         if (!empty($_POST['variant_ids'])) {
+
+            $variantCount = count($_POST['variant_ids']);
+            $variantIds = $this->productModel->generateMultipleVariantIds($variantCount);
+
             foreach ($_POST['variant_ids'] as $i => $vid) {
+
+                $variantId = $variantIds[$i];
+
                 $minStock = $_POST['min_stock_levels'][$i] ?? 1;
                 $stockQty = $_POST['stock_qtys'][$i] ?? 1;
-                $stockStatus = ($stockQty == 0) ? 'Out Of Stock' : (($stockQty <= $minStock) ? 'Low Stock' : 'In Stock');
-                $variantId = $this->productModel->generateId('product_variant', 'product_variant_id', 'PV');
+
+                $stockStatus = ($stockQty == 0)
+                    ? 'Out Of Stock'
+                    : (($stockQty <= $minStock) ? 'Low Stock' : 'In Stock');
 
                 $imgFileName = null;
-                // Check if a file was uploaded for THIS specific variant index
-                if (!empty($_FILES['variant_images_group']['name'][$i])) {
-                    $ext = pathinfo($_FILES['variant_images_group']['name'][$i], PATHINFO_EXTENSION);
+                if (
+                    isset($_FILES['variant_images_group']['name'][$i]) &&
+                    !empty($_FILES['variant_images_group']['name'][$i])
+                ) {
+                    $ext = pathinfo(
+                        $_FILES['variant_images_group']['name'][$i],
+                        PATHINFO_EXTENSION
+                    );
+
                     $imgFileName = $variantId . "." . $ext;
-                    $destination = $categoryFolder . $imgFileName;
-                    move_uploaded_file($_FILES['variant_images_group']['tmp_name'][$i], $destination);
+                    move_uploaded_file(
+                        $_FILES['variant_images_group']['tmp_name'][$i],
+                        $categoryFolder . $imgFileName
+                    );
                 }
 
-                // Single array entry per variant
                 $variantsData[] = [
                     'product_variant_id' => $variantId,
                     'min_stock_level' => $minStock,
@@ -168,10 +188,10 @@ class ProductsController
 
         $productData = [
             'product_id' => $productId,
-            'product_name' => $_POST['product_name'],
-            'description' => $_POST['description'],
-            'cost_price' => $_POST['cost_price'],
-            'sale_price' => $_POST['sales_price'],
+            'product_name' => $_POST['product_name'] ?? '',
+            'description' => $_POST['description'] ?? '',
+            'cost_price' => $_POST['cost_price'] ?? 0,
+            'sale_price' => $_POST['sales_price'] ?? 0,
             'category_id' => $categoryId,
             'img_url' => implode(',', $productImages)
         ];
@@ -186,11 +206,10 @@ class ProductsController
             header("Location: productList.php");
             exit();
         } catch (Exception $e) {
-            $_SESSION['flash_error'] = "Error updating product: " . $e->getMessage();
-            return [
-                'success' => false,
-                'message' => $e->getMessage()
-            ];
+
+            $_SESSION['flash_error'] = "Error adding product: " . $e->getMessage();
+            header("Location: addSingleProduct.php");
+            exit();
         }
     }
 
@@ -553,7 +572,7 @@ class ProductsController
 
                     $minStock = $_POST['min_stock_levels'][$i] ?? 1;
                     $stockQty = $_POST['stock_qtys'][$i] ?? 1;
-                    $stockStatus = ($stockQty == 0) ? 'out_of_stock' : (($stockQty <= $minStock) ? 'low_stock' : 'in_stock');
+                    $stockStatus = ($stockQty == 0) ? 'Out of Stock' : (($stockQty <= $minStock) ? 'Low Stock' : 'In Stock');
 
                     $variantId = $_POST['product_variant_ids'][$i] ?? $this->productModel->generateId('product_variant', 'product_variant_id', 'PV');
                     $imgFileName = $_POST['variant_existing_images'][$i] ?? null;

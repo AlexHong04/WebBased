@@ -277,7 +277,7 @@ a i {
 
 .btn-restock:hover {
   transform: translateY(-1px);
-  background-color: rgba(215, 142, 7, 0.412);
+  background-color: rgba(11, 109, 220, 0.219);
 }
 
 #bulkRestockBtn:disabled,
@@ -629,7 +629,7 @@ a i {
 }
 
 .actions a svg {
-  color: #000000; /* blue */
+  color: #000000; 
   width: 16px;
   height: 16px;
   vertical-align: middle;

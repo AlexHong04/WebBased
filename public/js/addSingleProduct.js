@@ -74,7 +74,19 @@ function setupImagePreview(
       "width:90px;height:90px;object-fit:cover;border-radius:6px;cursor:pointer;";
 
     img.addEventListener("click", () => {
-      window.open(src, "_blank");
+      if (!isStatic) {
+        // dynamic file from input
+        const file = filesArray.find((f) => f.name === identifier);
+        if (file) {
+          const blobUrl = URL.createObjectURL(file);
+          window.open(blobUrl, "_blank");
+          // optional: revoke later
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        }
+      } else {
+        // static image from server
+        window.open(src, "_blank");
+      }
     });
 
     div.appendChild(img);
@@ -136,6 +148,7 @@ function setupImagePreview(
         const div = createPreviewElement(e.target.result, file.name, false);
         previewContainer.appendChild(div);
       };
+
       reader.readAsDataURL(file);
     });
 
@@ -237,7 +250,23 @@ function setupVariantSection(section, initialImages = []) {
   const variantImageInput = section.querySelector(".variant-image-input");
   const variantPreview = section.querySelector(".variant-preview-container");
   const variantDropZone = section.querySelector(".variant-drop-zone");
+  const removeBtn = section.querySelector(".remove-variant-btn");
+  const isExistingVariant = section.querySelector(
+    'input[name="product_variant_ids[]"]'
+  );
 
+  if (removeBtn) {
+    if (IS_EDIT_MODE && isExistingVariant) {
+      removeBtn.style.display = "none";
+    }
+    else {
+      removeBtn.style.display = "inline-block";
+      removeBtn.onclick = function () {
+        section.remove();
+        renumberVariants();
+      };
+    }
+  }
   if (!variantImageInput || !variantPreview) return;
 
   let filesArray = [];
@@ -309,7 +338,7 @@ function setupVariantSection(section, initialImages = []) {
   }
 
   function updateInputFiles() {
-    variantPreview.innerHTML = ""; 
+    variantPreview.innerHTML = "";
 
     if (filesArray.length > 0) {
       staticImageNames = [];

@@ -138,6 +138,31 @@ class ProductModel
         }
     }
 
+    public function generateMultipleVariantIds(int $count): array
+    {
+        $this->db->query("
+        SELECT product_variant_id
+        FROM product_variant
+        ORDER BY product_variant_id DESC
+        LIMIT 1
+    ");
+
+        $lastId = $this->db->single();
+
+        $lastNumber = 0;
+        if (!empty($lastId)) {
+            $lastNumber = (int) substr($lastId, 2);
+        }
+
+        $ids = [];
+        for ($i = 1; $i <= $count; $i++) {
+            $ids[] = 'PV' . str_pad($lastNumber + $i, 4, '0', STR_PAD_LEFT);
+        }
+
+        return $ids;
+    }
+
+
     public function getCategoryNameById(string $categoryId): ?string
     {
         $sql = "SELECT category_name FROM category WHERE category_id = :category_id LIMIT 1";
