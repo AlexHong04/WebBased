@@ -59,9 +59,13 @@ class TwilioSMS
             CURLOPT_USERPWD        => $this->accountSid . ':' . $this->authToken
         ]);
 
-        curl_exec($ch);
+        $response = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
         curl_close($ch);
+
+        // DEBUG (IMPORTANT)
+        error_log("Twilio response: $response");
 
         return ($code >= 200 && $code < 300);
     }

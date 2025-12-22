@@ -934,26 +934,38 @@ class ProductsController
 
         exit;
     }
+
     public function systemCall($phone)
     {
+        // Remove non-digits
         $phone = preg_replace('/\D/', '', $phone);
+
+        // Malaysia format
         if (str_starts_with($phone, '0')) {
-            $phone = '+6' . $phone;
+            $phone = '6' . ltrim($phone, '0');
         }
+
+        if (!str_starts_with($phone, '6')) {
+            $phone = '6' . $phone;
+        }
+
+        $phone = '+' . $phone;
+
+        // DEBUG: confirm number
+        error_log("Calling number: $phone");
 
         $twilio = new TwilioSMS(
             'AC691f78ade95d9649a59a8e5c7a431e7a',
             '242e93ca44f709be3f93cd4ea0bd012a',
-            '+14199241697'
+            '+14199241697' // MUST be voice-enabled
         );
 
         $msg = "Hi Wei Xin. How about today !!!";
 
-
-        $isCalled = $twilio->call($phone, $msg);
-
-        return $isCalled;
+        return $twilio->call($phone, $msg);
     }
+
+
     public function handleDeleteProductVariantById(string $variantId)
     {
         if (empty($variantId)) return false;
