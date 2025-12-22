@@ -48,15 +48,17 @@ function displayValue($value)
 
       <!-- Sidebar -->
       <div class="profile-sidebar">
-        <div class="profile-avatar">
+        <div class="profile-avatar" id="avatarDropZone">
           <label for="profile-pic-input" class="avatar-label">
             <img id="profile-pic-preview"
-              src="/public/images/profile/<?= !empty($member->img_url) ? $member->img_url : '/public/images/user.png' ?>"
+              src="<?= (!empty($member->img_url) && trim($member->img_url) !== '')
+                      ? '/public/images/profile/' . $member->img_url
+                      : '/public/images/profile/user.png' ?>"
               alt="Profile Picture">
             <div class="plus">+</div>
+            <div class="drop-overlay">Drop to Upload</div>
           </label>
-
-          <input type="file" name="profile_pic" id="profile-pic-input" accept="image/*">
+          <input type="file" name="profile_pic" id="profile-pic-input" accept="image/*" style="display:none;">
         </div>
 
 

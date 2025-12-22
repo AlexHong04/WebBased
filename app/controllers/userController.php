@@ -591,6 +591,10 @@ class userController
             'rewardPoint' => $_POST['rewardPoint'] ?? 0
         ];
 
+        if (isset($fileName)) {
+            $memberData['img_url'] = $fileName;
+        }
+
         // Update member in database
         $updated = $this->userModel->updateMember($memberData);
 

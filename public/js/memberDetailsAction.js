@@ -2,6 +2,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const hiddenInput = document.getElementById("isBlockedInput");
   const successPopup = document.getElementById("successPopup");
   const errorPopup = document.getElementById("customPopup");
+  const statusDisplay = document.getElementById("statusDisplay");
+  const statusModal = document.getElementById("statusModal");
+  const cancelBtn = document.getElementById("cancelBtn");
+  const confirmBtn = document.getElementById("confirmBtn");
+  const avatarDropZone = document.getElementById("avatarDropZone");
+  const fileInput = document.getElementById("profile-pic-input");
+  const previewImg = document.getElementById("profile-pic-preview");
+  const memberForm = document.querySelector("form");
+
+  let newStatusValue = hiddenInput.value;
+  let isFormEdited = false;
 
   if (successPopup) {
     setTimeout(() => {
@@ -14,14 +25,6 @@ document.addEventListener("DOMContentLoaded", function () {
       errorPopup.classList.remove("show");
     }, 3000);
   }
-
-  const statusDisplay = document.getElementById("statusDisplay");
-  const statusModal = document.getElementById("statusModal");
-  const cancelBtn = document.getElementById("cancelBtn");
-  const confirmBtn = document.getElementById("confirmBtn");
-  const memberForm = document.querySelector("form");
-
-  let newStatusValue = hiddenInput.value; // current status
 
   // When user clicks the status display
   statusDisplay.addEventListener("click", () => {
@@ -74,18 +77,60 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Profile pic preview
-  const fileInput = document.getElementById("profile-pic-input");
-  const previewImg = document.getElementById("profile-pic-preview");
-
-  fileInput.addEventListener("change", function () {
-    const file = this.files[0];
-    if (file) {
+  // Helper function to process the file and show preview
+  function handleProfileFile(file) {
+    if (file && file.type.startsWith("image/")) {
       previewImg.src = URL.createObjectURL(file);
+      isFormEdited = true; // Trigger your existing change tracker
+
+      // Sync the dropped file back to the hidden input
+      // so the PHP form can see it upon submission
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      fileInput.files = dataTransfer.files;
     }
+  }
+
+  // 1. Method One: Standard File Input (Click)
+  fileInput.addEventListener("change", function () {
+    handleProfileFile(this.files[0]);
   });
 
-  let isFormEdited = false;
+  // 2. Method Two: Drag and Drop
+  ["dragenter", "dragover"].forEach((eventName) => {
+    avatarDropZone.addEventListener(
+      eventName,
+      (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        avatarDropZone.classList.add("drag-over");
+      },
+      false
+    );
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    avatarDropZone.addEventListener(
+      eventName,
+      (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        avatarDropZone.classList.remove("drag-over");
+      },
+      false
+    );
+  });
+
+  avatarDropZone.addEventListener(
+    "drop",
+    (e) => {
+      const droppedFiles = e.dataTransfer.files;
+      if (droppedFiles.length > 0) {
+        handleProfileFile(droppedFiles[0]);
+      }
+    },
+    false
+  );
 
   function showCustomPopup(message) {
     const errorPopup = document.getElementById("customPopup");
