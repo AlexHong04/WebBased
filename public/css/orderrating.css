@@ -39,7 +39,7 @@
 }
 
 .order-rating-header {
-  border-bottom: 1px solid var(--border-color);
+  /* border-bottom: 1px solid var(--border-color); */
   padding-bottom: 15px;
   display: flex;
   align-items: center;
@@ -282,7 +282,7 @@
 }
 
 [data-theme="dark"] .camera-icon {
-    filter: invert(1) brightness(2);
+  filter: invert(1) brightness(2);
 }
 
 .drop-zone {

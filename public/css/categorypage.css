@@ -25,7 +25,7 @@
 
 .specific-category-page {
   padding: 50px 20px;
-  background-color: var(--bg-body); 
+  background-color: var(--bg-body);
 }
 
 .specific-category-page .container {
@@ -34,7 +34,7 @@
 }
 
 .containerHeader {
-  border-bottom: 1px solid var(--border-color);
+  /* border-bottom: 1px solid var(--border-color); */
   padding-bottom: 15px;
   display: flex;
   align-items: center;
@@ -90,7 +90,7 @@
 .productCard {
   background-color: var(--bg-card);
   border-radius: 12px;
-  box-shadow: var(--shadow-card); 
+  box-shadow: var(--shadow-card);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
