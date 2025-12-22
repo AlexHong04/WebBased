@@ -2,13 +2,13 @@
 session_start();
 include '../../controllers/orderController.php';
 
-// if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'complete_order') {
-//   ob_clean();
-//   $orderController = new OrderController();
-//   header('Content-Type: application/json');
-//   $orderController->completeOrder();
-//   exit;
-// }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'complete_order') {
+  ob_clean();
+  $orderController = new OrderController();
+  header('Content-Type: application/json');
+  $orderController->completeOrder();
+  exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $orderId = $_POST['order_id'] ?? null;

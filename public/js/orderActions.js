@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
     formData.append("status", newStatus);
     selectedOrders.forEach((id) => formData.append("orders[]", id));
 
-    fetch(window.location.href, { method: "POST", body: formData })
+    fetch("", { method: "POST", body: formData })
       .then((res) => res.text())
       .then((result) => {
         let cleanResult = result.replace(/<script.*<\/script>/, "").trim();
