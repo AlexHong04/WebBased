@@ -67,7 +67,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
         <div class="header-container">
             <div class="logo">
                 <a href="/app/views/home.php">
-                    <img src="/public/images/lovine_logo.png" alt="Lovine Logo" class="logo-image" />
+                    <img src="/public/images/lovine_logo_circle.png" alt="Lovine Logo" class="logo-image" />
                 </a>
             </div>
 
