@@ -679,7 +679,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
                     container.innerHTML = html;
                 } else {
                     container.innerHTML = '<p style="text-align: center;">No addresses found.</p>';
-                    selectAddress('', 'No Address Selected', '', 'Please add a new address.');
+                    selectAddress('', 'No Address Selected', '-', 'Please add a new address.');
                 }
             }).catch(err => {
                 container.innerHTML = '<p style="text-align: center; color: red;">Failed to load.</p>';

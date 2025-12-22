@@ -28,12 +28,26 @@ include __DIR__ . '/../header.php';
 
             <div class="profile-avatar" id="avatarDropZone">
                 <label for="profile-pic-input" class="avatar-label">
+                    <?php
+                    $isDefaultImg = empty($profileData['img_url']);
+                    $imgSrc = $isDefaultImg
+                        ? '/public/images/profile/user.png'
+                        : '/public/images/profile/' . htmlspecialchars($profileData['img_url']);
+
+                    $imgClass = $isDefaultImg ? 'default-avatar' : '';
+                    ?>
                     <img id="profile-pic-preview"
+                        class="<?= $imgClass ?>"
+                        src="<?= $imgSrc ?>"
+                        alt="Profile Picture">
+
+                    <div class="plus">+</div>
+                    <!-- <img id="profile-pic-preview"
                         src="<?= !empty($profileData['img_url'])
                                     ? '/public/images/profile/' . htmlspecialchars($profileData['img_url'])
                                     : '/public/images/profile/user.png' ?>"
                         alt="Profile Picture">
-                    <div class="plus">+</div>
+                    <div class="plus">+</div> -->
                 </label>
 
                 <input type="file" name="profile_pic" id="profile-pic-input" accept="image/*">

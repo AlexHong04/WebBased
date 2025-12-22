@@ -89,7 +89,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                     <li class="dropdown">
                         <a href="#">Category</a>
                         <ul class="dropdown-menu">
-                            <li><a href="category/categoryHomePage.php">All</a></li>
+                            <li><a href="/app/views/category/categoryHomePage.php">All</a></li>
                             <?php if (!empty($categories)): ?>
                                 <?php foreach ($categories as $cat): ?>
                                     <li>

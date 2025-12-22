@@ -2,21 +2,34 @@
   --primary: #f1a2b8;
   --primary-hover: #e08fa5;
   --primary-light2: #fff0f5;
-
-  --secondary: #fff5f3;
-  --text-dark: #333333;
+  --bg-body: #fcfcfc;
+  --bg-card: #ffffff;
+  --bg-sidebar: #fff5f3;
+  --bg-input: #fffbfb;
+  --text-main: #333333;
   --text-gray: #777777;
-
   --border-color: #eee0e5;
-  --white: #ffffff;
-
-  /* New Teal Color for Address Button */
   --info: #17a2b8;
   --info-hover: #138496;
-
+  --success-green: #2ecc71;
+  --error-red: #dc3545;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.08);
   --radius: 16px;
+}
+
+[data-theme="dark"] {
+  --bg-body: #0a0a0a;
+  --bg-card: #18181b;
+  --bg-sidebar: #202023;
+  --bg-input: #27272a;
+  --primary-light2: #2d1b20;
+  --text-main: #ffffff;
+  --text-gray: #a1a1aa;
+  --border-color: #27272a;
+  --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --primary: #fc84a3;
 }
 
 /* =========================================
@@ -28,7 +41,7 @@
 
 .profile-section {
   padding: 4rem 0;
-  background-color: #fcfcfc;
+  background-color: var(--bg-body);
   min-height: 100vh;
 }
 
@@ -36,13 +49,13 @@
   font-size: 2.5rem;
   font-weight: 700;
   text-align: center;
-  color: var(--text-dark);
+  color: var(--text-main);
   margin-bottom: 1.5rem;
 }
 
 .profile-container {
   display: flex;
-  background: var(--white);
+  background: var(--bg-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   overflow: hidden;
@@ -56,7 +69,7 @@
    ========================================= */
 .profile-sidebar {
   width: 320px;
-  background: var(--secondary);
+  background: var(--bg-sidebar);
   padding: 3rem 2rem;
   text-align: center;
   border-right: 1px solid var(--border-color);
@@ -70,7 +83,7 @@
   margin: 0 auto 1.5rem;
   border-radius: 50%;
   overflow: hidden;
-  border: 5px solid var(--white);
+  border: 5px solid var(--bg-card);
   box-shadow: var(--shadow-sm);
 }
 
@@ -107,7 +120,7 @@
 #profile-name {
   font-size: 1.6rem;
   font-weight: 700;
-  color: var(--text-dark);
+  color: var(--text-main);
   margin: 0.8rem 0 0.3rem;
 }
 
@@ -125,7 +138,7 @@
 }
 
 .profile-nav a {
-  color: var(--text-dark);
+  color: var(--text-main);
   text-decoration: none;
   padding: 1rem 1rem 1rem 1rem !important;
   font-size: 1rem;
@@ -146,7 +159,7 @@
 
 .profile-nav a.active {
   background: var(--primary);
-  color: var(--white);
+  color: #fff;
   box-shadow: 0 4px 10px rgba(241, 162, 184, 0.4);
 }
 
@@ -168,7 +181,7 @@
 
 .profile-form-container h3 {
   font-size: 1.8rem;
-  color: var(--text-dark);
+  color: var(--text-main);
   margin-bottom: 2.5rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid var(--border-color);
@@ -184,7 +197,7 @@
   top: 50%;
   transform: translateY(-50%);
   left: 15px;
-  color: #999;
+  color: var(--text-gray);
   pointer-events: none;
   z-index: 5;
   transition: color 0.3s ease;
@@ -210,7 +223,7 @@
   margin-bottom: 0.8rem;
   font-weight: 600;
   font-size: 1.1rem;
-  color: var(--text-dark);
+  color: var(--text-main);
 }
 
 .form-control {
@@ -219,8 +232,8 @@
   border: 1px solid #e0e0e0;
   border-radius: var(--radius);
   font-size: 1rem;
-  color: var(--text-dark);
-  background-color: #fffbfb;
+  color: var(--text-main);
+  background-color: var(--bg-input);
   transition: all 0.3s ease;
   font-family: inherit;
   box-sizing: border-box;
@@ -234,15 +247,15 @@
 }
 
 .form-control:focus + .input-icon {
-  color: #d88a98;
+  color: var(--primary);
 }
 
 /* Readonly fields styling */
 .form-control[readonly] {
-  background-color: #f8f9fa;
-  color: #888;
+  background-color: var(--bg-body);
+  color: var(--text-gray);
   cursor: default; /* Changed from not-allowed for better UX */
-  border-color: #eee;
+  border-color: var(--border-color);
 }
 
 textarea.form-control {
@@ -302,6 +315,7 @@ textarea.form-control {
   transform: translateY(-3px);
   box-shadow: 0 8px 15px rgba(241, 162, 184, 0.3);
 }
+/*
 .place-order-btn {
   width: 100%;
   background: linear-gradient(135deg, #fc84a3 0%, #f55783 100%);
@@ -315,18 +329,18 @@ textarea.form-control {
   margin-top: 20px;
   transition: background 0.3s, transform 0.2s;
   box-shadow: 0 5px 15px rgba(252, 132, 163, 0.4);
-}
+}*/
 
 /* Cancel Button */
 .cancel-btn {
-  background: white;
+  background: var(--bg-card);
   color: var(--text-gray);
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
 }
 
 .cancel-btn:hover {
-  background: #f8f9fa;
-  color: var(--text-dark);
+  background: var(--bg-body);
+  color: var(--text-main);
   transform: translateY(-3px);
 }
 
@@ -362,7 +376,7 @@ textarea.form-control {
 }
 
 .modal-content {
-  background: var(--white);
+  background: var(--bg-card);
   border-radius: 16px;
   width: 95%;
   max-width: 550px;
@@ -390,14 +404,14 @@ textarea.form-control {
   margin-bottom: 20px;
   position: sticky;
   top: 0;
-  background: white;
+  background: var(--bg-card);
   z-index: 10;
 }
 
 .modal-title {
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--text-dark);
+  color: var(--text-main);
   margin: 0;
 }
 
@@ -405,13 +419,13 @@ textarea.form-control {
   background: none;
   border: none;
   font-size: 1.8rem;
-  color: #999;
+  color: var(--text-gray);
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .close-modal-btn:hover {
-  color: var(--text-dark);
+  color: var(--text-main);
 }
 
 /* Modal Buttons (Inside the form) */
@@ -449,7 +463,7 @@ textarea.form-control {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--bg-card);
 }
 
 .address-list-item:hover {
@@ -460,14 +474,14 @@ textarea.form-control {
 
 .address-list-text strong {
   font-size: 1rem;
-  color: var(--text-dark);
+  color: var(--text-main);
   display: block;
   margin-bottom: 4px;
 }
 
 .address-list-text span {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-gray);
   line-height: 1.4;
 }
 
@@ -480,7 +494,7 @@ textarea.form-control {
 }
 
 .address-action-buttons i {
-  color: #bbb;
+  color: var(--text-gray);
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.2s;
@@ -496,7 +510,7 @@ textarea.form-control {
   justify-content: center;
   align-items: center;
   padding: 16px;
-  border: 2px dashed #ddd;
+  border: 2px dashed var(--border-color);
   border-radius: 12px;
   color: var(--text-gray);
   text-decoration: none;
@@ -504,13 +518,13 @@ textarea.form-control {
   transition: all 0.2s;
   font-weight: 600;
   gap: 8px;
-  background: #fcfcfc;
+  background: var(--bg-input);
 }
 
 .add-address-link:hover {
   border-color: var(--primary);
   color: var(--primary);
-  background: #fffbfd;
+  background: var(--primary-light2);
 }
 
 /* =========================================
@@ -527,13 +541,13 @@ textarea.form-control {
   margin-bottom: 15px;
 }
 .modal-icon.success {
-  color: #2ecc71;
+  color: var(--success-green);
 }
 .modal-icon.warning {
-  color: #f1c40f;
+  color: var(--warning-yellow);
 }
 .modal-icon.danger {
-  color: #e74c3c;
+  color: var(--error-red);
 }
 
 .modal-title.centered {
@@ -543,7 +557,7 @@ textarea.form-control {
 }
 
 .modal-message {
-  color: #666;
+  color: var(--text-gray);
   margin: 0 0 25px;
   font-size: 1rem;
   line-height: 1.5;
@@ -562,7 +576,7 @@ textarea.form-control {
 }
 
 .modal-btn.btn-success {
-  background-color: #2ecc71;
+  background-color: var(--success-green);
 }
 .modal-btn.btn-success:hover {
   background-color: #27ae60;
@@ -570,16 +584,16 @@ textarea.form-control {
 
 .modal-btn.btn-secondary,
 .modal-btn.btn-cancel {
-  background-color: #f0f0f0;
-  color: #555;
+  background-color: var(--bg-body);
+  color: var(--text-gray);
 }
 .modal-btn.btn-secondary:hover,
 .modal-btn.btn-cancel:hover {
-  background-color: #e0e0e0;
+  background-color: var(--border-color);
 }
 
 .modal-btn.btn-danger {
-  background-color: #e74c3c;
+  background-color: var(--error-red);
 }
 .modal-btn.btn-danger:hover {
   background-color: #c0392b;
@@ -678,18 +692,22 @@ textarea.form-control {
   }
 }
 
+/* Error States */
 .form-control.is-invalid {
-  border-color: #dc3545; /* Red color */
+  border-color: var(--error-red) !important;
   padding-right: calc(1.5em + 0.75rem);
   background-image: none; /* Optional: remove if you have icons */
 }
 
 .text-danger {
-  color: #dc3545;
+  color: var(--error-red);
   font-size: 0.875em;
   margin-top: 0.25rem;
 }
 
+.profile-avatar .plus {
+  display: none;
+}
 .profile-avatar input[type="file"] {
   display: none;
 }
@@ -705,6 +723,10 @@ textarea.form-control {
 
 .profile-avatar img:hover {
   opacity: 0.8;
+}
+
+[data-theme="dark"] .profile-avatar img.default-avatar {
+    content: url('/public/images/profile/user_white.png');
 }
 
 .avatar-label {
@@ -731,7 +753,7 @@ textarea.form-control {
   right: 5px;
   width: 28px;
   height: 28px;
-  background: #ff859f;
+  background: var(--primary);
   color: #fff;
   border-radius: 50%;
   border: 2px solid #fff;
