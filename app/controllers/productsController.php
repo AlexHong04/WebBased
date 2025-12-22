@@ -938,18 +938,18 @@ class ProductsController
     public function systemCall($phone)
     {
         // Remove non-digits
-        $phone = preg_replace('/\D/', '', $phone);
+        $phone = preg_replace('/\D/', '', $phone); // 假设输入 0123456789 -> 0123456789
 
         // Malaysia format
         if (str_starts_with($phone, '0')) {
-            $phone = '6' . ltrim($phone, '0');
+            $phone = '6' . ltrim($phone, '0'); // -> 6123456789
         }
 
         if (!str_starts_with($phone, '6')) {
             $phone = '6' . $phone;
         }
 
-        $phone = '+' . $phone;
+        $phone = '+' . $phone; // -> +6123456789
 
         // DEBUG: confirm number
         error_log("Calling number: $phone");
