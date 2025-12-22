@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../controllers/userController.php';
 require_once __DIR__ . '/../models/CartModel.php';
 require_once __DIR__ . '/../helpers/validation.php';
-// require_once __DIR__ . '/../controllers/productController.php';
+require_once __DIR__ . '/../controllers/productsController.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -11,9 +11,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $cartCount = 0;
 $cartModel = new CartModel();
-// $controller = new ProductController();
+$controller = new ProductsController();
 
-// $categories = $controller->getAllCategories();
+$categories = $controller->fetchAllCategories();
 
 if (isset($_SESSION['customerId'])) {
     $cid = $_SESSION['customerId'];
@@ -78,11 +78,21 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                         <a href="#">Category</a>
                         <ul class="dropdown-menu">
                             <li><a href="category/categoryHomePage.php">All</a></li>
-                            <!-- <li><a href="product/product_details.php?id=<?php echo $categories['category_id']; ?>">Bracelet</a></li> -->
-                            <li><a href="#">Earrings</a></li>
-                            <li><a href="#">Hairclaw</a></li>
-                            <li><a href="#">Necklace</a></li>
+                            <?php if (!empty($categories)): ?>
+                                <?php foreach ($categories as $cat): ?>
+                                    <li>
+                                        <a href="/app/views/category/specificCategoryPage.php?id=<?php echo $cat['category_id']; ?>">
+                                            <?php echo $cat['category_name']; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                            <!-- <li><a href="product/product_details.php?id=<?php echo $categories['category_id']; ?>">Bracelet</a></li>
                             <li><a href="#">Ring</a></li>
+                            <li><a href="#">Necklace</a></li>
+                            <li><a href="#">Earring</a></li>
+                            <li><a href="#">Hairclaw</a></li> -->
+
                         </ul>
                     </li>
                     <li><a href="#">Order</a></li>

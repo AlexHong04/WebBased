@@ -1,6 +1,7 @@
 <?php
+session_start();
 $title = "Order Details Page";
-$pageCSS = "orderhistorydetails.css";
+$pageCSS = "adminorderdetails.css";
 
 include  '../../controllers/orderController.php';
 
@@ -11,12 +12,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["ajaxUpdate"])) {
 
   foreach ($_POST["orders"] as $orderId) {
     $updated = $orderController->updateStatus($orderId, $_POST["status"]);
-    if (!$updated) {
-      echo "Failed to update order $orderId";
-      exit;
-    }
+    $_SESSION['success_message'] = "Status updated successfully.";
   }
-
   echo "success";
   exit;
 }
@@ -60,18 +57,6 @@ foreach ($orders as $row) {
 
 $orders = $groupedOrders;
 
-$statusOption = [
-  'Pending',
-  'Paid',
-  'Packing',
-  'Out for Delivery',
-  'Delivered',
-  'Completed',
-  'Cancel Requested',
-  'Cancelled',
-  'Refunded'
-];
-
 function displayValue($value)
 {
   return empty($value) && $value !== "0" ? "-" : $value;
@@ -85,6 +70,20 @@ function calSubtotal($subtotal, $tax)
 ?>
 
 <div class="orderHistoryDetails">
+  <?php if (!empty($_SESSION['success_message'])): ?>
+    <div id="successPopup" class="successPopup show">
+      <?= $_SESSION['success_message'] ?>
+    </div>
+    <?php unset($_SESSION['success_message']); ?>
+
+    <script>
+      setTimeout(() => {
+        const popup = document.getElementById("successPopup");
+        if (popup) popup.classList.remove("show");
+      }, 3000);
+    </script>
+  <?php endif; ?>
+
   <div class="dataDetailsBox">
     <div class="dataDetailsHeader">
       <a href="#" class="back-link" onclick="history.back(); return false;">&#x293A;</a>
@@ -94,12 +93,43 @@ function calSubtotal($subtotal, $tax)
     <div class="orderList">
       <?php if (!empty($orders)): ?>
         <?php foreach ($orders as $order_id => $orderData): ?>
+          <?php
+          $status = strtolower(trim($orderData['order_status']));
+          $statusClass = '';
+
+          switch ($status) {
+            case 'pending':
+            case 'cancel requested':
+              $statusClass = 'status-alert';
+              break;
+
+            case 'paid':
+            case 'packing':
+            case 'out for delivery':
+            case 'delivered':
+              $statusClass = 'status-progress';
+              break;
+
+            case 'completed':
+              $statusClass = 'status-success';
+              break;
+
+            case 'cancelled':
+            case 'refunded':
+            case 'reviewed':
+              $statusClass = 'status-final-fail';
+              break;
+
+            default:
+              $statusClass = 'status-default';
+          }
+          ?>
           <div class="order-card-wrapper">
 
             <div class="orderHeader">
               <h2>Order ID: <?= $order_id ?></h2>
-              <div class="orderStatus">
-                <h3 id="currentOrderStatus"><?= $orderData['order_status'] ?></h3>
+              <div class="orderStatus <?= $statusClass ?>">
+                <h3 class="currentOrderStatus"><?= $orderData['order_status'] ?></h3>
               </div>
 
             </div>
@@ -163,11 +193,11 @@ function calSubtotal($subtotal, $tax)
               <?php endforeach; ?>
             </div>
 
-            <?php if ($orderData['order_status'] != "Pending" && $orderData['order_status'] != "Delivered" && $orderData['order_status'] != "Completed" && $orderData['order_status'] != "Cancelled" && $orderData['order_status'] != "Refunded"): ?>
-              <div class="btn-container">
-                <button class="updateBtn" data-order-id="<?= $order_id ?>">Update Status</button>
-              </div>
-            <?php endif; ?>
+            <!-- <?php if ($orderData['order_status'] != "Pending" && $orderData['order_status'] != "Delivered" && $orderData['order_status'] != "Completed" && $orderData['order_status'] != "Cancelled" && $orderData['order_status'] != "Refunded"): ?> -->
+            <div class="btn-container">
+              <button type="button" class="updateBtn" data-order-id="<?= $order_id ?>">Update Status</button>
+            </div>
+            <!-- <?php endif; ?> -->
 
           </div>
         <?php endforeach; ?>
@@ -177,169 +207,107 @@ function calSubtotal($subtotal, $tax)
     </div>
   </div>
 
-  <!-- Status Update Popup -->
-  <div id="statusPopup" class="popup-overlay">
-    <div class="popup-box">
-      <h3>Update Order Status</h3>
+</div>
 
-      <p id="selectedCount"></p>
+<div id="statusPopup" class="status-popup-overlay">
+  <div class="status-popup-box">
+    <h3>Update Order Status</h3>
 
-      <label>New Status:</label>
-      <div class="status-custom-select-wrapper">
-        <div class="status-custom-select" id="statusSelectPopup">
-          <input type="hidden" id="newStatus" value="Pending">
-          <div class="status-selected"></div>
-          <ul class="options">
-            <?php foreach ($statusOption as $status): ?>
-              <li data-value="<?= htmlspecialchars($status) ?>"><?= htmlspecialchars($status) ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
-      </div>
+    <p id="popupInfo"></p>
 
-      <div class="popup-actions">
-        <button id="popupCancel">Cancel</button>
-        <button id="popupConfirm">Confirm</button>
-      </div>
+    <p>
+      New status:
+      <strong id="nextStatusText"></strong>
+    </p>
+
+    <div class="popup-actions">
+      <button id="popupCancel">Cancel</button>
+      <button id="popupConfirm">Confirm</button>
     </div>
   </div>
-
-  <div id="successPopup" class="successPopup"></div>
-  <div id="errorPopup" class="customPopup"></div>
-
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", () => {
+
     const popup = document.getElementById("statusPopup");
-    const popupCancel = document.getElementById("popupCancel");
-    const popupConfirm = document.getElementById("popupConfirm");
-    const statusSelect = document.getElementById("newStatus");
-    const selectedCount = document.getElementById("selectedCount");
-    const popupSelect = document.getElementById("statusSelectPopup");
-    const selected = popupSelect.querySelector(".status-selected");
-    const options = popupSelect.querySelectorAll(".options li");
-    const hiddenInput = document.getElementById("newStatus");
-    const errorPopup = document.getElementById("errorPopup");
-    const updateButtons = document.querySelectorAll(".updateBtn");
-    const orderCards = document.querySelectorAll(".order-card-wrapper");
+    const popupInfo = document.getElementById("popupInfo");
+    const nextStatusText = document.getElementById("nextStatusText");
+    const btnCancel = document.getElementById("popupCancel");
+    const btnConfirm = document.getElementById("popupConfirm");
 
-    // Define the status flow
-    const statusFlow = [
-      "Pending",
-      "Paid",
-      "Packing",
-      "Out for Delivery",
-      "Delivered",
-      "Completed",
-      "Cancel Requested",
-      "Cancelled",
-      "Refunded",
-    ];
+    let selectedOrderId = null;
+    let nextStatus = null;
 
-    updateButtons.forEach(btn => {
+    const nextStatusMap = {
+      "Pending": "Paid",
+      "Paid": "Packing",
+      "Packing": "Out for Delivery",
+      "Out for Delivery": "Delivered",
+      "Delivered": "Completed",
+      "Cancel Requested": "Cancelled"
+    };
+
+    document.querySelectorAll(".updateBtn").forEach(btn => {
       btn.addEventListener("click", () => {
-        const orderId = btn.dataset.orderId;
-        hiddenInput.dataset.orderId = orderId;
 
-        const currentStatusEl = btn.closest(".order-card-wrapper").querySelector("#currentOrderStatus");
-        const currentStatus = currentStatusEl.textContent.trim();
+        selectedOrderId = btn.dataset.orderId;
 
-        selectedCount.innerHTML = `Order ID: ${orderId}<br>Current status: ${currentStatus}`;
+        const currentStatus = btn
+          .closest(".order-card-wrapper")
+          .querySelector(".currentOrderStatus")
+          .textContent
+          .trim();
 
-        // Filter popup options: only allow next statuses
-        options.forEach(option => {
-          const value = option.dataset.value;
-          const currentIndex = statusFlow.indexOf(currentStatus);
-          option.style.display = (statusFlow.indexOf(value) === currentIndex + 1) ? "block" : "none";
-        });
+        nextStatus = nextStatusMap[currentStatus];
 
-        const firstAllowed = Array.from(options).find(opt => opt.style.display !== "none");
-        if (firstAllowed) {
-          hiddenInput.value = firstAllowed.dataset.value;
-        } else {
-          selected.textContent = "No available status";
-          hiddenInput.value = "";
+        if (!nextStatus) {
+          alert("No next status available.");
+          return;
         }
 
-        popup.style.display = "flex";
+        popupInfo.innerHTML = `
+        Order ID: <strong>${selectedOrderId}</strong><br>
+        Current status: <strong>${currentStatus}</strong>
+      `;
+
+        nextStatusText.textContent = nextStatus;
+
+        popup.classList.add("show");
       });
     });
 
-    // Cancel popup
-    popupCancel.addEventListener("click", () => (popup.style.display = "none"));
+    btnCancel.addEventListener("click", () => {
+      popup.classList.remove("show");
+    });
 
-    popupConfirm.addEventListener("click", () => {
-      const newStatus = hiddenInput.value;
-      if (!newStatus) return;
+    btnConfirm.addEventListener("click", () => {
+      if (!selectedOrderId || !nextStatus) return;
 
-      const orderId = hiddenInput.dataset.orderId;
       const formData = new FormData();
       formData.append("ajaxUpdate", "1");
-      formData.append("status", newStatus);
-      formData.append("orders[]", hiddenInput.dataset.orderId);
+      formData.append("status", nextStatus);
+      formData.append("orders[]", selectedOrderId);
 
       fetch("", {
           method: "POST",
           body: formData
         })
         .then(res => res.text())
-        .then(result => {
-          if (result.trim() === "success") {
-            const card = document.querySelector(`.order-card-wrapper [data-order-id="${hiddenInput.dataset.orderId}"]`).closest(".order-card-wrapper");
-            card.querySelector("#currentOrderStatus").textContent = newStatus;
-            popup.style.display = "none";
-            showSuccessToast("Order status updated!");
-            setTimeout(() => {
-              location.reload();
-            }, 1500); // 1.5 seconds delay
+        .then(res => {
+          console.log("AJAX response:", res);
+          if (res.trim() === "success") {
+            popup.classList.remove("show");
+            location.reload();
           } else {
-            console.error("Server returned an error:", result.trim());
-            showError("Failed to update order status.");
+            alert("Update failed");
           }
         })
         .catch(err => {
-          console.error("Fetch error:", err); // log fetch/network errors
-          showError("Network error: " + err);
+          console.error(err);
+          alert("Network error");
         });
     });
 
-    // Toast
-    function showSuccessToast(message) {
-      const popup = document.getElementById("successPopup");
-      popup.innerText = message;
-      popup.classList.add("show");
-      setTimeout(() => popup.classList.remove("show"), 3000);
-    }
-
-    function showError(msg) {
-      if (!errorPopup) return;
-      errorPopup.textContent = msg;
-      errorPopup.classList.add("show");
-
-      // Auto-hide after 3 seconds
-      setTimeout(() => {
-        errorPopup.classList.remove("show");
-      }, 3000);
-    }
-
-    document.querySelectorAll(".custom-select").forEach((select) => {
-      const selected = select.querySelector(".selected");
-      const options = select.querySelector(".options");
-
-      selected.addEventListener("click", () => select.classList.toggle("open"));
-      options.querySelectorAll("li").forEach((option) => {
-        option.addEventListener("click", () => {
-          selected.textContent = option.textContent;
-          document.getElementById("statusFilter").value = option.dataset.value;
-          select.classList.remove("open");
-          filterTable();
-        });
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!select.contains(e.target)) select.classList.remove("open");
-      });
-    });
   });
 </script>

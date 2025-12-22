@@ -2,8 +2,8 @@
 $title = "Category Specific Page";
 $pageCSS = "categorypage.css";
 
-include '../header.php';
-include '../../controllers/productsController.php';
+require_once '../header.php';
+require_once '../../controllers/productsController.php';
 
 $controller = new ProductsController();
 $products = $controller->getProductsByCategoryId();
