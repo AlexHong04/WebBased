@@ -1,7 +1,9 @@
 <?php
 session_start();
 require_once '../../controllers/orderController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $customerId = $_SESSION['customerId'] ?? null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'complete_order') {

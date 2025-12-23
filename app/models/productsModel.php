@@ -570,9 +570,10 @@ class ProductModel
         $this->db->query("SELECT p.*, c.category_name 
                           FROM product p
                           LEFT JOIN category c ON p.category_id = c.category_id
-                          WHERE p.product_name LIKE :keyword 
-                          OR p.description LIKE :keyword
-                          ORDER BY p.product_name ASC");
+                          WHERE (p.product_name LIKE :keyword OR p.description LIKE :keyword)
+                          AND p.is_deleted = 0
+                          ORDER BY p.product_name ASC
+                          ");
 
         $this->db->bind(':keyword', "%$keyword%");
 

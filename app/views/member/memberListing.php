@@ -37,9 +37,12 @@ $title = "Member Listing Page";
 $pageCSS = "datalisting.css";
 
 include  '../adminHeader.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $memberController = new UserController();
 $data = $memberController->index();
+
 
 $filters    = $data['filters'];
 $members     = $data['members'];

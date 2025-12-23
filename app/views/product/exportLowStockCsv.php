@@ -1,6 +1,8 @@
 <?php
 include '../../controllers/productsController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $controller = new ProductsController();
 $products = $controller->getAllProductVariant('', '', 'lowStock');
 

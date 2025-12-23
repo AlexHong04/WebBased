@@ -1,7 +1,9 @@
 <?php
 $title = "Product Maintenance";
 include '../../controllers/productsController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $current_sort = $_GET['sort'] ?? 'customer_id';
 $current_order = $_GET['order'] ?? 'asc';
 $templateId = $_GET['template_id'] ?? 1; // Default template

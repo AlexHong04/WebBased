@@ -44,7 +44,8 @@ function verifyJWT($jwt, $secret)
 
 $SECRET = "Lovine";
 
-function authenticate() {
+function authenticate()
+{
     global $SECRET;
 
     // 1. session token exists
@@ -62,11 +63,13 @@ function authenticate() {
             // write back to session
             $_SESSION['token'] = $_COOKIE['remember_token'];
             $_SESSION['customerId'] = $data['customerId'];
+            $_SESSION['adminId'] = $data['adminId'];
             return $data;
         }
     }
 
     // 3. no token → force login
+    $_SESSION['flash_error']['authenticate'] = "Authenticate Issues! Please sign in to continue.";
     header("Location: /app/views/security/signIn.php");
     exit;
 }

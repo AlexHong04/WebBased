@@ -5,7 +5,9 @@ $pageCSS = "orderrating.css";
 include '../header.php';
 include '../../controllers/orderController.php';
 include '../../controllers/reviewController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $orderController = new OrderController();
 $reviewController = new ReviewController();
 

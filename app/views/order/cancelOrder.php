@@ -6,7 +6,9 @@ $pageCSS = "ordercancellation.css";
 
 include '../../controllers/orderController.php';
 include '../header.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $orderId = $_GET['id'];
 $custId = $_SESSION['customerId'];
 $orderController = new OrderController();

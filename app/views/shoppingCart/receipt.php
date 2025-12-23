@@ -2,7 +2,9 @@
 require_once __DIR__ . '/../../controllers/receiptController.php';
 require_once __DIR__ . '/../../helpers/html.php';
 require_once __DIR__ . '/../../helpers/request.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $controller = new ReceiptController();
 $data = $controller->index(true);
 

@@ -1,6 +1,8 @@
 <?php
 include '../../controllers/orderController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 // Handle AJAX update request
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["ajaxUpdate"])) {
 

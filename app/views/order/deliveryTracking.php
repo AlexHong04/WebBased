@@ -4,7 +4,9 @@ $pageCSS = "deliverytracking.css";
 
 include '../header.php';
 include '../../controllers/orderController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $orderController = new OrderController();
 
 if (!isset($_GET['id'])) {

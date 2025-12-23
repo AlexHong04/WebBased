@@ -5,7 +5,9 @@ $pageCSS = "lowStockAlert.css";
 require_once __DIR__ . '/../adminHeader.php';
 include '../../controllers/productsController.php';
 include_once '../../helpers/html.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $controller = new ProductsController();
 
 $current_sort = $_GET['sort'] ?? 'product_variant_id';

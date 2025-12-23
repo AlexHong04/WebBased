@@ -13,7 +13,9 @@ $title = "Admin Listing Page";
 $pageCSS = "adminlisting.css";
 
 require_once __DIR__ . '/../../controllers/adminController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $adminController = new adminController();
 
 // --- HANDLE FORM SUBMISSION ---

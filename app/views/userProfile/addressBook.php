@@ -6,7 +6,9 @@ require_once __DIR__ . '/../../helpers/html.php';
 require_once __DIR__ . '/../../helpers/request.php';
 require_once __DIR__ . '/../../controllers/AddressController.php';
 require_once __DIR__ .  '/../../controllers/userController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $userController = new userController();
 $controller = new AddressController();
 $addresses = $controller->index();

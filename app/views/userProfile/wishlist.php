@@ -2,7 +2,9 @@
 require_once __DIR__ . '/../../helpers/html.php';
 require_once __DIR__ . '/../../controllers/WishlistController.php';
 require_once __DIR__ .  '/../../controllers/userController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $controller = new userController();
 $wishlistController = new WishlistController();
 $wishlistItems = $wishlistController->index();

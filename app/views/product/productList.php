@@ -21,7 +21,9 @@ $pageCSS = "productList.css";
 
 include '../../controllers/productsController.php';
 include_once '../../helpers/html.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $controller = new ProductsController();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

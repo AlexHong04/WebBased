@@ -5,7 +5,9 @@ $pageCSS = "adminmember.css";
 session_start();
 
 include '../../controllers/userController.php';
+require_once __DIR__ . '/../../helpers/auth.php';
 
+authenticate();
 $controller = new UserController();
 $data = $controller->getMembers();
 $member = (object)$data;
