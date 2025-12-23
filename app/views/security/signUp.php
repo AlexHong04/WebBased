@@ -63,17 +63,14 @@ require_once __DIR__ . '/../../helpers/html.php';
 
                 <div class="col-half">
                     <div class="input-box">
-                        <label class="field-label" for="gender">Gender</label>
+                        <label class="field-label" for="phone">Phone Number</label>
                         <div class="input-wrapper">
-                            <?php
-                            $genders = ['Male' => 'Male', 'Female' => 'Female'];
-                            html_select('gender', $genders, 'Select Gender', null, 'class="input-field" id="gender"');
-                            ?>
+                            <?= html_text('phone', 'class="input-field" placeholder="phone" id="phone"'); ?>
                             <svg xmlns="http://www.w3.org/2000/svg" class="input-icon" viewBox="0 0 512 512" width="18" height="18" fill="currentColor">
-                                <path d="M320 64c0-17.7 14.3-32 32-32h80c17.7 0 32 14.3 32 32v80c0 17.7-14.3 32-32 32s-32-14.3-32-32V96l-74.5 74.5C368.6 221.7 384 283.4 384 352c0 88.4-71.6 160-160 160S64 440.4 64 352c0-82 62-149.8 141.6-159.2L254.4 144H192c-17.7 0-32-14.3-32-32s14.3-32 32-32h128zM224 448c53 0 96-43 96-96s-43-96-96-96s-96 43-96 96s43 96 96 96z" />
+                                <path d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" />
                             </svg>
                         </div>
-                        <small id="genderError" class="error-message"></small>
+                        <small id="phoneError" class="error-message"></small>
                     </div>
                 </div>
             </div>
@@ -175,7 +172,7 @@ require_once __DIR__ . '/../../helpers/html.php';
 
 <script src="/public/js/validation.js"></script>
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('signUpForm');
         initPasswordStrength();
 
@@ -218,7 +215,64 @@ require_once __DIR__ . '/../../helpers/html.php';
                 }
             });
         }
+        const bars = document.querySelectorAll('.bar');
+        const reqLength = document.getElementById('req-length');
+        const reqNum = document.getElementById('req-num');
+        const reqUpper = document.getElementById('req-upper');
+        const reqSpecial = document.getElementById('req-special');
 
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const val = this.value;
+                let score = 0;
+
+                // 1. Check Length (8+)
+                if (val.length >= 8) {
+                    reqLength.classList.add('valid');
+                    score++;
+                } else {
+                    reqLength.classList.remove('valid');
+                }
+
+                // 2. Check Number
+                if (/\d/.test(val)) {
+                    reqNum.classList.add('valid');
+                    score++;
+                } else {
+                    reqNum.classList.remove('valid');
+                }
+
+                // 3. Check Uppercase
+                if (/[A-Z]/.test(val)) {
+                    reqUpper.classList.add('valid');
+                    score++;
+                } else {
+                    reqUpper.classList.remove('valid');
+                }
+
+                // 4. Check Special Char
+                if (/[!@#$%^&*(),.?":{}|<>]/.test(val)) {
+                    reqSpecial.classList.add('valid');
+                    score++;
+                } else {
+                    reqSpecial.classList.remove('valid');
+                }
+
+                // Update Bars Colors
+                bars.forEach(bar => bar.className = 'bar'); // Reset
+
+                if (score >= 1) bars[0].classList.add('weak');
+                if (score >= 2) bars[1].classList.add('weak'); // or medium
+                if (score >= 3) {
+                    bars[0].classList.add('medium');
+                    bars[1].classList.add('medium');
+                    bars[2].classList.add('medium');
+                }
+                if (score >= 4) {
+                    bars.forEach(bar => bar.classList.add('strong'));
+                }
+            });
+        }
         // 4. Form Validation Logic
         if (form) {
             form.addEventListener('submit', function(e) {

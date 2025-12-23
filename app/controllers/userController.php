@@ -25,7 +25,7 @@ class userController
             $firstName = post('firstName');
             $lastName = post('lastName');
             $email = post('email');
-            $gender = post('gender');
+            $phone = post('phone');
             $password = post('password');
             $confirm_password = post('confirm_password');
             // validate form data
@@ -36,6 +36,11 @@ class userController
             } else if (!isValidEmailDomain($email)) {
                 $errors['email'] = "Email domain does not exist.";
             }
+
+            if ($this->userModel->getIsPhoneExists($phone) || $this->userModel->getIsStaffPhoneExists($phone)) {
+                $errors['phone'] = "This phone number is already registered.";
+            }
+
             // if (empty($password)) $errors['password'] = "Password is required.";
             // if ($password !== $confirm_password) $errors['confirm_password'] = "Passwords do not match.";
             // if (empty($gender)) $errors['gender'] = "Gender is required.";
@@ -49,7 +54,7 @@ class userController
             // hash the password
             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
             // save user to database
-            $isCreated = $this->userModel->createUser($firstName, $lastName, $email, $gender, $hashed_password);
+            $isCreated = $this->userModel->createUser($firstName, $lastName, $email, $phone, $hashed_password);
             $_SESSION['flash_success'] = "Account created successfully! Please check your email to activate your account.";
             if ($isCreated) {
                 $loginLink = base('app/views/security/signIn.php?action=activate&email=' . $email);
@@ -313,6 +318,7 @@ class userController
                 $firstName = post('firstName');
                 $lastName  = post('lastName');
                 $phone     = post('phone');
+                $gender    = post('gender');
                 $email     = post('email');
                 $addressLine = post('streetLine');
                 $city      = post('city');
@@ -321,7 +327,7 @@ class userController
 
                 $errors = [];
 
-                // --- Validation Logic (Email & Phone) ---
+                // Validation Logic (Email & Phone)
                 if ($email != $currentUserData['email']) {
                     if ($this->userModel->getIsEmailExists($email) || $this->userModel->getIsStaffEmailExists($email)) {
                         $errors['email'] = "This Email is already registered.";
@@ -336,7 +342,6 @@ class userController
                     }
                 }
 
-                // --- 📸 Image Upload Logic (Updated to match updateMember) ---
                 $uploadedImgName = null;
 
                 // Check if file is uploaded and no errors
@@ -353,17 +358,13 @@ class userController
 
                     if (in_array($fileExtension, $allowedfileExtensions)) {
 
-                        // 1. 👇 CHANGE HERE: Use original filename instead of MD5 hash
-                        // This matches the logic in your updateMember function
                         $newFileName = basename($fileName);
 
-                        // 2. Define upload directory
                         $uploadFileDir = __DIR__ . '/../../public/images/profile/';
                         $dest_path = $uploadFileDir . $newFileName;
 
                         // 3. Move file
                         if (move_uploaded_file($fileTmpPath, $dest_path)) {
-                            // ✅ Success, store the filename
                             $uploadedImgName = $newFileName;
                         } else {
                             $errors['profile_pic'] = "Error saving file to directory.";
@@ -380,11 +381,11 @@ class userController
                     return;
                 }
 
-                // --- 📦 Build Data Array ---
                 $updateData = [
                     'customer_id' => $customerId,
                     'firstName'   => $firstName,
                     'lastName'    => $lastName,
+                    'gender'      => $gender,
                     'phone'       => $phone,
                     'email'       => $email,
                     'streetLine'  => $addressLine,
@@ -393,12 +394,10 @@ class userController
                     'postcode'    => $postcode
                 ];
 
-                // ✅ If a new image was uploaded, add it to the array
                 if ($uploadedImgName) {
                     $updateData['img_url'] = $uploadedImgName;
                 }
 
-                // Call Model to update
                 $this->userModel->updateUser($updateData);
                 $_SESSION['flash_success'] = "Profile updated successfully!";
                 redirect('profile.php');

@@ -52,16 +52,16 @@ class userModel
     }
 
     // create new user
-    public function createUser($firstName, $lastName, $email, $gender, $password)
+    public function createUser($firstName, $lastName, $email, $phone, $password)
     {
         $customerId = $this->db->generateId('customer', 'customer_id', 'CU');
 
-        $this->db->query("INSERT INTO customer (customer_id,firstName,lastName,email,gender,password,created_at,isActive) VALUES (:customer_id, :firstName, :lastName, :email, :gender, :password, NOW(), 0)");
+        $this->db->query("INSERT INTO customer (customer_id,firstName,lastName,email,phone,password,created_at,isActive) VALUES (:customer_id, :firstName, :lastName, :email, :phone, :password, NOW(), 0)");
         $this->db->bind(':customer_id', $customerId);
         $this->db->bind(':firstName', $firstName);
         $this->db->bind(':lastName', $lastName);
         $this->db->bind(':email', $email);
-        $this->db->bind(':gender', $gender);
+        $this->db->bind(':phone', $phone);
         $this->db->bind(':password', $password);
         return $this->db->execute();
     }
@@ -71,9 +71,9 @@ class userModel
         $customerId = $this->db->generateId('customer', 'customer_id', 'CU');
         $randomPassword = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
         $this->db->query("INSERT INTO customer 
-                          (customer_id, firstName, lastName, email, password, gender, img_url, created_at, isActive, isBlocked) 
+                          (customer_id, firstName, lastName, email, password, gender,phone, img_url, created_at, isActive, isBlocked) 
                           VALUES 
-                          (:id, :fname, :lname, :email, :pass, :gender, :img, NOW(), 1, 0)");
+                          (:id, :fname, :lname, :email, :pass, :gender, :phone, :img, NOW(), 1, 0)");
 
         $this->db->bind(':id', $customerId);
         $this->db->bind(':fname', $firstName);
@@ -81,6 +81,7 @@ class userModel
         $this->db->bind(':email', $email);
         $this->db->bind(':pass', $randomPassword);
         $this->db->bind(':gender', 'U');
+        $this->db->bind(':phone', '0000000000');
         $this->db->bind(':img', $picture);
 
         if ($this->db->execute()) {
@@ -106,7 +107,7 @@ class userModel
 
     public function getUser($email)
     {
-        $this->db->query("SELECT customer_id,firstName,lastName,email,phone,password,isActive,isBlocked FROM customer WHERE email = :email");
+        $this->db->query("SELECT customer_id,firstName,lastName,gender,email,phone,password,isActive,isBlocked FROM customer WHERE email = :email");
         $this->db->bind(':email', $email);
         return $this->db->result();
     }
@@ -120,16 +121,14 @@ class userModel
 
     public function updateUser($data)
     {
-        // 1. 🟢 Customer 表更新逻辑 (参考 updateMember)
-        // ----------------------------------------------------
         $sql = "UPDATE customer SET 
                 firstName = :firstName, 
                 lastName = :lastName, 
                 phone = :phone, 
+                gender = :gender,
                 email = :email, 
                 updated_at = NOW()";
 
-        // 动态检查是否有图片上传
         if (isset($data['img_url'])) {
             $sql .= ", img_url = :img_url";
         }
@@ -138,69 +137,54 @@ class userModel
 
         $this->db->query($sql);
 
-        // 绑定基本参数
         $this->db->bind(':firstName', $data['firstName']);
         $this->db->bind(':lastName', $data['lastName']);
         $this->db->bind(':phone', $data['phone']);
+        $this->db->bind(':gender', $data['gender']);
         $this->db->bind(':email', $data['email']);
         $this->db->bind(':id', $data['customer_id']);
 
-        // 动态绑定图片参数
         if (isset($data['img_url'])) {
             $this->db->bind(':img_url', $data['img_url']);
         }
-
-        // 如果主表更新失败，直接返回 false
         if (!$this->db->execute()) {
             return false;
         }
-
-        // 2. 🟡 Address 表更新逻辑 (保留原有逻辑，但改为从数组取值)
-        // ----------------------------------------------------
-
-        // 检查数组中是否有地址数据 (注意这里用 $data['key'])
         $hasAddressData = !empty($data['streetLine']) ||
             !empty($data['city']) ||
             !empty($data['state']) ||
             !empty($data['postcode']);
 
         if ($hasAddressData) {
-            // 检查该用户是否已有地址记录
-            $this->db->query("SELECT customer_id FROM address WHERE customer_id = :id");
+            $this->db->query("SELECT customer_id,is_default FROM address WHERE customer_id = :id");
             $this->db->bind(':id', $data['customer_id']);
             $existingAddress = $this->db->result();
 
             if ($existingAddress) {
-                // 更新现有地址
                 $this->db->query("UPDATE address SET 
                     recipient_name = :recipient_name,
                     recipient_phone = :recipient_phone, 
                     street_line = :street_line, 
                     city = :city, 
                     state = :state, 
-                    postcode = :postcode, 
-                    is_default = :is_default 
-                    WHERE customer_id = :cid");
+                    postcode = :postcode  
+                    WHERE customer_id = :cid AND is_default = 1");
             } else {
-                // 插入新地址
                 $address_id = $this->db->generateId('address', 'address_id', 'AD');
                 $this->db->query("INSERT INTO address (address_id, customer_id, recipient_name, recipient_phone, street_line, city, state, postcode, is_default) 
-                                  VALUES (:aid, :cid, :recipient_name, :recipient_phone, :street_line, :city, :state, :postcode, :is_default)");
+                                  VALUES (:aid, :cid, :recipient_name, :recipient_phone, :street_line, :city, :state, :postcode, 1)");
                 $this->db->bind(':aid', $address_id);
             }
 
-            // 绑定地址参数
-            // 注意：recipient_name 通常是 First + Last Name 拼接
             $fullName = $data['firstName'] . ' ' . $data['lastName'];
 
             $this->db->bind(':recipient_name', $fullName);
             $this->db->bind(':recipient_phone', $data['phone']);
-            $this->db->bind(':street_line', $data['streetLine']); // 确保 Controller 传过来的是 streetLine
+            $this->db->bind(':street_line', $data['streetLine']);
             $this->db->bind(':city', $data['city']);
             $this->db->bind(':state', $data['state']);
             $this->db->bind(':postcode', $data['postcode']);
             $this->db->bind(':cid', $data['customer_id']);
-            $this->db->bind(':is_default', 1); // 默认为默认地址
 
             return $this->db->execute();
         }

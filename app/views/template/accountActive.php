@@ -94,7 +94,7 @@ $loginLink = base("app/views/security/signIn.php" );
 
             <div style="margin-bottom: 20px;">
                 <!-- <button class="btn" onclick="window.location.href='<?= $loginLink ?>'">Activate Account 1</button> -->
-                <a href="<?= $loginLink ?>?action=activate&email=<?= $toEmail ?>" class="btn">Activate Account 2</a>
+                <a href="<?= $loginLink ?>?action=activate&email=<?= $toEmail ?>" class="btn">Activate Account</a>
                 <!-- <form action="signIn.php" method="POST">
                     <button type="submit" name="activate">Activate Account</button>
                 </form> -->

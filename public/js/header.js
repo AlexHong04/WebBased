@@ -55,6 +55,8 @@ scanBtn.addEventListener("click", (e) => {
     });
 });
 
+
+
 qrCancel.addEventListener("click", () => {
   if (qrScanner) {
     qrScanner

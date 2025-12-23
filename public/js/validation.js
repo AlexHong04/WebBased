@@ -240,7 +240,7 @@ function validateSignUpForm(form) {
     const firstName = form.querySelector('#firstName');
     const lastName = form.querySelector('#lastName');
     const email = form.querySelector('#email');
-    const gender = form.querySelector('#gender');
+    const gender = form.querySelector('#phone');
     const password = form.querySelector('#password');
     const confirmPass = form.querySelector('#confirm_password');
 
@@ -257,8 +257,8 @@ function validateSignUpForm(form) {
         isValid = false;
     }
 
-    // 3. Gender
-    if (isEmpty(gender.value)) { showError('gender', 'Please select a gender'); isValid = false; }
+    // 3. phone
+    if (isEmpty(phone.value)) { showError('phone', 'Please enter a phone'); isValid = false; }
 
     // 4. Password Presence
     if (isEmpty(password.value)) { showError('password', 'Password is required'); isValid = false; }

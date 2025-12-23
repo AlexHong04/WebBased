@@ -225,3 +225,65 @@ document.getElementById("form-step-3").addEventListener("submit", function (e) {
       btn.disabled = false;
     });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const passwordInput = document.getElementById("newPassword");
+  const bars = document.querySelectorAll(".bar");
+  const reqLength = document.getElementById("req-length");
+  const reqNum = document.getElementById("req-num");
+  const reqUpper = document.getElementById("req-upper");
+  const reqSpecial = document.getElementById("req-special");
+
+  if (passwordInput) {
+    passwordInput.addEventListener("input", function () {
+      const val = this.value;
+      let score = 0;
+
+      // 1. Check Length (8+)
+      if (val.length >= 8) {
+        reqLength.classList.add("valid");
+        score++;
+      } else {
+        reqLength.classList.remove("valid");
+      }
+
+      // 2. Check Number
+      if (/\d/.test(val)) {
+        reqNum.classList.add("valid");
+        score++;
+      } else {
+        reqNum.classList.remove("valid");
+      }
+
+      // 3. Check Uppercase
+      if (/[A-Z]/.test(val)) {
+        reqUpper.classList.add("valid");
+        score++;
+      } else {
+        reqUpper.classList.remove("valid");
+      }
+
+      // 4. Check Special Char
+      if (/[!@#$%^&*(),.?":{}|<>]/.test(val)) {
+        reqSpecial.classList.add("valid");
+        score++;
+      } else {
+        reqSpecial.classList.remove("valid");
+      }
+
+      // Update Bars Colors
+      bars.forEach((bar) => (bar.className = "bar")); // Reset
+
+      if (score >= 1) bars[0].classList.add("weak");
+      if (score >= 2) bars[1].classList.add("weak");
+      if (score >= 3) {
+        bars[0].classList.add("medium");
+        bars[1].classList.add("medium");
+        bars[2].classList.add("medium");
+      }
+      if (score >= 4) {
+        bars.forEach((bar) => bar.classList.add("strong"));
+      }
+    });
+  }
+});

@@ -198,6 +198,15 @@ select.input-field {
   }
 }
 
+.bar.weak {
+  background: #e24c71;
+}
+.bar.medium {
+  background: #f39c12;
+}
+.bar.strong {
+  background: #00d26a;
+}
 .check-item.valid .icon {
   color: #2ecc71;
 }
@@ -230,10 +239,10 @@ select.input-field {
 }
 
 .toggle-password {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    z-index: 10;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 10;
 }

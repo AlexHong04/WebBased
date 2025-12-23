@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
     if ($_POST['action'] === 'sendOtp') {
 
-        
+
         $phone = trim($_POST['phone'] ?? '');
 
         if (empty($phone) || !preg_match('/^\+?6?01[0-9]{8}$/', $phone)) {
@@ -131,6 +131,51 @@ require_once __DIR__ . '/../header.php';
                 </div>
                 <div class="input-box">
                     <input type="submit" class="submit" value="Reset Password">
+                </div>
+                <div class="container">
+                    <div class="col-half" style="width: 100%;">
+                        <p class="label">Password Strength</p>
+                        <div class="bars">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
+                    </div>
+                    <div class="requirements-grid " style="margin-top: 5px; gap: 10px; justify-content: center; ">
+                        <div class="requirements-grid ">
+                            <div class="check-item" id="req-length">
+                                <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="20" height="20">
+                                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" />
+                                    <path d="M7.5 12.5l2.5 2.5L16.5 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <p class="check-text">8+ characters</p>
+                            </div>
+                            <div class="check-item" id="req-num">
+                                <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="20" height="20">
+                                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" />
+                                    <path d="M7.5 12.5l2.5 2.5L16.5 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <p class="check-text">One number</p>
+                            </div>
+                        </div>
+                        <div class="requirements-grid ">
+                            <div class="check-item" id="req-upper">
+                                <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="20" height="20">
+                                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" />
+                                    <path d="M7.5 12.5l2.5 2.5L16.5 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <p class="check-text">One uppercase</p>
+                            </div>
+                            <div class="check-item" id="req-special">
+                                <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" width="20" height="20">
+                                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" />
+                                    <path d="M7.5 12.5l2.5 2.5L16.5 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <p class="check-text">One special char</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

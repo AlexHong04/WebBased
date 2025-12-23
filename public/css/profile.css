@@ -33,7 +33,7 @@
 }
 
 /* =========================================
-   1. GLOBAL & LAYOUT
+    GLOBAL & LAYOUT
    ========================================= */
 * {
   box-sizing: border-box;
@@ -65,7 +65,7 @@
 }
 
 /* =========================================
-   2. SIDEBAR
+    SIDEBAR
    ========================================= */
 .profile-sidebar {
   width: 320px;
@@ -168,7 +168,7 @@
 }
 
 /* =========================================
-   3. PROFILE CONTENT & FORM
+    PROFILE CONTENT & FORM
    ========================================= */
 .profile-content {
   flex: 1;
@@ -276,7 +276,7 @@ textarea.form-control {
 }
 
 /* =========================================
-   4. ACTION BUTTONS (Updated)
+    ACTION BUTTONS (Updated)
    ========================================= */
 .form-actions {
   display: flex;
@@ -357,7 +357,7 @@ textarea.form-control {
 }
 
 /* =========================================
-   5. MODALS (Overlay & Content)
+    MODALS (Overlay & Content)
    ========================================= */
 .modal-overlay {
   position: fixed;
@@ -451,7 +451,7 @@ textarea.form-control {
 }
 
 /* =========================================
-   6. ADDRESS LIST ITEMS
+    ADDRESS LIST ITEMS
    ========================================= */
 .address-list-item {
   padding: 15px;
@@ -528,7 +528,7 @@ textarea.form-control {
 }
 
 /* =========================================
-   7. FEEDBACK MODALS (Success/Warning)
+    FEEDBACK MODALS (Success/Warning)
    ========================================= */
 .modal-content.feedback-modal {
   text-align: center;
@@ -617,7 +617,7 @@ textarea.form-control {
 }
 
 /* =========================================
-   8. ANIMATIONS
+   ANIMATIONS
    ========================================= */
 @keyframes fadeIn {
   from {
@@ -639,7 +639,7 @@ textarea.form-control {
 }
 
 /* =========================================
-   9. RESPONSIVE
+   RESPONSIVE
    ========================================= */
 @media (max-width: 1024px) {
   .profile-container {
@@ -796,51 +796,125 @@ textarea.form-control {
 
 .profile-avatar {
   position: relative;
-  border: 2px dashed transparent; /* Invisible border normally */
+  border: 2px dashed transparent;
   transition: all 0.3s ease;
-  border-radius: 50%; /* Optional: matches your avatar shape */
+  border-radius: 50%;
 }
 
-/* Dragging state - This class is added by your JS */
 .profile-avatar.drag-over {
-  border-color: #007bff; /* Blue border when dragging over */
-  background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
+  border-color: #007bff;
+  background-color: rgba(0, 123, 255, 0.1);
   transform: scale(1.05);
 }
 
 .profile-avatar .plus {
-  display: none; /* 默认隐藏加号 */
+  display: none;
 }
 
 .avatar-label {
-  pointer-events: none; /* 默认禁止点击 label */
-  cursor: default; /* 鼠标变回默认箭头 */
+  pointer-events: none;
+  cursor: default;
 }
 
-/* 编辑模式 (Edit Mode) - 这些样式会在 JS 添加 'edit-mode' 类后生效 */
 .profile-avatar.edit-mode .plus {
-  display: flex; /* 显示加号 */
+  display: flex;
 }
 
 .profile-avatar.edit-mode .avatar-label {
-  pointer-events: auto; /* 允许点击 */
-  cursor: pointer; /* 鼠标变成手型 */
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .profile-avatar.edit-mode {
-  border-color: #eee; /* 编辑模式下给个淡淡的边框提示范围 (可选) */
+  border-color: #eee;
 }
 #profile-pic-input {
-  display: none; /*通常我们会隐藏原生丑陋的 input，只点 label*/
+  display: none;
 }
 
-/* 3. 编辑模式：允许点击 */
-/* 当 JS 给父容器加上 'edit-mode' 类时，恢复点击功能 */
 .profile-avatar.edit-mode .avatar-label {
-  pointer-events: auto; /* ✅ 恢复点击 */
-  cursor: pointer; /* 变回手型 */
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .profile-avatar.edit-mode .plus {
-  display: flex !important; /* 显示 + 号 */
+  display: flex !important;
+}
+
+select.readonly-style {
+  pointer-events: none;
+  touch-action: none;
+  background-color: #f8f9fa;
+  color: #888;
+  border-color: #eee;
+}
+
+select#gender {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+select#gender::-ms-expand {
+  display: none;
+}
+
+.bars {
+  margin: 8px 0;
+  flex: 1 1 auto;
+  display: flex;
+  gap: 3px;
+  height: 6px;
+}
+
+.bar {
+  background: #e1e1e1;
+  height: 100%;
+  width: 25%;
+  border-radius: 20px;
+  transition: background 0.4s;
+}
+
+.bar.weak {
+  background: #e24c71;
+}
+.bar.medium {
+  background: #f39c12;
+}
+.bar.strong {
+  background: #00d26a;
+}
+.requirements-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+}
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.check-item .icon {
+  color: #ccc;
+  transition: color 0.3s;
+}
+
+.check-item.valid .icon {
+  color: #00d26a; /* Green for valid */
+}
+
+.check-item.valid .check-text {
+  color: #00d26a;
+}
+
+.strength-label {
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 600;
 }

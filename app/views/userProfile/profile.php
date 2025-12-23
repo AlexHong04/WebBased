@@ -122,6 +122,21 @@ include __DIR__ . '/../header.php';
                         </div>
                     </div>
                     <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <div class="input-wrapper">
+                            <?php
+                            $genders = ['Male' => 'Male', 'Female' => 'Female'];
+
+                            html_select('gender', $genders, 'Select Gender', $profileData['gender'] ?? '', 'class="form-control readonly-style"');
+                            ?>
+
+                            <svg xmlns="http://www.w3.org/2000/svg" class="input-icon" viewBox="0 0 512 512" width="18" height="18" fill="currentColor">
+                                <path d="M320 64c0-17.7 14.3-32 32-32h80c17.7 0 32 14.3 32 32v80c0 17.7-14.3 32-32 32s-32-14.3-32-32V96l-74.5 74.5C368.6 221.7 384 283.4 384 352c0 88.4-71.6 160-160 160S64 440.4 64 352c0-82 62-149.8 141.6-159.2L254.4 144H192c-17.7 0-32-14.3-32-32s14.3-32 32-32h128zM224 448c53 0 96-43 96-96s-43-96-96-96s-96 43-96 96s43 96 96 96z" />
+                            </svg>
+                        </div>
+                        <small id="genderError" class="error-message"></small>
+                    </div>
+                    <div class="form-group">
                         <label for="email">Email</label>
                         <div class="input-wrapper">
                             <?php html_text('email', 'class="form-control" readonly', $profileData['email'] ?? ''); ?>
