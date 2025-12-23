@@ -40,8 +40,6 @@ include  '../adminHeader.php';
 
 $memberController = new UserController();
 $data = $memberController->index();
-// $members = $data["members"];
-// $pagination = $data["pagination"];
 
 $filters    = $data['filters'];
 $members     = $data['members'];
@@ -49,6 +47,8 @@ $pagination = $data['pagination'];
 
 $sort = $filters['sort'] ?? 'customer_id';
 $dir  = $filters['dir'] ?? 'asc';
+$search  = $filters['search'] ?? '';
+
 $activeStatus = $_GET['activeStatus'] ?? '';
 $blockStatus = $_GET['blockStatus'] ?? '';
 $activeSelectedText = $activeStatus !== '' ? $activeStatus : 'All';
@@ -106,7 +106,16 @@ $fields = [
   <div class="filters-pagination-container">
     <div class="filters-actions">
       <div class="filters">
-        <input type="text" id="dataSearch" placeholder="Search customer ID, name...">
+        <div class="search-wrapper">
+          <input
+            type="text"
+            id="dataSearch"
+            placeholder="Search ID..."
+            value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" />
+          <button type="button" id="clearSearch" aria-label="Clear search">
+            &times;
+          </button>
+        </div>
 
         <div class="custom-select" id="activeSelect">
           <input type="hidden" id="activeFilter" value="">
@@ -148,14 +157,6 @@ $fields = [
       <tr>
         <th>Select</th>
         <?php table_headers($fields, $sort, $dir, $href); ?>
-        <!-- <th>Customer Id</th>
-        <th>Email</th>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Phone</th>
-        <th>Created At</th>
-        <th>Updated At</th>
-        <th>Reward Point</th> -->
         <th>Active</th>
         <th>Blocked</th>
       </tr>

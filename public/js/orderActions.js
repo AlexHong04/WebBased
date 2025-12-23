@@ -72,33 +72,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // function updateButtons() {
-  //   const checkedBoxes = document.querySelectorAll(".dataCheckbox:checked");
-  //   const checkedCount = checkedBoxes.length;
-
-  //   if (checkedCount === 0) {
-  //     viewBtn.style.display = "none";
-  //     updateBtn.style.display = "none";
-  //     return;
-  //   }
-
-  //   const statuses = Array.from(checkedBoxes).map((cb) =>
-  //     cb.closest("tr").querySelector(".order-status").textContent.trim()
-  //   );
-  //   const allSameStatus = statuses.every((status) => status === statuses[0]);
-
-  // if (checkedCount === 1) {
-  //   viewBtn.style.display = "inline-block";
-  //   updateBtn.style.display = "inline-block";
-  // } else if (checkedCount > 1 && allSameStatus) {
-  //   viewBtn.style.display = "none";
-  //   updateBtn.style.display = "inline-block";
-  // } else {
-  //   viewBtn.style.display = "none";
-  //   updateBtn.style.display = "none";
-  // }
-  // }
-
   // Show popup when clicking Update
   updateBtn.addEventListener("click", () => {
     const checkedBoxes = document.querySelectorAll(".dataCheckbox:checked");
@@ -217,52 +190,6 @@ document.addEventListener("DOMContentLoaded", function () {
     updateButtons();
   }
 
-  // Search/filter
-  // function filterTable() {
-  //   const searchValue = searchInput.value.toLowerCase();
-  //   const statusValue = statusFilter.value;
-
-  //   tableRows.forEach((row) => {
-  //     const orderId = row.querySelector(".dataCheckbox").value;
-  //     const customerId = row.cells[2].textContent.toLowerCase();
-  //     const status = row.querySelector(".order-status").textContent.trim();
-
-  //     const matchesSearch =
-  //       orderId.includes(searchValue) || customerId.includes(searchValue);
-  //     const matchesStatus = statusValue === "" || status === statusValue;
-
-  //     row.style.display = matchesSearch && matchesStatus ? "" : "none";
-  //   });
-
-  //   updateButtons();
-  // }
-
-  // const urlParams = new URLSearchParams(window.location.search);
-  // const currentStatus = urlParams.get("status") || "";
-
-  // document.querySelectorAll(".custom-select").forEach((select) => {
-  //   const selected = select.querySelector(".selected");
-  //   const options = select.querySelector(".options");
-
-  //   selected.addEventListener("click", () => select.classList.toggle("open"));
-  //   options.querySelectorAll("li").forEach((option) => {
-  //     option.addEventListener("click", () => {
-  //       selected.textContent = option.textContent;
-  //       document.getElementById("statusFilter").value = option.dataset.value;
-  //       select.classList.remove("open");
-  //       const params = new URLSearchParams(window.location.search);
-  //       params.set("status", option.dataset.value); // use 'status'
-  //       params.set("page", 1);
-  //       window.location.search = params.toString();
-  //       filterTable();
-  //     });
-  //   });
-
-  //   document.addEventListener("click", (e) => {
-  //     if (!select.contains(e.target)) select.classList.remove("open");
-  //   });
-  // });
-
   const urlParams = new URLSearchParams(window.location.search);
   const currentStatus = urlParams.get("status") || ""; // get current status from URL
 
@@ -323,7 +250,37 @@ document.addEventListener("DOMContentLoaded", function () {
     window.location.href = `adminOrderDetails.php?id=${orderId}`;
   });
 
-  searchInput.addEventListener("input", filterTable);
+  let searchTimer = null;
+  const clearBtn = document.getElementById("clearSearch");
+
+  function toggleClearButton() {
+    clearBtn.style.display = searchInput.value ? "block" : "none";
+  }
+
+  toggleClearButton();
+
+  searchInput.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
+      params.set("search", searchInput.value.trim());
+      params.set("page", 1);
+      window.location.search = params.toString();
+    }, 500); // wait 500ms after typing stops
+  });
+
+  // On click clear
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    toggleClearButton();
+
+    const params = new URLSearchParams(window.location.search);
+    params.delete("search");
+    params.set("page", 1);
+    window.location.search = params.toString();
+  });
+
   statusFilter.addEventListener("change", filterTable);
 
   updateButtons(); // Initialize

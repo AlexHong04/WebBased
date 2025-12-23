@@ -20,6 +20,7 @@ class OrderController
     $filters = [
       'page'   => $_GET['page'] ?? 1,
       'status' => $_GET['status'] ?? '',
+      'search' => $_GET['search'] ?? '',
       'sort'   => $_GET['sort'] ?? 'order_id',
       'dir'    => $_GET['dir'] ?? 'asc'
     ];
@@ -31,6 +32,7 @@ class OrderController
       $pagination->offset,
       $pagination->recordsPerPage,
       $filters['status'],
+      $filters['search'],
       $filters['sort'],
       $filters['dir']
     );
@@ -72,15 +74,19 @@ class OrderController
       die("No order ID provided.");
     }
 
+    $customerId = $_SESSION['customerId'] ?? null;
+
     $orderID = $_GET['id'];
-    $items = $this->orderModel->getDetails($orderID);
+    $items = $this->orderModel->getDetails($orderID, $customerId);
 
     return $items;
   }
 
   public function getOrderStatus($orderId)
   {
-    $items = $this->orderModel->getAllStatus($orderId);
+    $custId = $_SESSION['customerId'] ?? null;
+
+    $items = $this->orderModel->getAllStatus($orderId, $custId);
 
     return $items;
   }
@@ -106,7 +112,8 @@ class OrderController
 
   public function getDeliveryDetails($orderID)
   {
-    return $this->orderModel->getDelivery($orderID);
+    $custId = $_SESSION['customerId'];
+    return $this->orderModel->getDelivery($orderID, $custId);
   }
 
   public function updateStatus($orderId, $newStatus)

@@ -8,9 +8,10 @@ include '../../controllers/orderController.php';
 include '../header.php';
 
 $orderId = $_GET['id'];
+$custId = $_SESSION['customerId'];
 $orderController = new OrderController();
 $orders = $orderController->getOrderDetails();
-$custId = $orders[0]['customer_id'];
+// $custId = $orders[0]['customer_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $orderId = $_POST['order_id'] ?? $_GET['id'] ?? null;
@@ -75,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <button type="button" id="cancelBtn" data-order-id="<?= $orderId ?>">Cancel Order</button>
     </div>
   <?php else: ?>
-    <p>No orders available for cancellation.</p>
+    <p class="no-order">No orders available for cancellation.</p>
   <?php endif; ?>
 
   <!-- Confirmation Modal -->

@@ -160,6 +160,11 @@
   margin-bottom: 20px;
 }
 
+.no-order {
+  width: 100%;
+  text-align: center;
+}
+
 #timelineList {
   list-style: none;
   padding: 0;

@@ -128,7 +128,7 @@ function calSubtotal($subtotal, $tax)
 
     <div class="dataDetailsHeader">
       <!-- <a href="#" class="back-link" onclick="history.back(); return false;">&#x293A;</a> -->
-        <a href="/app/views/order/customerOrderHistory.php?id=<?= $customerId ?>" class="back-link">&#x293A;</a>
+      <a href="/app/views/order/customerOrderHistory.php?id=<?= $customerId ?>" class="back-link">&#x293A;</a>
       <h1>Order Details</h1>
     </div>
 
@@ -203,7 +203,7 @@ function calSubtotal($subtotal, $tax)
               <?php endforeach; ?>
             </div>
 
-            <?php if ($orderData['order_status'] != "Cancel Requested" && $orderData['order_status'] != "Cancelled" && $orderData['order_status'] != "Refunded" && $orderData['order_status'] != "Completed"): ?>
+            <?php if ($orderData['order_status'] != "Cancel Requested" && $orderData['order_status'] != "Cancelled" && $orderData['order_status'] != "Refunded"): ?>
               <div class="btn-container">
                 <?php if ($orderData['order_status'] == "Pending"): ?>
                   <button type="button"

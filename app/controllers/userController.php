@@ -536,26 +536,6 @@ class userController
     }
 
     // zq
-    // public function index()
-    // {
-    //     // Count total records
-    //     $total = $this->userModel->countMembers();
-
-    //     // Get current page
-    //     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-
-    //     // Create pagination object
-    //     $pagination = new Pagination($total, 10, $page); // 10 rows per page
-
-    //     // Fetch paginated members
-    //     $members = $this->userModel->getMembers($pagination->offset, $pagination->recordsPerPage);
-
-    //     return [
-    //         "members" => $members,
-    //         "pagination" => $pagination
-    //     ];
-    // }
-
     public function index()
     {
         $filters = [
@@ -563,10 +543,11 @@ class userController
             'activeStatus' => $_GET['activeStatus'] ?? '',
             'blockStatus' => $_GET['blockStatus'] ?? '',
             'sort'   => $_GET['sort'] ?? 'customer_id',
-            'dir'    => $_GET['dir'] ?? 'asc'
+            'dir'    => $_GET['dir'] ?? 'asc',
+            'search'    => $_GET['search'] ?? ''
         ];
 
-        $total = $this->userModel->countMembers($filters['activeStatus'], $filters['blockStatus']);
+        $total = $this->userModel->countMembers($filters['activeStatus'], $filters['blockStatus'], $filters['search']);
         $pagination = new Pagination($total, 10, $filters['page']);
 
         $members = $this->userModel->getMembers(
@@ -575,7 +556,8 @@ class userController
             $filters['activeStatus'],
             $filters['blockStatus'],
             $filters['sort'],
-            $filters['dir']
+            $filters['dir'],
+            $filters['search']
         );
 
         return [

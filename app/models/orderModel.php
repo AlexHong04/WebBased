@@ -221,22 +221,34 @@ class OrderModel
     return $this->db->result();
   }
 
-  public function countOrders($status = '')
+  public function countOrders($status = '', $search = '')
   {
     $sql = "SELECT COUNT(*) AS total
-            FROM ordertable o
-            LEFT JOIN (
-                SELECT os1.order_id, os1.order_status, os1.created_datetime
-                FROM orderstatus os1
-                INNER JOIN (
-                    SELECT order_id, MAX(created_datetime) AS latest_time
-                    FROM orderstatus
-                    GROUP BY order_id
-                ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
-            ) AS os_latest ON o.order_id = os_latest.order_id";
+          FROM ordertable o
+          LEFT JOIN (
+              SELECT os1.order_id, os1.order_status, os1.created_datetime
+              FROM orderstatus os1
+              INNER JOIN (
+                  SELECT order_id, MAX(created_datetime) AS latest_time
+                  FROM orderstatus
+                  GROUP BY order_id
+              ) os2 
+              ON os1.order_id = os2.order_id 
+              AND os1.created_datetime = os2.latest_time
+          ) AS os_latest ON o.order_id = os_latest.order_id";
+
+    $conditions = [];
 
     if ($status !== '') {
-      $sql .= " WHERE os_latest.order_status = :status";
+      $conditions[] = "os_latest.order_status = :status";
+    }
+
+    if ($search !== '') {
+      $conditions[] = "(o.order_id LIKE :search OR o.customer_id LIKE :search)";
+    }
+
+    if (!empty($conditions)) {
+      $sql .= " WHERE " . implode(" AND ", $conditions);
     }
 
     $this->db->query($sql);
@@ -245,11 +257,15 @@ class OrderModel
       $this->db->bind(':status', $status);
     }
 
+    if ($search !== '') {
+      $this->db->bind(':search', "%$search%");
+    }
+
     $result = $this->db->result();
-    return (int) ($result["total"] ?? 0);
+    return (int) ($result['total'] ?? 0);
   }
 
-  public function getOrders($offset, $limit, $status = '', $sort = 'customer_id', $dir = 'asc')
+  public function getOrders($offset, $limit, $status = '', $search = '', $sort = 'customer_id', $dir = 'asc')
   {
     $allowedSort = ['order_id', 'customer_id', 'created_datetime', 'total_amount'];
     if (!in_array($sort, $allowedSort)) {
@@ -257,25 +273,37 @@ class OrderModel
     }
 
     $dir = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
-
-    // FORCE integers (prevents SQL injection)
     $offset = (int)$offset;
     $limit  = (int)$limit;
 
-    $sql = "SELECT o.*, os_latest.order_status AS order_status, os_latest.created_datetime AS created_datetime
-        FROM ordertable o
-        LEFT JOIN (
-            SELECT os1.order_id, os1.order_status, os1.created_datetime
-            FROM orderstatus os1
-            INNER JOIN (
-                SELECT order_id, MAX(created_datetime) AS latest_time
-                FROM orderstatus
-                GROUP BY order_id
-            ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
-        ) AS os_latest ON o.order_id = os_latest.order_id";
+    $sql = "SELECT o.*, 
+                 os_latest.order_status AS order_status, 
+                 os_latest.created_datetime AS created_datetime
+          FROM ordertable o
+          LEFT JOIN (
+              SELECT os1.order_id, os1.order_status, os1.created_datetime
+              FROM orderstatus os1
+              INNER JOIN (
+                  SELECT order_id, MAX(created_datetime) AS latest_time
+                  FROM orderstatus
+                  GROUP BY order_id
+              ) os2 
+              ON os1.order_id = os2.order_id 
+              AND os1.created_datetime = os2.latest_time
+          ) AS os_latest ON o.order_id = os_latest.order_id";
+
+    $conditions = [];
 
     if ($status !== '') {
-      $sql .= " WHERE order_status = :status";
+      $conditions[] = "os_latest.order_status = :status";
+    }
+
+    if ($search !== '') {
+      $conditions[] = "(o.order_id LIKE :search OR o.customer_id LIKE :search)";
+    }
+
+    if (!empty($conditions)) {
+      $sql .= " WHERE " . implode(" AND ", $conditions);
     }
 
     $sql .= " ORDER BY $sort $dir LIMIT $offset, $limit";
@@ -284,6 +312,10 @@ class OrderModel
 
     if ($status !== '') {
       $this->db->bind(':status', $status);
+    }
+
+    if ($search !== '') {
+      $this->db->bind(':search', "%$search%");
     }
 
     return $this->db->resultAll();
@@ -379,7 +411,7 @@ class OrderModel
     return $this->db->result();
   }
 
-  public function getDetails($orderID)
+  public function getDetails($orderID, $customerId)
   {
     $this->db->query("
     SELECT 
@@ -425,14 +457,16 @@ class OrderModel
     ) AS os_earliest ON o.order_id = os_earliest.order_id
 
     WHERE o.order_id = :order_id
+    AND o.customer_id = :customer_id
 ");
 
     $this->db->bind(':order_id', $orderID);
+    $this->db->bind(':customer_id', $customerId);
 
     return $this->db->resultAll();
   }
 
-  public function getAllStatus($orderId)
+  public function getAllStatus($orderId, $custId)
   {
     $this->db->query("
     SELECT os.*
@@ -506,13 +540,18 @@ AND NOT EXISTS (
     return null;
   }
 
-  public function getDelivery($orderID)
+  public function getDelivery($orderID, $custId)
   {
     $this->db->query("
-        SELECT shipment_id, receiver_name, receiver_phone, receiver_address FROM shipments
-        WHERE order_id = :order_id
+        SELECT s.shipment_id, s.receiver_name, s.receiver_phone, s.receiver_address
+        FROM shipments s
+        JOIN ordertable o
+        ON s.order_id = o.order_id
+        WHERE s.order_id = :order_id
+        AND o.customer_id = :customer_id
     ");
     $this->db->bind(':order_id', $orderID);
+    $this->db->bind(':customer_id', $custId);
 
     return $this->db->result();
   }

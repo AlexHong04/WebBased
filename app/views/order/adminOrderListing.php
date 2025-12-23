@@ -25,6 +25,7 @@ $pagination = $data['pagination'];
 
 $sort = $filters['sort'] ?? 'order_id';
 $dir  = $filters['dir'] ?? 'asc';
+$search  = $filters['search'] ?? '';
 $statusFilter = $_GET['status'] ?? '';
 $selectedText = $statusFilter !== '' ? $statusFilter : 'All Status';
 
@@ -67,7 +68,16 @@ $fields = [
   <div class="filters-pagination-container">
     <div class="filters-actions">
       <div class="filters">
-        <input type="text" id="dataSearch" placeholder="Search ID...">
+        <div class="search-wrapper">
+          <input
+            type="text"
+            id="dataSearch"
+            placeholder="Search ID..."
+            value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" />
+          <button type="button" id="clearSearch" aria-label="Clear search">
+            &times;
+          </button>
+        </div>
 
         <div class="custom-select" id="statusSelect">
           <input type="hidden" id="statusFilter" value="<?= htmlspecialchars($currentStatus) ?>">
@@ -98,12 +108,6 @@ $fields = [
       <tr class="thead">
         <th>Select</th>
         <?php table_headers($fields, $sort, $dir, $href); ?>
-        <!-- <th>Order Id</th>
-        <th>Customer Id</th>
-        <th>Created At</th>
-        <th>Item Quantity</th>
-        <th>Total Amount (RM)</th>
-        <th>Redeemed Point</th> -->
         <th>Status</th>
       </tr>
     </thead>

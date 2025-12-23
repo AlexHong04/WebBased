@@ -110,27 +110,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Custom select handling
-  // document.querySelectorAll(".custom-select").forEach((select) => {
-  //   const selected = select.querySelector(".selected");
-  //   const options = select.querySelector(".options");
-
-  //   selected.addEventListener("click", () => select.classList.toggle("open"));
-
-  //   options.querySelectorAll("li").forEach((option) => {
-  //     option.addEventListener("click", () => {
-  //       selected.textContent = option.textContent;
-  //       select.querySelector("input").value = option.dataset.value;
-  //       select.classList.remove("open");
-  //       filterTable();
-  //     });
-  //   });
-
-  //   document.addEventListener("click", (e) => {
-  //     if (!select.contains(e.target)) select.classList.remove("open");
-  //   });
-  // });
-
   document.getElementById("viewBtn").addEventListener("click", function () {
     const checkboxes = document.querySelectorAll(".dataCheckbox:checked");
 
@@ -185,7 +164,36 @@ document.addEventListener("DOMContentLoaded", function () {
   checkboxes.forEach((cb) => cb.addEventListener("change", updateButtons));
 
   // Search input listener
-  searchInput.addEventListener("input", filterTable);
+  let searchTimer = null;
+  const clearBtn = document.getElementById("clearSearch");
+
+  function toggleClearButton() {
+    clearBtn.style.display = searchInput.value ? "block" : "none";
+  }
+
+  toggleClearButton();
+
+  searchInput.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+
+    searchTimer = setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
+      params.set("search", searchInput.value.trim());
+      params.set("page", 1);
+      window.location.search = params.toString();
+    }, 500); // wait 500ms after typing stops
+  });
+
+  // On click clear
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    toggleClearButton();
+
+    const params = new URLSearchParams(window.location.search);
+    params.delete("search");
+    params.set("page", 1);
+    window.location.search = params.toString();
+  });
 
   // Initial button state
   updateButtons();

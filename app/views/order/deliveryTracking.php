@@ -12,9 +12,10 @@ if (!isset($_GET['id'])) {
 }
 
 $orderID = $_GET['id'];
-
 $deliveryDetails = $orderController->getDeliveryDetails($orderID);
-$orderStatuses = $orderController->getOrderStatus($orderID);
+if (!empty($deliveryDetails)) {
+  $orderStatuses = $orderController->getOrderStatus($orderID);
+}
 
 if ($deliveryDetails === false) {
   $deliveryDetails = [
@@ -57,24 +58,26 @@ function getTrackingData($order_id, $deliveryDetails, $orderStatuses)
   $timeline = [];
   $latest_status_data = null;
 
-  foreach ($orderStatuses as $status_item) {
-    $status_name = $status_item['order_status'];
-    $datetime = $status_item['created_datetime'];
+  if (!empty($orderStatuses)) {
+    foreach ($orderStatuses as $status_item) {
+      $status_name = $status_item['order_status'];
+      $datetime = $status_item['created_datetime'];
 
-    if (isset($status_map[$status_name])) {
-      $map_data = $status_map[$status_name];
+      if (isset($status_map[$status_name])) {
+        $map_data = $status_map[$status_name];
 
-      $timeline[] = [
-        'status' => $status_name,
-        'date' => $datetime,
-        'location' => $map_data['location'],
-        'description' => $map_data['description'],
-      ];
+        $timeline[] = [
+          'status' => $status_name,
+          'date' => $datetime,
+          'location' => $map_data['location'],
+          'description' => $map_data['description'],
+        ];
 
-      $latest_status_data = [
-        'status' => $status_name,
-        'latest_update' => $datetime . ', ' . $map_data['location'], // Combine time and location
-      ];
+        $latest_status_data = [
+          'status' => $status_name,
+          'latest_update' => $datetime . ', ' . $map_data['location'], // Combine time and location
+        ];
+      }
     }
   }
 
@@ -91,8 +94,9 @@ function getTrackingData($order_id, $deliveryDetails, $orderStatuses)
     ]
   );
 }
-
-$data = getTrackingData($orderID, $deliveryDetails, $orderStatuses);
+if (!empty($orderStatuses) && !empty($deliveryDetails)) {
+  $data = getTrackingData($orderID, $deliveryDetails, $orderStatuses);
+}
 
 function calculateEstimatedDelivery(array $orderStatuses): string
 {
@@ -163,36 +167,38 @@ $steps = [
   'Delivered'
 ];
 
-$currentStatus = $data ? $data['status'] : '';
-$activeIndex = -1;
+if (!empty($data)) {
+  $currentStatus = $data ? $data['status'] : '';
+  $activeIndex = -1;
+  if ($currentStatus) {
+    if (strpos($currentStatus, 'Out for Delivery') !== false) {
+      $currentStepName = 'Out for Delivery';
+    } elseif (strpos($currentStatus, 'Packing') !== false) {
+      $currentStepName = 'Packing';
+    } elseif (strpos($currentStatus, 'Paid') !== false) {
+      $currentStepName = 'Processing';
+    } elseif (strpos($currentStatus, 'Delivered') !== false) {
+      $currentStepName = 'Delivered';
+    } else {
+      $currentStepName = '';
+    }
 
-if ($currentStatus) {
-  if (strpos($currentStatus, 'Out for Delivery') !== false) {
-    $currentStepName = 'Out for Delivery';
-  } elseif (strpos($currentStatus, 'Packing') !== false) {
-    $currentStepName = 'Packing';
-  } elseif (strpos($currentStatus, 'Paid') !== false) {
-    $currentStepName = 'Processing';
-  } elseif (strpos($currentStatus, 'Delivered') !== false) {
-    $currentStepName = 'Delivered';
-  } else {
-    $currentStepName = '';
+    $activeIndex = array_search($currentStepName, $steps);
   }
 
-  $activeIndex = array_search($currentStepName, $steps);
+  $totalSteps = count($steps);
+
+  $lineProgressWidth = 0;
+  if ($activeIndex > 0) {
+    $segmentProgress = $activeIndex / ($totalSteps - 1);
+    $lineProgressWidth = $segmentProgress * 80;
+  }
+
+  $lineStyle = "style=\"--progress-width: " . $lineProgressWidth . "%;\"";
+
+  $statusText = $data ? $data['status'] : 'Tracking Not Found';
 }
 
-$totalSteps = count($steps);
-
-$lineProgressWidth = 0;
-if ($activeIndex > 0) {
-  $segmentProgress = $activeIndex / ($totalSteps - 1);
-  $lineProgressWidth = $segmentProgress * 80;
-}
-
-$lineStyle = "style=\"--progress-width: " . $lineProgressWidth . "%;\"";
-
-$statusText = $data ? $data['status'] : 'Tracking Not Found';
 
 ?>
 
@@ -202,7 +208,7 @@ $statusText = $data ? $data['status'] : 'Tracking Not Found';
     <h1>Delivery Tracking</h1>
   </div>
 
-  <?php if ($data): ?>
+  <?php if (!empty($data)): ?>
     <div class="progress-stepper" <?= $lineStyle ?>>
       <?php foreach ($steps as $index => $step): ?>
         <?php
@@ -304,6 +310,8 @@ $statusText = $data ? $data['status'] : 'Tracking Not Found';
         ?>
       </ul>
     </div>
+  <?php else: ?>
+    <p class="no-order">No delivery details found.</p>
   <?php endif; ?>
 
 </div>
