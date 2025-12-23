@@ -43,7 +43,6 @@ authenticate();
 $memberController = new UserController();
 $data = $memberController->index();
 
-
 $filters    = $data['filters'];
 $members     = $data['members'];
 $pagination = $data['pagination'];
@@ -113,7 +112,7 @@ $fields = [
           <input
             type="text"
             id="dataSearch"
-            placeholder="Search ID..."
+            placeholder="Search..."
             value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" />
           <button type="button" id="clearSearch" aria-label="Clear search">
             &times;

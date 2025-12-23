@@ -344,31 +344,45 @@ class userModel
     //     return $this->db->resultAll();
     // }
 
-    public function countMembers($activeStatus = '', $blockStatus = '')
+    public function countMembers($activeStatus = '', $blockStatus = '', $search = '')
     {
-        $sql = "SELECT COUNT(*) AS total FROM customer WHERE 1";
+        $sql = "SELECT COUNT(*) AS total FROM customer";
+        $conditions = [];
 
-        // Active filter
         if ($activeStatus === 'Yes') {
-            $sql .= " AND isActive = 1";
+            $conditions[] = "isActive = 1";
         } elseif ($activeStatus === 'No') {
-            $sql .= " AND isActive = 0";
+            $conditions[] = "isActive = 0";
         }
 
-        // Blocked filter
         if ($blockStatus === 'Yes') {
-            $sql .= " AND isBlocked = 1";
+            $conditions[] = "isBlocked = 1";
         } elseif ($blockStatus === 'No') {
-            $sql .= " AND isBlocked = 0";
+            $conditions[] = "isBlocked = 0";
+        }
+
+        if ($search !== '') {
+            $conditions[] = "(customer_id LIKE :search 
+                          OR email LIKE :search 
+                          OR lastName LIKE :search 
+                          OR firstName LIKE :search)";
+        }
+
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
         }
 
         $this->db->query($sql);
+
+        if ($search !== '') {
+            $this->db->bind(':search', "%$search%");
+        }
+
         $result = $this->db->result();
         return (int)($result["total"] ?? 0);
     }
 
-
-    public function getMembers($offset, $limit, $activeStatus = '', $blockStatus = '', $sort = 'customer_id', $dir = 'asc')
+    public function getMembers($offset, $limit, $activeStatus = '', $blockStatus = '', $sort = 'customer_id', $dir = 'asc', $search = '')
     {
         $allowedSort = ['customer_id', 'email', 'phone', 'lastName', 'firstName', 'created_at', 'updated_at', 'rewardPoint'];
         if (!in_array($sort, $allowedSort)) {
@@ -376,24 +390,29 @@ class userModel
         }
 
         $dir = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
-
-        // FORCE integers (prevents SQL injection)
         $offset = (int)$offset;
         $limit  = (int)$limit;
 
         $sql = "SELECT * FROM customer";
         $conditions = [];
 
-        if ($activeStatus !== '' && $activeStatus == 'Yes') {
+        if ($activeStatus === 'Yes') {
             $conditions[] = "isActive = 1";
-        } elseif ($activeStatus !== '' && $activeStatus == 'No') {
+        } elseif ($activeStatus === 'No') {
             $conditions[] = "isActive = 0";
         }
 
-        if ($blockStatus !== '' && $blockStatus == 'Yes') {
+        if ($blockStatus === 'Yes') {
             $conditions[] = "isBlocked = 1";
-        } elseif ($blockStatus !== '' && $blockStatus == 'No') {
+        } elseif ($blockStatus === 'No') {
             $conditions[] = "isBlocked = 0";
+        }
+
+        if ($search !== '') {
+            $conditions[] = "(customer_id LIKE :search 
+                          OR email LIKE :search 
+                          OR lastName LIKE :search 
+                          OR firstName LIKE :search)";
         }
 
         if (!empty($conditions)) {
@@ -403,9 +422,13 @@ class userModel
         $sql .= " ORDER BY $sort $dir LIMIT $offset, $limit";
 
         $this->db->query($sql);
+
+        if ($search !== '') {
+            $this->db->bind(':search', "%$search%");
+        }
+
         return $this->db->resultAll();
     }
-
 
     public function getSpecificMember($custID)
     {
