@@ -77,7 +77,7 @@ function getTrackingData($order_id, $deliveryDetails, $orderStatuses)
 
         $latest_status_data = [
           'status' => $status_name,
-          'latest_update' => $datetime . ', ' . $map_data['location'], // Combine time and location
+          'latest_update' => $datetime . ', ' . $map_data['location'],
         ];
       }
     }
@@ -290,7 +290,6 @@ if (!empty($data)) {
         $timeline = $data['timeline'];
         $isFirst = true;
         foreach ($timeline as $event):
-          // Split the datetime string at the space
           $datetimeParts = explode(' ', $event['date']);
           $datePart = $datetimeParts[0] ?? ''; // e.g., '2025-12-13'
           $timePart = $datetimeParts[1] ?? ''; // e.g., '01:46:17'
@@ -322,22 +321,16 @@ if (!empty($data)) {
   document.addEventListener('DOMContentLoaded', function() {
     const timelineEvents = document.querySelectorAll('.timeline-event');
 
-    // Function to initialize the timeline display
     function initializeTimeline() {
       timelineEvents.forEach(event => {
-        // Check if the event is the latest one (marked by PHP)
         if (event.classList.contains('active')) {
-          // You can add more interactive styling here if needed
           console.log('Latest event:', event.querySelector('.description').textContent);
         }
       });
     }
 
-    // Example of future interactivity: Clicking to expand details (if data allows)
     timelineEvents.forEach(event => {
       event.addEventListener('click', function() {
-        // For now, we'll just toggle a temporary class
-        // In a real app, this could fetch more hidden details via AJAX
         this.classList.toggle('expanded');
       });
     });

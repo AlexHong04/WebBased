@@ -62,7 +62,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const hiddenInput = select.querySelector("input");
     const options = select.querySelector(".options");
 
-    // Set initial value based on URL
     if (select.id === "activeSelect" && currentActive) {
       selected.textContent =
         currentActive === "Yes"
@@ -82,29 +81,25 @@ document.addEventListener("DOMContentLoaded", function () {
       hiddenInput.value = currentBlock;
     }
 
-    // Open/close dropdown
     selected.addEventListener("click", () => select.classList.toggle("open"));
 
-    // Option click
     options.querySelectorAll("li").forEach((option) => {
       option.addEventListener("click", () => {
         selected.textContent = option.textContent;
         hiddenInput.value = option.dataset.value;
         select.classList.remove("open");
 
-        // Update URL params separately for each dropdown
         const params = new URLSearchParams(window.location.search);
         if (select.id === "activeSelect") {
           params.set("activeStatus", option.dataset.value);
         } else if (select.id === "blockedSelect") {
           params.set("blockStatus", option.dataset.value);
         }
-        params.set("page", 1); // reset to page 1 on filter change
+        params.set("page", 1);
         window.location.search = params.toString();
       });
     });
 
-    // Close if click outside
     document.addEventListener("click", (e) => {
       if (!select.contains(e.target)) select.classList.remove("open");
     });
@@ -150,10 +145,8 @@ document.addEventListener("DOMContentLoaded", function () {
     toast.innerText = message;
     container.appendChild(toast);
 
-    // Show toast
     setTimeout(() => toast.classList.add("show"), 100);
 
-    // Hide and remove toast
     setTimeout(() => {
       toast.classList.remove("show");
       setTimeout(() => container.removeChild(toast), 500);
@@ -181,7 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
       params.set("search", searchInput.value.trim());
       params.set("page", 1);
       window.location.search = params.toString();
-    }, 500); // wait 500ms after typing stops
+    }, 500);
   });
 
   // On click clear

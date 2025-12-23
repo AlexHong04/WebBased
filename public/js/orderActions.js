@@ -111,7 +111,6 @@ document.addEventListener("DOMContentLoaded", function () {
       hiddenInput.value = "";
     }
 
-    // popup.style.display = "flex";
     Object.assign(popup.style, {
       display: "flex",
       visibility: "visible",
@@ -191,14 +190,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   const urlParams = new URLSearchParams(window.location.search);
-  const currentStatus = urlParams.get("status") || ""; // get current status from URL
+  const currentStatus = urlParams.get("status") || "";
 
   document.querySelectorAll(".custom-select").forEach((select) => {
     const selected = select.querySelector(".selected");
     const options = select.querySelector(".options");
     const hiddenInput = select.querySelector("input[type=hidden]");
 
-    // Set initial value based on URL
     hiddenInput.value = currentStatus;
     if (currentStatus === "") {
       selected.textContent = "All Status";
@@ -209,27 +207,23 @@ document.addEventListener("DOMContentLoaded", function () {
       if (option) selected.textContent = option.textContent;
     }
 
-    // Handle dropdown click
     selected.addEventListener("click", () => select.classList.toggle("open"));
 
-    // Handle selecting an option
     options.querySelectorAll("li").forEach((option) => {
       option.addEventListener("click", () => {
         selected.textContent = option.textContent;
         hiddenInput.value = option.dataset.value;
         select.classList.remove("open");
 
-        // Update URL with new filter and reset page to 1
         const params = new URLSearchParams(window.location.search);
         params.set("status", option.dataset.value);
         params.set("page", 1);
         window.location.search = params.toString();
 
-        filterTable(); // optional, if you are using client-side filtering
+        filterTable();
       });
     });
 
-    // Close dropdown if clicked outside
     document.addEventListener("click", (e) => {
       if (!select.contains(e.target)) select.classList.remove("open");
     });

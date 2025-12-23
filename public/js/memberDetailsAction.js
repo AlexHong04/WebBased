@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let newStatusValue = hiddenInput.value;
   let isFormEdited = false;
 
-  // Restore active tab
   const savedTab = localStorage.getItem("activeMemberTab");
   if (savedTab) {
     document
@@ -30,7 +29,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const activeContainer = document.getElementById(savedTab);
     if (activeContainer) activeContainer.style.display = "block";
 
-    // Optionally clear it if you only want it to persist once
     localStorage.removeItem("activeMemberTab");
   }
 
@@ -46,9 +44,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 3000);
   }
 
-  // When user clicks the status display
+  // Status Popup
   statusDisplay.addEventListener("click", () => {
-    // Toggle status value
     newStatusValue = hiddenInput.value == "1" ? "0" : "1";
     const statusText = newStatusValue == "1" ? "Blocked" : "Normal";
 
@@ -56,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function () {
       "modalMessage"
     ).textContent = `Are you sure you want to change member status to "${statusText}"?`;
 
-    // Show modal
     statusModal.style.display = "flex";
   });
 
@@ -67,20 +63,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Confirm button
   confirmBtn.addEventListener("click", () => {
-    // Update hidden input
     hiddenInput.value = newStatusValue;
 
-    // Update status display UI
     statusDisplay.textContent = newStatusValue == "1" ? "Blocked" : "Normal";
     statusDisplay.classList.toggle("blocked", newStatusValue == "1");
     statusDisplay.classList.toggle("normal", newStatusValue != "1");
 
     isFormEdited = true;
 
-    // Close modal
     statusModal.style.display = "none";
 
-    // Submit form automatically
     memberForm.requestSubmit();
   });
 
@@ -89,13 +81,11 @@ document.addEventListener("DOMContentLoaded", function () {
     tab.addEventListener("click", function (e) {
       e.preventDefault();
 
-      // Check if the user has unsaved changes
       if (isFormEdited) {
         showCustomPopup("Please save your changes before switching tabs.");
         return;
       }
 
-      // Switch tabs
       document
         .querySelectorAll(".tab")
         .forEach((t) => t.classList.remove("active"));
@@ -108,26 +98,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Helper function to process the file and show preview
+  // process the file and show preview
   function handleProfileFile(file) {
     if (file && file.type.startsWith("image/")) {
       previewImg.src = URL.createObjectURL(file);
-      isFormEdited = true; // Trigger your existing change tracker
+      isFormEdited = true;
 
-      // Sync the dropped file back to the hidden input
-      // so the PHP form can see it upon submission
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(file);
       fileInput.files = dataTransfer.files;
     }
   }
 
-  // 1. Method One: Standard File Input (Click)
+  // Standard File Input (Click)
   fileInput.addEventListener("change", function () {
     handleProfileFile(this.files[0]);
   });
 
-  // 2. Method Two: Drag and Drop
+  // Drag and Drop
   ["dragenter", "dragover"].forEach((eventName) => {
     avatarDropZone.addEventListener(
       eventName,
@@ -166,7 +154,6 @@ document.addEventListener("DOMContentLoaded", function () {
   function showCustomPopup(message) {
     const errorPopup = document.getElementById("customPopup");
 
-    // If the popup doesn't exist yet, create it
     if (!errorPopup) {
       const div = document.createElement("div");
       div.id = "customPopup";
@@ -174,12 +161,10 @@ document.addEventListener("DOMContentLoaded", function () {
       div.textContent = message;
       document.body.appendChild(div);
 
-      // Remove after 3 seconds
       setTimeout(() => div.classList.remove("show"), 3000);
       return;
     }
 
-    // If it exists, update text and show
     errorPopup.textContent = message;
     errorPopup.classList.add("show");
     setTimeout(() => errorPopup.classList.remove("show"), 3000);
@@ -221,36 +206,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Track changes in all inputs
   memberForm.querySelectorAll("input").forEach((input) => {
-    // Store initial value
     const initialValue = input.type === "file" ? null : input.value;
 
-    // For text, email, number, etc.
     input.addEventListener("input", () => {
       if (input.type !== "hidden" && input.value !== initialValue) {
         isFormEdited = true;
       }
     });
 
-    // For file inputs
     if (input.type === "file") {
       input.addEventListener("change", () => {
         if (input.files.length > 0) isFormEdited = true;
       });
     }
   });
-
-  // Form submit validation
-  // memberForm.addEventListener("submit", (e) => {
-  //   if (!isFormEdited) {
-  //     e.preventDefault();
-  //     showCustomPopup("Please enter something before submitting.");
-  //     return;
-  //   }
-
-  //   // Reset tracking after successful submission
-  //   isFormEdited = false;
-  //   window.removeEventListener("beforeunload", beforeUnloadHandler);
-  // });
 
   function beforeUnloadHandler(e) {
     if (isFormEdited) {
