@@ -1,5 +1,6 @@
 <?php
 include '../../controllers/productsController.php';
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -15,6 +16,9 @@ if (isset($_SESSION['undo_variants'])) {
     }
 }
 
+require_once __DIR__ . '/../../helpers/auth.php';
+
+authenticate();
 $controller = new ProductsController();
 $controller->submitProductForm();
 $title = "Add Single Products";
