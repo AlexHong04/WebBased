@@ -138,7 +138,7 @@ class userController
                 $loggedInId = $staff['admin_id'];
                 $loggedInEmail = $staff['email'];
                 $isStaffLogin = true;
-            } elseif ($user) {
+            } elseif ($user && password_verify($password, $user['password'])) {
 
                 if (!isset($_SESSION['login_attempts_' . $email])) {
                     $_SESSION['login_attempts_' . $email] = 0;
@@ -152,7 +152,9 @@ class userController
                         return;
                     }
 
-                    unset($_SESSION['login_attempts_' . $email]);
+                    if (isset($_SESSION['login_attempts_' . $email])) {
+                        unset($_SESSION['login_attempts_' . $email]);
+                    }
 
                     $loggedInId = $user['customer_id'];
                     $loggedInEmail = $user['email'];
