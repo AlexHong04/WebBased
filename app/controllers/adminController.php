@@ -112,7 +112,7 @@ class adminController
     }
 
     // 3. Get Current Admin Profile
-    public function profile()
+    public function getProfile()
     {
         if (!isset($_SESSION['adminId'])) {
             redirect('security/signIn.php');
@@ -224,6 +224,91 @@ class adminController
 
             $_SESSION['flash_success'] = "Password changed successfully.";
             redirect('admin/profile.php');
+        }
+    }
+
+    public function editStaff()
+    {
+        if (!isset($_SESSION['adminId'])) {
+            redirect('security/signIn.php');
+            return;
+        }
+
+        if (is_post()) {
+            $id = post('admin_id');
+            $firstName = post('firstName');
+            $lastName = post('lastName');
+            $email = post('email');
+            $phone = post('phone');
+            $address = post('address');
+            $position = post('position');
+            $password = post('password'); // Optional
+
+            $errors = [];
+
+            // Validation
+            if ($this->adminModel->isEmailExistsForOthers($email, $id)) {
+                $errors['email'] = "Email already used by another staff.";
+            }
+
+            if (!empty($password) && strlen($password) < 6) {
+                $errors['password'] = "Password must be at least 6 characters.";
+            }
+
+            if (!empty($errors)) {
+                $_SESSION['flash_error'] = $errors;
+                redirect('adminListing.php');
+                return;
+            }
+
+            $data = [
+                'admin_id' => $id,
+                'firstName' => $firstName,
+                'lastName' => $lastName,
+                'email' => $email,
+                'phone' => $phone,
+                'address' => $address,
+                'position' => $position
+            ];
+
+            // Only hash password if user entered a new one
+            if (!empty($password)) {
+                $data['password'] = password_hash($password, PASSWORD_BCRYPT);
+            }
+
+            if ($this->adminModel->updateStaffFull($data)) {
+                $_SESSION['flash_success'] = "Staff updated successfully.";
+            } else {
+                $_SESSION['flash_error']['global'] = "Failed to update staff.";
+            }
+            redirect('adminListing.php');
+        }
+    }
+
+    // 7. Delete Staff
+    public function deleteStaff()
+    {
+        if (!isset($_SESSION['adminId'])) {
+            redirect('security/signIn.php');
+            return;
+        }
+
+        if (is_post()) {
+            $id = post('admin_id');
+
+            // Prevent deleting self
+            if ($id == $_SESSION['adminId']) {
+                $_SESSION['flash_error']['global'] = "You cannot delete your own account.";
+                redirect('adminListing.php');
+                return;
+            }
+
+            if ($this->adminModel->deleteAdmin($id)) {
+                $_SESSION['flash_success'] = "Staff deleted successfully.";
+            } else {
+                $_SESSION['flash_error']['global'] = "Failed to delete staff.";
+            }
+            redirect('adminListing.php');
         }
     }
 }

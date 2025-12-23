@@ -77,7 +77,7 @@ class adminModel
 
     // 5. Helper: Generate Custom Admin ID (AD001, AD002, etc.)
     // Because admin_id is varchar(6)
-private function generateAdminId()
+    private function generateAdminId()
     {
         $this->db->query("SELECT admin_id FROM admin ORDER BY admin_id DESC LIMIT 1");
         $row = $this->db->single();
@@ -122,10 +122,62 @@ private function generateAdminId()
         $this->db->execute();
         return $this->db->rowCount() > 0;
     }
-    
+
     // 8. Get All Admins (For List View)
-    public function getAllAdmins() {
+    public function getAllAdmins()
+    {
         $this->db->query("SELECT * FROM admin ORDER BY created_at DESC");
         return $this->db->resultAll();
+    }
+
+    public function updateStaffFull($data)
+    {
+        $sql = "UPDATE admin SET 
+                firstName = :fname, 
+                lastName = :lname, 
+                phone = :phone, 
+                address = :addr, 
+                position = :pos,
+                email = :email";
+
+        if (!empty($data['password'])) {
+            $sql .= ", password = :pass";
+        }
+
+        $sql .= " WHERE admin_id = :id";
+
+        $this->db->query($sql);
+
+        $this->db->bind(':fname', $data['firstName']);
+        $this->db->bind(':lname', $data['lastName']);
+        $this->db->bind(':phone', $data['phone']);
+        $this->db->bind(':addr', $data['address']);
+        $this->db->bind(':pos', $data['position']);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':id', $data['admin_id']);
+
+        if (!empty($data['password'])) {
+            $this->db->bind(':pass', $data['password']);
+        }
+
+        return $this->db->execute();
+    }
+
+    // [NEW] Delete Admin
+    public function deleteAdmin($id)
+    {
+        $this->db->query("DELETE FROM admin WHERE admin_id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    // [NEW] Check email exists excluding specific ID (for edit validation)
+    public function isEmailExistsForOthers($email, $excludeId)
+    {
+        $this->db->query("SELECT email FROM admin WHERE email = :email AND admin_id != :id");
+        $this->db->bind(':email', $email);
+        $this->db->bind(':id', $excludeId);
+        $this->db->execute();
+        return $this->db->rowCount() > 0;
     }
 }

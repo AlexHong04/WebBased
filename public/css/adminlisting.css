@@ -1,0 +1,562 @@
+/* =========================================
+   1. MAIN CONTAINER & TEXT
+   ========================================= */
+.dataListing {
+  padding: 20px 40px;
+  text-align: center;
+  font-family: "Arial", Helvetica, sans-serif;
+  min-height: 80vh; /* Ensure footer doesn't jump up */
+}
+
+.dataListing > p {
+  font-weight: bold;
+  font-size: 30px;
+  padding: 10px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* =========================================
+   2. FILTERS & SEARCH BAR
+   ========================================= */
+.filters-pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.filters-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.dataListing .filters {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+/* Search Input */
+.dataListing #dataSearch {
+  padding: 10px 15px;
+  width: 300px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  font-size: 15px;
+  background-color: #fafafa;
+  transition: all 0.3s ease;
+}
+
+.dataListing #dataSearch:focus {
+  outline: none;
+  border-color: #f1a2b8;
+  box-shadow: 0 0 0 3px rgba(241, 162, 184, 0.1);
+  background-color: #fff;
+}
+
+/* Custom Dropdown (Position Filter) */
+.custom-select {
+  position: relative;
+  width: 180px;
+  user-select: none;
+  font-family: "Arial", sans-serif;
+}
+
+.custom-select .selected {
+  padding: 10px 15px;
+  color: #555;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.custom-select .selected::after {
+  content: "▾";
+  margin-left: 10px;
+  transition: transform 0.2s ease;
+}
+
+.custom-select.open .selected::after {
+  transform: rotate(180deg);
+}
+
+.custom-select .options {
+  margin: 5px 0 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  transition: max-height 0.25s ease;
+}
+
+.custom-select.open .options {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.custom-select .options li {
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 14px;
+  color: #333;
+  text-align: left;
+}
+
+.custom-select .options li:last-child {
+  border-bottom: none;
+}
+
+.custom-select .options li:hover {
+  background: #fff0f5;
+  color: #ec5d86;
+}
+
+/* =========================================
+   3. ACTION BUTTONS (ADD / VIEW)
+   ========================================= */
+.main-actions {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.btn-add {
+  background-color: #ec5d86; /* Stronger pink */
+  color: white;
+  border: none;
+  padding: 0 20px;
+  height: 39px; /* Align with input height */
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(236, 93, 134, 0.2);
+}
+
+.btn-add:hover {
+  background-color: #d64d73;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(236, 93, 134, 0.3);
+}
+
+#actionButtons button {
+  height: 39px;
+  background-color: white;
+  color: #555;
+  border: 1px solid #e0e0e0;
+  font-size: 14px;
+  padding: 0 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#actionButtons button:hover {
+  background-color: #f8f9fa;
+  border-color: #ccc;
+  color: #333;
+}
+
+/* =========================================
+   4. DATA TABLE
+   ========================================= */
+.data {
+  width: 100%;
+  border-collapse: separate; 
+  border-spacing: 0;
+  margin-top: 15px;
+  text-align: center;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f0f0f0;
+}
+
+.data thead th {
+  background-color: #fff0f5;
+  color: #333;
+  font-weight: 700;
+  padding: 15px 10px;
+  font-size: 14px;
+  border-bottom: 2px solid #fce4eb;
+}
+
+.data thead th a {
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
+.data tbody tr {
+  background-color: #ffffff;
+  transition: background-color 0.2s;
+}
+
+.data tbody tr:hover {
+  background-color: #fffbfd; /* Very light pink hover */
+}
+
+.data td {
+  padding: 12px 10px;
+  font-size: 14px;
+  color: #555;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.data tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data input[type="checkbox"] {
+  accent-color: #ec5d86;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Table Row Actions (Edit/Delete Icons) */
+.action-buttons-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background-color: rgba(0,0,0,0.05);
+  transform: scale(1.1);
+}
+
+.btn-edit {
+  color: #2196f3; /* Blue */
+}
+
+.btn-delete {
+  color: #f44336; /* Red */
+}
+
+/* =========================================
+   5. PAGINATION
+   ========================================= */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  margin-top: 5px;
+}
+
+.pagination a,
+.pagination span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px !important;
+  text-decoration: none;
+  border: 1px solid #e0e0e0;
+  color: #666;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.pagination a:hover {
+  background-color: #fff0f5;
+  border-color: #fce4eb;
+  color: #ec5d86;
+}
+
+.pagination a.active, 
+.pagination span.active {
+  background-color: #ec5d86;
+  color: white;
+  border-color: #ec5d86;
+  font-weight: bold;
+}
+
+/* =========================================
+   6. MODALS & FORMS (Enhanced UI)
+   ========================================= */
+/* Modal Overlay Base */
+#addStaffModal,
+#editStaffModal,
+#deleteStaffModal {
+  display: none;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 2147483647 !important;
+  justify-content: center !important;
+  align-items: center !important;
+  backdrop-filter: blur(2px); /* Nice blur effect */
+}
+
+#addStaffModal.show-error {
+  display: flex !important;
+}
+
+/* Common Modal Box Style */
+#addStaffModal .popup-box,
+#editStaffModal .popup-box,
+#deleteStaffModal .popup-box {
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid #fce4eb;
+  font-family: "Arial", sans-serif;
+  position: relative !important;
+  margin: auto !important;
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Size Variants */
+#addStaffModal .popup-box,
+#editStaffModal .popup-box {
+  width: 600px !important;
+  max-width: 90% !important;
+  padding: 30px 40px !important;
+}
+
+#deleteStaffModal .popup-box {
+  width: 400px !important;
+  padding: 30px !important;
+  text-align: center;
+}
+
+/* Header */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f5f5f5;
+}
+
+.popup-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #ec5d86;
+  font-weight: 700;
+}
+
+.close-modal {
+  font-size: 28px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1;
+  background: none;
+  border: none;
+}
+
+.close-modal:hover {
+  color: #ec5d86;
+}
+
+/* Form Layout */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background-color: #fafafa;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  color: #333;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #f1a2b8;
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(241, 162, 184, 0.15);
+}
+
+/* Action Buttons */
+.popup-actions {
+  margin-top: 10px;
+  padding-top: 20px;
+  border-top: 1px solid #f5f5f5;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Buttons inside Modal */
+.btn-cancel {
+  background-color: #fff;
+  color: #666;
+  border: 1px solid #e0e0e0;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #f5f5f5;
+  color: #333;
+  border-color: #ccc;
+}
+
+.btn-submit {
+  background-color: #ec5d86;
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(236, 93, 134, 0.25);
+  transition: all 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: #d64d73;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(236, 93, 134, 0.35);
+}
+
+/* =========================================
+   7. ALERTS & TOASTS
+   ========================================= */
+.alert {
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Toast Notification (Bottom/Top Right) */
+.toast {
+  min-width: 280px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  color: #333;
+  background-color: #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  border-left: 5px solid #2ecc71; /* Green accent */
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  font-family: "Arial", sans-serif;
+  font-size: 14px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Animation for Modal */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
