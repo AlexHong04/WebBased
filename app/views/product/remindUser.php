@@ -10,7 +10,7 @@ $templateId = $_GET['template_id'] ?? 1; // Default template
 $whatsappTemplates = [
     1 => [
         'name' => 'Default Back in Stock',
-        'text' => "🎉 Hi {firstname}! 🛒\nThe product {product_name} is back in stock!\n🔹 Variant ID: {product_variant}\n🔹 Quantity: {stock_qty}\nCheck it out: {product_link}"
+        'text' => "🎉 Hi {firstname}! 🛒\nThe product {product_name} is back in stock!\n🔹 Still have {stock_qty} left\nCheck it out: {product_link}"
     ],
     2 => [
         'name' => 'Promo Message',
@@ -31,7 +31,7 @@ function renderTemplate($templateText, $customer, $item)
         '{product_name}' => $item['product_name'] ?? '',
         '{product_id}' => $item['product_id'] ?? '',
         '{stock_qty}' => $item['stock_qty'] ?? '',
-        '{product_link}' => "http://localhost:8000/app/views/product/product_details.php?{$item['product_id']}" ?? ''
+        '{product_link}' => "http://localhost:8000/app/views/product/product_details.php?id={$item['product_id']}" ?? ''
     ];
     return str_replace(array_keys($replacements), array_values($replacements), $templateText);
 }
@@ -78,7 +78,6 @@ foreach ($wishlistItems as $item) {
     $customers[$customer_id]['items'][] = $item;
 }
 $customerCount = count($customers);
-
 
 include '../adminHeader.php';
 ?>
@@ -155,7 +154,8 @@ include '../adminHeader.php';
                     $itemListText = implode("\n", $product_lines);
 
                     $messageText = renderTemplate($whatsappTemplates[$templateId]['text'], $customer, $customer['items'][0]);
-                    $wa_link = "https://wa.me/{$customer['phone']}?text=" . rawurlencode($messageText);
+                    $wa_phone = '6' . preg_replace('/[^0-9]/', '', $customer['phone']);
+                    $wa_link = "https://wa.me/{$wa_phone}?text=" . rawurlencode($messageText);
                 ?>
                     <tr>
                         <td><?php echo htmlspecialchars($customer['customer_id']); ?></td>
