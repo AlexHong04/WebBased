@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const avatarDropZone = document.getElementById("avatarDropZone");
   const fileInput = document.getElementById("profile-pic-input");
   const previewImg = document.getElementById("profile-pic-preview");
+  const checkboxWrapper = document.getElementById("recipient-checkbox-wrapper");
   const inputs = form.querySelectorAll(
     "input:not([type='hidden']):not([type='file']), textarea, select"
   );
@@ -24,6 +25,9 @@ document.addEventListener("DOMContentLoaded", function () {
       fileInput.removeAttribute("disabled"); 
       avatarDropZone.classList.add("edit-mode"); 
 
+      if (checkboxWrapper) {
+        checkboxWrapper.style.display = "block";
+      }
       editBtn.innerText = "Save Changes";
       editBtn.type = "submit";
 

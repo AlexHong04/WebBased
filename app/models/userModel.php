@@ -156,33 +156,39 @@ class userModel
             !empty($data['postcode']);
 
         if ($hasAddressData) {
-            $this->db->query("SELECT cu.customer_id, cu.firstName, cu.lastName, cu.email, cu.gender, cu.phone, cu.img_url, ad.street_line, ad.city, ad.state, ad.postcode 
-                      FROM customer cu 
-                      LEFT JOIN address ad ON cu.customer_id = ad.customer_id AND ad.is_default = 1
-                      WHERE cu.customer_id = :id");
+            $this->db->query("SELECT customer_id, address_id FROM address WHERE customer_id = :id AND is_default = 1");
             $this->db->bind(':id', $data['customer_id']);
             $existingAddress = $this->db->result();
 
+            $fullName = $data['firstName'] . ' ' . $data['lastName'];
+
             if ($existingAddress) {
-                $this->db->query("UPDATE address SET 
-                    recipient_name = :recipient_name,
-                    recipient_phone = :recipient_phone, 
+
+                $updateSql = "UPDATE address SET 
                     street_line = :street_line, 
                     city = :city, 
                     state = :state, 
-                    postcode = :postcode  
-                    WHERE customer_id = :cid AND is_default = 1");
+                    postcode = :postcode";
+
+                if (isset($data['updateRecipient']) && $data['updateRecipient'] == '1') {
+                    $updateSql .= ", recipient_name = :recipient_name, recipient_phone = :recipient_phone";
+                }
+
+                $updateSql .= " WHERE customer_id = :cid AND is_default = 1";
+                $this->db->query($updateSql);
+
+                if (isset($data['updateRecipient']) && $data['updateRecipient'] == '1') {
+                    $this->db->bind(':recipient_name', $fullName);
+                    $this->db->bind(':recipient_phone', $data['phone']);
+                }
             } else {
                 $address_id = $this->db->generateId('address', 'address_id', 'AD');
                 $this->db->query("INSERT INTO address (address_id, customer_id, recipient_name, recipient_phone, street_line, city, state, postcode, is_default) 
                                   VALUES (:aid, :cid, :recipient_name, :recipient_phone, :street_line, :city, :state, :postcode, 1)");
                 $this->db->bind(':aid', $address_id);
+                $this->db->bind(':recipient_name', $fullName);
+                $this->db->bind(':recipient_phone', $data['phone']);
             }
-
-            $fullName = $data['firstName'] . ' ' . $data['lastName'];
-
-            $this->db->bind(':recipient_name', $fullName);
-            $this->db->bind(':recipient_phone', $data['phone']);
             $this->db->bind(':street_line', $data['streetLine']);
             $this->db->bind(':city', $data['city']);
             $this->db->bind(':state', $data['state']);
@@ -325,45 +331,44 @@ class userModel
         return $this->db->resultAll();
     }
 
-    public function countMembers($activeStatus = '', $blockStatus = '', $search = '')
+    // public function countMembers()
+    // {
+    //     $this->db->query("SELECT COUNT(*) AS total FROM customer");
+    //     $result = $this->db->result();
+    //     return $result["total"];
+    // }
+
+    // public function getMembers($offset, $limit)
+    // {
+    //     $this->db->query("SELECT * FROM customer LIMIT $offset, $limit");
+    //     return $this->db->resultAll();
+    // }
+
+    public function countMembers($activeStatus = '', $blockStatus = '')
     {
-        $sql = "SELECT COUNT(*) AS total FROM customer";
-        $conditions = [];
+        $sql = "SELECT COUNT(*) AS total FROM customer WHERE 1";
 
+        // Active filter
         if ($activeStatus === 'Yes') {
-            $conditions[] = "isActive = 1";
+            $sql .= " AND isActive = 1";
         } elseif ($activeStatus === 'No') {
-            $conditions[] = "isActive = 0";
+            $sql .= " AND isActive = 0";
         }
 
+        // Blocked filter
         if ($blockStatus === 'Yes') {
-            $conditions[] = "isBlocked = 1";
+            $sql .= " AND isBlocked = 1";
         } elseif ($blockStatus === 'No') {
-            $conditions[] = "isBlocked = 0";
-        }
-
-        if ($search !== '') {
-            $conditions[] = "(customer_id LIKE :search 
-                          OR email LIKE :search 
-                          OR lastName LIKE :search 
-                          OR firstName LIKE :search)";
-        }
-
-        if (!empty($conditions)) {
-            $sql .= " WHERE " . implode(" AND ", $conditions);
+            $sql .= " AND isBlocked = 0";
         }
 
         $this->db->query($sql);
-
-        if ($search !== '') {
-            $this->db->bind(':search', "%$search%");
-        }
-
         $result = $this->db->result();
         return (int)($result["total"] ?? 0);
     }
 
-    public function getMembers($offset, $limit, $activeStatus = '', $blockStatus = '', $sort = 'customer_id', $dir = 'asc', $search = '')
+
+    public function getMembers($offset, $limit, $activeStatus = '', $blockStatus = '', $sort = 'customer_id', $dir = 'asc')
     {
         $allowedSort = ['customer_id', 'email', 'phone', 'lastName', 'firstName', 'created_at', 'updated_at', 'rewardPoint'];
         if (!in_array($sort, $allowedSort)) {
@@ -371,29 +376,24 @@ class userModel
         }
 
         $dir = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
+
+        // FORCE integers (prevents SQL injection)
         $offset = (int)$offset;
         $limit  = (int)$limit;
 
         $sql = "SELECT * FROM customer";
         $conditions = [];
 
-        if ($activeStatus === 'Yes') {
+        if ($activeStatus !== '' && $activeStatus == 'Yes') {
             $conditions[] = "isActive = 1";
-        } elseif ($activeStatus === 'No') {
+        } elseif ($activeStatus !== '' && $activeStatus == 'No') {
             $conditions[] = "isActive = 0";
         }
 
-        if ($blockStatus === 'Yes') {
+        if ($blockStatus !== '' && $blockStatus == 'Yes') {
             $conditions[] = "isBlocked = 1";
-        } elseif ($blockStatus === 'No') {
+        } elseif ($blockStatus !== '' && $blockStatus == 'No') {
             $conditions[] = "isBlocked = 0";
-        }
-
-        if ($search !== '') {
-            $conditions[] = "(customer_id LIKE :search 
-                          OR email LIKE :search 
-                          OR lastName LIKE :search 
-                          OR firstName LIKE :search)";
         }
 
         if (!empty($conditions)) {
@@ -403,13 +403,9 @@ class userModel
         $sql .= " ORDER BY $sort $dir LIMIT $offset, $limit";
 
         $this->db->query($sql);
-
-        if ($search !== '') {
-            $this->db->bind(':search', "%$search%");
-        }
-
         return $this->db->resultAll();
     }
+
 
     public function getSpecificMember($custID)
     {
@@ -442,6 +438,30 @@ class userModel
 
         return $this->db->execute();
     }
+
+    // public function updateMember($data)
+    // {
+    //     $this->db->query("UPDATE customer SET 
+    //                 firstName = :firstName,
+    //                 lastName = :lastName,
+    //                 phone = :phone,
+    //                 email = :email,
+    //                 updated_at = NOW(),
+    //                 isBlocked = :isBlocked,
+    //                 rewardPoint = :rewardPoint,
+    //                 img_url = :img_url
+    //             WHERE customer_id = :customer_id");
+    //     $this->db->bind(':firstName', $data['firstName']);
+    //     $this->db->bind(':lastName', $data['lastName']);
+    //     $this->db->bind(':phone', $data['phone']);
+    //     $this->db->bind(':email', $data['email']);
+    //     $this->db->bind(':isBlocked', $data['isBlocked']);
+    //     $this->db->bind(':rewardPoint', $data['rewardPoint']);
+    //     $this->db->bind(':img_url', $data['img_url']);
+    //     $this->db->bind(':customer_id', $data['customer_id']);
+
+    //     return $this->db->execute();
+    // }
 
     public function updateMember($data)
     {

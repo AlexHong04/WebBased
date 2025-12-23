@@ -186,6 +186,17 @@ include __DIR__ . '/../header.php';
                         </svg>
                     </div>
                     <small class="form-text">Street address, P.O. box, company name</small>
+                    <div id="recipient-checkbox-wrapper" class="recipient-checkbox-wrapper" style="display: none;">
+                        <label class="custom-checkbox-container">
+                            <input type="checkbox" id="updateRecipient" name="updateRecipient" value="1">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">
+                                Update <strong>Receiver Name & Phone</strong> with my profile info?
+                                <br>
+                                <span class="sub-text">(Applies to default address only)</span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="form-actions">

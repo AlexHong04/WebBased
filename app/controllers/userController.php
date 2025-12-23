@@ -391,7 +391,8 @@ class userController
                     'streetLine'  => $addressLine,
                     'city'        => $city,
                     'state'       => $state,
-                    'postcode'    => $postcode
+                    'postcode'    => $postcode,
+                    'updateRecipient' => $_POST['updateRecipient'] ?? 0
                 ];
 
                 if ($uploadedImgName) {
