@@ -65,12 +65,16 @@
 		<div class="footer-section">
 			<h3 class="footer-heading">EXPLORE</h3>
 			<ul class="footer-links">
-				<li><a href="#"><span class="link-icon">→</span> All</a></li>
-				<li><a href="#"><span class="link-icon">→</span> Bracelet</a></li>
-				<li><a href="#"><span class="link-icon">→</span> Earrings</a></li>
-				<li><a href="#"><span class="link-icon">→</span> Hairclaw</a></li>
-				<li><a href="#"><span class="link-icon">→</span> Necklace</a></li>
-				<li><a href="#"><span class="link-icon">→</span> Ring</a></li>
+				<li><a href="/app/views/category/categoryHomePage.php"><span class="link-icon">→</span> All</a></li>
+				<?php if (!empty($categories)): ?>
+					<?php foreach ($categories as $cat): ?>
+						<li>
+							<a href="/app/views/category/specificCategoryPage.php?id=<?php echo $cat['category_id']; ?>">
+								<?php echo $cat['category_name']; ?>
+							</a>
+						</li>
+					<?php endforeach; ?>
+				<?php endif; ?>
 			</ul>
 		</div>
 

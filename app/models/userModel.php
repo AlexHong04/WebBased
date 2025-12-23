@@ -38,7 +38,7 @@ class userModel
         // Added cu.img_url to the select list
         $this->db->query("SELECT cu.customer_id, cu.firstName, cu.lastName, cu.email, cu.gender, cu.phone, cu.img_url, ad.street_line, ad.city, ad.state, ad.postcode 
                       FROM customer cu 
-                      LEFT JOIN address ad ON cu.customer_id = ad.customer_id 
+                      LEFT JOIN address ad ON cu.customer_id = ad.customer_id AND ad.is_default = 1
                       WHERE cu.customer_id = :id");
         $this->db->bind(':id', $id);
         return $this->db->result();
@@ -156,7 +156,10 @@ class userModel
             !empty($data['postcode']);
 
         if ($hasAddressData) {
-            $this->db->query("SELECT customer_id,is_default FROM address WHERE customer_id = :id");
+            $this->db->query("SELECT cu.customer_id, cu.firstName, cu.lastName, cu.email, cu.gender, cu.phone, cu.img_url, ad.street_line, ad.city, ad.state, ad.postcode 
+                      FROM customer cu 
+                      LEFT JOIN address ad ON cu.customer_id = ad.customer_id AND ad.is_default = 1
+                      WHERE cu.customer_id = :id");
             $this->db->bind(':id', $data['customer_id']);
             $existingAddress = $this->db->result();
 
