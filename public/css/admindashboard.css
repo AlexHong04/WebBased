@@ -306,17 +306,17 @@
 }
 
 .color-0 {
-  background-color: #ceeef9ff;
+  background-color: rgba(128, 61, 252, 1);
 }
 .color-1 {
-  background-color: #ffd1d1ff;
+  background-color: rgba(155, 104, 252, 1);
 }
 .color-2 {
-  background-color: #d8c5fcff;
+  background-color: rgba(175, 135, 248, 1);
 }
 .color-3 {
-  background-color: #c6f8e7ff;
+  background-color: rgb(193, 165, 245);
 }
 .color-4 {
-  background-color: #fdf3c8ff;
+  background-color: rgb(221, 208, 246);
 }

@@ -64,7 +64,7 @@ class ReviewController
       $this->reviewModel->saveReview(
         $description,
         $rating,
-        !empty($img_urls) ? json_encode($img_urls) : null,
+        !empty($img_urls) ? implode(',', $img_urls) : null,
         $variantId,
         $orderId
       );

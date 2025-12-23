@@ -262,7 +262,7 @@ require_once __DIR__ . '/adminheader.php';
   );
 
   let currentAngle = 0;
-  const colors = ["#ceeef9ff", "#ffd1d1ff", "#d8c5fcff", "#c6f8e7ff", "#fdf3c8ff", ];
+  const colors = ["rgba(128, 61, 252, 1)", "rgba(155, 104, 252, 1)", "rgba(175, 135, 248, 1)", "rgb(193, 165, 245)", "rgb(221, 208, 246)", ];
   const segments = [];
 
   categoryData.forEach((item, index) => {
