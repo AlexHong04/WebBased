@@ -11,6 +11,7 @@ $controller = new userController();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'reset_password') {
     $controller->resetPassword();
 }
+$profileData = $controller->getProfile();
 
 require_once __DIR__ . '/../header.php';
 ?>
@@ -20,24 +21,41 @@ require_once __DIR__ . '/../header.php';
 
     <div class="profile-container">
         <div class="profile-sidebar">
-            <div class="profile-avatar">
-                <img id="profile-image" src="image/DefaultAvatar.jpg" alt="Profile Avatar">
+            <div class="profile-avatar" id="avatarDropZone">
+                <label for="profile-pic-input" class="avatar-label">
+                    <?php
+                    $isDefaultImg = empty($profileData['img_url']);
+                    $imgSrc = $isDefaultImg
+                        ? '/public/images/profile/user.png'
+                        : '/public/images/profile/' . htmlspecialchars($profileData['img_url']);
 
-                <div class="avatar-overlay">
-                    <label for="avatar-upload" class="avatar-change-btn">
-                        <i class="fas fa-camera"></i>
-                    </label>
-                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
-                </div>
+                    $imgClass = $isDefaultImg ? 'default-avatar' : '';
+                    ?>
+                    <img id="profile-pic-preview"
+                        class="<?= $imgClass ?>"
+                        src="<?= $imgSrc ?>"
+                        alt="Profile Picture">
+
+                    <div class="plus">+</div>
+                    <!-- <img id="profile-pic-preview"
+                        src="<?= !empty($profileData['img_url'])
+                                    ? '/public/images/profile/' . htmlspecialchars($profileData['img_url'])
+                                    : '/public/images/profile/user.png' ?>"
+                        alt="Profile Picture">
+                    <div class="plus">+</div> -->
+                </label>
+
+                <input type="file" name="profile_pic" id="profile-pic-input" accept="image/*">
             </div>
 
-            <h2 id="profile-name">User Name</h2>
-            <p id="profile-email">user@example.com</p>
+            <h2 id="profile-name"><?= htmlspecialchars(($profileData['firstName'] ?? '') . ' ' . ($profileData['lastName'] ?? '')) ?></h2>
+            <p id="profile-gender"><?= htmlspecialchars($profileData['gender'] ?? '') ?></p>
+
 
             <div class="profile-nav">
                 <a href="profile.php">
                     <svg xmlns=" http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
-                    <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z" />
+                        <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z" />
                     </svg>
                     Profile Information
                 </a>
@@ -177,7 +195,7 @@ require_once __DIR__ . '/../header.php';
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('profile-form');
-        
+
         const passwordInput = document.getElementById('newPassword'); // Target newPassword
         const bars = document.querySelectorAll('.bar');
         const reqLength = document.getElementById('req-length');

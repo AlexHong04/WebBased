@@ -17,25 +17,32 @@ function handleScanSuccess(decodedText) {
     window.location.href = `/app/views/admin/adminOrderDetails.php?id=${decodedText}`;
   }
 }
-
 function stopScannerAndClose() {
-  if (qrScanner && isScannerRunning) {
-    qrScanner
-      .stop()
-      .then(() => {
+  if (qrScanner) {
+    if (isScannerRunning) {
+      qrScanner
+        .stop()
+        .then(() => {
+          qrScanner.clear();
+          isScannerRunning = false;
+          qrPopup.classList.remove("active");
+        })
+        .catch((err) => {
+          console.log("Stop failed: ", err);
+          qrPopup.classList.remove("active");
+        });
+    } else {
+      try {
         qrScanner.clear();
-        isScannerRunning = false;
-        qrPopup.classList.remove("active");
-      })
-      .catch((err) => {
-        console.log("Stop failed: ", err);
-        qrPopup.classList.remove("active");
-      });
+      } catch (e) {
+        console.log("Scanner clear skipped or failed", e);
+      }
+      qrPopup.classList.remove("active");
+    }
   } else {
     qrPopup.classList.remove("active");
   }
 }
-
 scanBtn.addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -80,7 +87,7 @@ scanBtn.addEventListener("click", (e) => {
       console.error("Camera start failed:", err);
       isScannerRunning = false;
 
-      qrPopup.classList.remove("active");
+      // qrPopup.classList.remove("active");
 
       alert(
         "Camera permission is required to scan QR codes. Please allow access and try again."
@@ -97,28 +104,52 @@ if (uploadBtn && fileInput) {
     fileInput.click();
   });
 
-  fileInput.addEventListener("change", (e) => {
+  fileInput.addEventListener("change", async (e) => {
     if (e.target.files.length === 0) {
       return;
     }
 
     const imageFile = e.target.files[0];
 
+    if (qrScanner && isScannerRunning) {
+      try {
+        await qrScanner.stop();
+        isScannerRunning = false;
+        qrScanner.clear();
+      } catch (err) {
+        console.warn("Failed to stop camera before file scan:", err);
+      }
+    }
+
     if (!qrScanner) {
       qrScanner = new Html5Qrcode("qr-reader");
     }
-
+    const readerDiv = document.getElementById("qr-reader");
+    if (readerDiv)
+      readerDiv.innerHTML =
+        '<div style="padding:50px; text-align:center;">Processing image...</div>';
     qrScanner
       .scanFile(imageFile, true)
       .then((decodedText) => {
         handleScanSuccess(decodedText);
       })
       .catch((err) => {
-        console.error("Error scanning file:", err);
-        alert("No QR code found in this image. Please try another one.");
-      });
+        let errorMsg = "No QR code found.";
+        if (err?.toString().includes("LuminanceSource")) {
+          errorMsg = "Image format not supported or corrupted.";
+        } else if (err?.toString().includes("No MultiFormat Readers")) {
+          errorMsg =
+            "No QR code detected. Try cropping the image closer to the QR code.";
+        }
 
-    fileInput.value = "";
+        alert(
+          `Scan Failed: ${errorMsg}\n\nTip: Try a clearer image with a plain background.`
+        );
+
+        try {
+          qrScanner.clear();
+        } catch (ex) {}
+      });
   });
 }
 
@@ -200,19 +231,35 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch((err) => console.error("Search error:", err));
     }, 300);
   });
-
   function renderSuggestions(products) {
     let html = "";
     products.forEach((p) => {
       const link = `/app/views/product/product_details.php?id=${p.product_id}`;
+
+      let finalImgPath = "/public/images/lovine_logo_circle.png";
+
+      if (p.img_url) {
+        const firstImg = p.img_url.split(",")[0].trim();
+
+        let rawCat = p.category_name ? p.category_name : "uncategorized";
+        let catFolder = rawCat.replace(/[^a-zA-Z0-9_\-]/g, "_");
+
+        finalImgPath = `/public/images/${catFolder}/${firstImg}`;
+      }
       html += `
-                <a href="${link}" class="search-item">
+              <a href="${link}" class="search-item" style="display: flex; align-items: center; padding: 10px 20px; gap: 8px;">
+                    
+                    <img src="${finalImgPath}" 
+                         alt="${p.product_name}" 
+                         style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; margin-right: 8px; background: #fff;"
+                         onerror="this.onerror=null;this.src='/public/images/lovine_logo_circle.png';">
+                    
                     <div class="search-item-info">
-                        <span class="search-item-name">${highlightMatch(
+                        <span class="search-item-name" style="font-size: 1.05rem;">${highlightMatch(
                           p.product_name,
                           input.value
                         )}</span>
-                        <span class="search-item-price">RM ${
+                        <span class="search-item-price" style="font-size: 0.95rem; color: #666; margin-top: 4px; display:block;">RM ${
                           p.sale_price
                         }</span>
                     </div>

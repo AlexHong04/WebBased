@@ -4,7 +4,7 @@ $pageCSS = "admindashboard.css";
 
 
 require_once __DIR__ . '/../controllers/orderController.php';
-
+require_once __DIR__ . '/../helpers/html.php';
 $orderController = new OrderController();
 $topOrders = $orderController->getTopOrders();
 $topCategory = $orderController->getTopCategory();
@@ -188,7 +188,7 @@ require_once __DIR__ . '/adminheader.php';
   </div>
 
 </div>
-
+<?php showToast(); ?>
 <script>
   const bars = document.querySelectorAll(".bar-fill");
   const orderData = <?= json_encode($fullOrderData) ?>;

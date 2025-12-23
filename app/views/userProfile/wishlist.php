@@ -1,11 +1,13 @@
 <?php
 require_once __DIR__ . '/../../helpers/html.php';
 require_once __DIR__ . '/../../controllers/WishlistController.php';
+require_once __DIR__ .  '/../../controllers/userController.php';
 
-$controller = new WishlistController();
-$wishlistItems = $controller->index();
+$controller = new userController();
+$wishlistController = new WishlistController();
+$wishlistItems = $wishlistController->index();
 $totalItems = count($wishlistItems);
-
+$profileData = $controller->getProfile();
 $toastMsg = '';
 $toastType = '';
 
@@ -32,14 +34,40 @@ include '../header.php';
     <h1 class="section-title">My Profile</h1>
     <div class="profile-container">
         <div class="profile-sidebar">
-            <div class="profile-avatar">
-                <img id="profile-image" src="/public/images/default-avatar.png" alt="Profile Avatar">
+            <div class="profile-avatar" id="avatarDropZone">
+                <label for="profile-pic-input" class="avatar-label">
+                    <?php
+                    $isDefaultImg = empty($profileData['img_url']);
+                    $imgSrc = $isDefaultImg
+                        ? '/public/images/profile/user.png'
+                        : '/public/images/profile/' . htmlspecialchars($profileData['img_url']);
+
+                    $imgClass = $isDefaultImg ? 'default-avatar' : '';
+                    ?>
+                    <img id="profile-pic-preview"
+                        class="<?= $imgClass ?>"
+                        src="<?= $imgSrc ?>"
+                        alt="Profile Picture">
+
+                    <div class="plus">+</div>
+                    <!-- <img id="profile-pic-preview"
+                        src="<?= !empty($profileData['img_url'])
+                                    ? '/public/images/profile/' . htmlspecialchars($profileData['img_url'])
+                                    : '/public/images/profile/user.png' ?>"
+                        alt="Profile Picture">
+                    <div class="plus">+</div> -->
+                </label>
+
+                <input type="file" name="profile_pic" id="profile-pic-input" accept="image/*">
             </div>
-            <h2 id="profile-name"><?= htmlspecialchars($_SESSION['username'] ?? 'User') ?></h2>
+
+            <h2 id="profile-name"><?= htmlspecialchars(($profileData['firstName'] ?? '') . ' ' . ($profileData['lastName'] ?? '')) ?></h2>
+            <p id="profile-gender"><?= htmlspecialchars($profileData['gender'] ?? '') ?></p>
+
             <div class="profile-nav">
                 <a href="profile.php">
                     <svg xmlns=" http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
-                    <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z" />
+                        <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z" />
                     </svg>
                     Profile Information
                 </a>
@@ -49,7 +77,7 @@ include '../header.php';
                     </svg>
                     Address Book
                 </a>
-                <a href="resetPassword.php" >
+                <a href="resetPassword.php">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="18" height="18" fill="currentColor" style="margin-right: 10px;">
                         <path d="M400 224h-24v-72C376 68.2 307.8 0 224 0S72 68.2 72 152v72H48c-26.5 0-48 21.5-48 48v192c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V272c0-26.5-21.5-48-48-48zm-104 0H152v-72c0-39.7 32.3-72 72-72s72 32.3 72 72v72z" />
                     </svg>

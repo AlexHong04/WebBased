@@ -5,10 +5,12 @@ $pageCSS = "profile.css";
 require_once __DIR__ . '/../../helpers/html.php';
 require_once __DIR__ . '/../../helpers/request.php';
 require_once __DIR__ . '/../../controllers/AddressController.php';
+require_once __DIR__ .  '/../../controllers/userController.php';
 
+$userController = new userController();
 $controller = new AddressController();
 $addresses = $controller->index();
-
+$profileData = $userController->getProfile();
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'];
 $apiPath = '/app/controllers/address_router.php';
@@ -26,16 +28,31 @@ include __DIR__ . '/../header.php';
 
     <div class="profile-container">
         <div class="profile-sidebar">
-            <div class="profile-avatar">
-                <img id="profile-image" src="/images/DefaultAvatar.png" alt="Profile Avatar">
-                <div class="avatar-overlay">
-                    <label for="avatar-upload" class="avatar-change-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24" fill="currentColor">
-                            <path d="M149.1 64.8L138.7 96H64C28.7 96 0 124.7 0 160V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H373.3L362.9 64.8C356.4 45.2 338.1 32 317.4 32H194.6c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z" />
-                        </svg>
-                    </label>
-                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
-                </div>
+            <div class="profile-avatar" id="avatarDropZone">
+                <label for="profile-pic-input" class="avatar-label">
+                    <?php
+                    $isDefaultImg = empty($profileData['img_url']);
+                    $imgSrc = $isDefaultImg
+                        ? '/public/images/profile/user.png'
+                        : '/public/images/profile/' . htmlspecialchars($profileData['img_url']);
+
+                    $imgClass = $isDefaultImg ? 'default-avatar' : '';
+                    ?>
+                    <img id="profile-pic-preview"
+                        class="<?= $imgClass ?>"
+                        src="<?= $imgSrc ?>"
+                        alt="Profile Picture">
+
+                    <div class="plus">+</div>
+                    <!-- <img id="profile-pic-preview"
+                        src="<?= !empty($profileData['img_url'])
+                                    ? '/public/images/profile/' . htmlspecialchars($profileData['img_url'])
+                                    : '/public/images/profile/user.png' ?>"
+                        alt="Profile Picture">
+                    <div class="plus">+</div> -->
+                </label>
+
+                <input type="file" name="profile_pic" id="profile-pic-input" accept="image/*">
             </div>
 
             <h2 id="profile-name"><?= htmlspecialchars(($profileData['firstName'] ?? '') . ' ' . ($profileData['lastName'] ?? '')) ?></h2>
