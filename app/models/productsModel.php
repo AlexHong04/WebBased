@@ -438,15 +438,15 @@ class ProductModel
     public function getProductVariants($productId)
     {
         $sql = "SELECT 
-                    pv.product_variant_id,
-                    pv.stock_qty,
-                    pv.stock_status,
-                    v.variant_name,
-                    pv.img_url
-                FROM product_variant pv
-                JOIN variant v ON pv.variant_id = v.variant_id
-                WHERE pv.product_id = ?
-                GROUP BY pv.product_variant_id";
+                pv.product_variant_id,
+                pv.stock_qty,
+                pv.stock_status,
+                v.variant_name,
+                pv.img_url
+            FROM product_variant pv
+            JOIN variant v ON pv.variant_id = v.variant_id
+            WHERE pv.product_id = ? 
+            AND pv.is_deleted = 0";
 
         $this->db->query($sql);
         $this->db->bind(1, $productId);
