@@ -453,3 +453,14 @@
 .profile-avatar.drag-over .drop-overlay {
   opacity: 1;
 }
+
+.error-msg {
+  display: block;
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.input-error {
+  border: 1px solid #e74c3c;
+}

@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
     statusModal.style.display = "none";
 
     // Submit form automatically
-    memberForm.submit();
+    memberForm.requestSubmit();
   });
 
   // Tab switching
@@ -154,6 +154,40 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => errorPopup.classList.remove("show"), 3000);
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const malaysiaPhoneRegex = /^(\+?6?01)[0-9]{8,9}$/;
+
+  function showError(input, message) {
+    const group = input.closest(".info-group");
+    if (!group) return;
+
+    let error = group.querySelector(".error-msg");
+    if (!error) {
+      error = document.createElement("small");
+      error.className = "error-msg";
+      group.appendChild(error);
+    }
+
+    error.textContent = message;
+    input.classList.add("input-error");
+  }
+
+  function clearError(input) {
+    const group = input.closest(".info-group");
+    if (!group) return;
+
+    const error = group.querySelector(".error-msg");
+    if (error) {
+      error.textContent = "";
+    }
+
+    input.classList.remove("input-error");
+  }
+
+  memberForm.querySelectorAll("input").forEach((input) => {
+    input.addEventListener("input", () => clearError(input));
+  });
+
   // Track changes in all inputs
   memberForm.querySelectorAll("input").forEach((input) => {
     // Store initial value
@@ -175,17 +209,17 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Form submit validation
-  memberForm.addEventListener("submit", (e) => {
-    if (!isFormEdited) {
-      e.preventDefault();
-      showCustomPopup("Please enter something before submitting.");
-      return;
-    }
+  // memberForm.addEventListener("submit", (e) => {
+  //   if (!isFormEdited) {
+  //     e.preventDefault();
+  //     showCustomPopup("Please enter something before submitting.");
+  //     return;
+  //   }
 
-    // Reset tracking after successful submission
-    isFormEdited = false;
-    window.removeEventListener("beforeunload", beforeUnloadHandler);
-  });
+  //   // Reset tracking after successful submission
+  //   isFormEdited = false;
+  //   window.removeEventListener("beforeunload", beforeUnloadHandler);
+  // });
 
   function beforeUnloadHandler(e) {
     if (isFormEdited) {
@@ -195,4 +229,49 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   window.addEventListener("beforeunload", beforeUnloadHandler);
+
+  memberForm.addEventListener("submit", (e) => {
+    let isValid = true;
+
+    if (!isFormEdited) {
+      e.preventDefault();
+      showCustomPopup("Please enter something before submitting.");
+      return;
+    }
+
+    memberForm.querySelectorAll("input[required]").forEach((input) => {
+      if (!input.value.trim()) {
+        showError(input, "This field is required");
+        isValid = false;
+      } else {
+        clearError(input);
+      }
+    });
+
+    const email = memberForm.querySelector('input[name="email"]');
+    if (email && !emailRegex.test(email.value.trim())) {
+      showError(email, "Invalid email format");
+      isValid = false;
+    }
+
+    const phone = memberForm.querySelector('input[name="phone"]');
+    if (phone && !malaysiaPhoneRegex.test(phone.value.replace(/[\s\-]/g, ""))) {
+      showError(phone, "Invalid Malaysian phone number");
+      isValid = false;
+    }
+
+    const reward = memberForm.querySelector('input[name="rewardPoint"]');
+    if (reward && reward.value !== "" && Number(reward.value) < 0) {
+      showError(reward, "Reward points cannot be negative");
+      isValid = false;
+    }
+
+    if (!isValid) {
+      e.preventDefault();
+      return;
+    }
+
+    isFormEdited = false;
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
+  });
 });

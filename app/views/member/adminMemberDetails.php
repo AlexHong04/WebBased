@@ -44,7 +44,7 @@ function displayValue($value)
     <?php unset($_SESSION['error_message']); ?>
   <?php endif; ?>
 
-  <form method="POST" enctype="multipart/form-data">
+  <form method="POST" enctype="multipart/form-data" novalidate>
     <input type="hidden" name="customer_id" value="<?= $member->customer_id ?>">
 
     <div class="profile-container">
@@ -73,7 +73,6 @@ function displayValue($value)
             <a href="#" class="tab" data-target="address-info">Address Information</a>
           </div>
 
-
           <input type="hidden" name="isBlocked" id="isBlockedInput" value="<?= $member->isBlocked ?>">
           <div class="status-row">
             <label>Status:</label>
@@ -92,23 +91,33 @@ function displayValue($value)
           <div class="profile-info-grid">
             <div class="info-group">
               <label>First Name</label>
-              <input type="text" name="firstName" value="<?= htmlspecialchars($member->firstName) ?>">
+              <input type="text" name="firstName" value="<?= htmlspecialchars($member->firstName) ?>" required>
+              <small class="error-msg"></small>
+
             </div>
             <div class="info-group">
               <label>Last Name</label>
-              <input type="text" name="lastName" value="<?= htmlspecialchars($member->lastName) ?>">
+              <input type="text" name="lastName" value="<?= htmlspecialchars($member->lastName) ?>" required>
+              <small class="error-msg"></small>
+
             </div>
             <div class="info-group">
               <label>Email</label>
-              <input type="email" name="email" value="<?= htmlspecialchars($member->email) ?>">
+              <input type="email" name="email" value="<?= htmlspecialchars($member->email) ?>" required>
+              <small class="error-msg"></small>
+
             </div>
             <div class="info-group">
               <label>Phone</label>
-              <input type="text" name="phone" value="<?= htmlspecialchars($member->phone) ?>">
+              <input type="text" name="phone" value="<?= htmlspecialchars($member->phone) ?>" required>
+              <small class="error-msg"></small>
+
             </div>
             <div class="info-group">
               <label>Reward Points</label>
-              <input type="number" name="rewardPoint" value="<?= htmlspecialchars($member->rewardPoint) ?>">
+              <input type="number" name="rewardPoint" value="<?= htmlspecialchars($member->rewardPoint) ?>" min="0">
+              <small class="error-msg"></small>
+
             </div>
           </div>
           <div class="save-btn-wrapper">
@@ -128,23 +137,33 @@ function displayValue($value)
                   <input type="hidden" name="addresses[<?= $i ?>][address_id]" value="<?= $addr['address_id'] ?>">
                   <div class="info-group">
                     <label>Street</label>
-                    <input type="text" name="addresses[<?= $i ?>][street_line]" value="<?= htmlspecialchars($addr['street_line']) ?>">
+                    <input type="text" name="addresses[<?= $i ?>][street_line]" value="<?= htmlspecialchars($addr['street_line']) ?>" required>
+                    <small class="error-msg"></small>
+
                   </div>
                   <div class="info-group">
                     <label>City</label>
-                    <input type="text" name="addresses[<?= $i ?>][city]" value="<?= htmlspecialchars($addr['city']) ?>">
+                    <input type="text" name="addresses[<?= $i ?>][city]" value="<?= htmlspecialchars($addr['city']) ?>" required>
+                    <small class="error-msg"></small>
+
                   </div>
                   <div class="info-group">
                     <label>State</label>
-                    <input type="text" name="addresses[<?= $i ?>][state]" value="<?= htmlspecialchars($addr['state']) ?>">
+                    <input type="text" name="addresses[<?= $i ?>][state]" value="<?= htmlspecialchars($addr['state']) ?>" required>
+                    <small class="error-msg"></small>
+
                   </div>
                   <div class="info-group">
                     <label>Postcode</label>
-                    <input type="text" name="addresses[<?= $i ?>][postcode]" value="<?= htmlspecialchars($addr['postcode']) ?>">
+                    <input type="text" name="addresses[<?= $i ?>][postcode]" value="<?= htmlspecialchars($addr['postcode']) ?>" required>
+                    <small class="error-msg"></small>
+
                   </div>
                   <div class="info-group">
                     <label>Recipient Phone</label>
-                    <input type="text" name="addresses[<?= $i ?>][recipient_phone]" value="<?= htmlspecialchars($addr['recipient_phone']) ?>">
+                    <input type="text" name="addresses[<?= $i ?>][recipient_phone]" value="<?= htmlspecialchars($addr['recipient_phone']) ?>" required>
+                    <small class="error-msg"></small>
+
                   </div>
                 </div>
                 <div class="save-btn-wrapper">
