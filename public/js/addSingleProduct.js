@@ -75,16 +75,13 @@ function setupImagePreview(
 
     img.addEventListener("click", () => {
       if (!isStatic) {
-        // dynamic file from input
         const file = filesArray.find((f) => f.name === identifier);
         if (file) {
           const blobUrl = URL.createObjectURL(file);
           window.open(blobUrl, "_blank");
-          // optional: revoke later
           setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
         }
       } else {
-        // static image from server
         window.open(src, "_blank");
       }
     });
@@ -415,9 +412,12 @@ function addNewVariant() {
 
   setupVariantSection(section, []);
   renumberVariants();
+  setupVariantDuplicateValidation();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupVariantDuplicateValidation();
+
   const existingVariants = activeVariantsContainer.querySelectorAll(
     ".variant-section-basicInfo"
   );
@@ -491,10 +491,8 @@ function setupFormSubmission() {
         errorSpan.textContent = message;
 
         if (insertAfter) {
-          // Insert after the target element
           errorTarget.insertAdjacentElement("afterend", errorSpan);
         } else {
-          // Insert inside the container (default behavior)
           const container =
             errorTarget.closest(".form-group") || errorTarget.parentNode;
           container.appendChild(errorSpan);
@@ -503,6 +501,13 @@ function setupFormSubmission() {
         isValid = false;
       }
     };
+
+    document
+      .querySelectorAll(".variant-section-basicInfo")
+      .forEach((section) => {
+        section.style.backgroundColor = "";
+        section.style.border = "";
+      });
 
     const formData = new FormData(document.getElementById("productForm"));
 
@@ -523,6 +528,7 @@ function setupFormSubmission() {
     if (sales < cost)
       showError("sales_price", "Sales price cannot be less than cost price.");
 
+    // Validate variants
     const variantSections = document.querySelectorAll(
       ".variant-section-basicInfo"
     );
@@ -540,48 +546,89 @@ function setupFormSubmission() {
       );
       isValid = false;
     } else {
+      // Track selected variants to check for duplicates
+      const selectedVariants = new Map();
+
       variantSections.forEach((section, i) => {
         const vId = section.querySelector('[name="variant_ids[]"]')?.value;
+        const vSelect = section.querySelector('[name="variant_ids[]"]');
         const minStock = section.querySelector(
           '[name="min_stock_levels[]"]'
         )?.value;
         const stockQty = section.querySelector('[name="stock_qtys[]"]')?.value;
+        const variantName =
+          vSelect?.selectedOptions[0]?.text || `Variant ${i + 1}`;
 
+        // Validate variant selection
         if (!vId) {
-          const variantSelect = section.querySelector('[name="variant_ids[]"]');
           showError(
             "variant_ids",
             `Please select a variant for Variant ${i + 1}.`,
             false,
             null,
-            variantSelect
+            vSelect
           );
+          // Highlight the section with red border
+          section.style.border = "2px solid red";
+          section.style.borderRadius = "5px";
+          section.style.padding = "10px";
+          section.style.marginBottom = "15px";
+        } else {
+          // Check for duplicate variants
+          if (selectedVariants.has(vId)) {
+            const duplicateIndex = selectedVariants.get(vId);
+            showError(
+              "variant_ids",
+              `Cannot select the same variant "${variantName}" in multiple sections.`,
+              false,
+              null,
+              vSelect
+            );
+
+            section.style.border = "2px solid red";
+            section.style.borderRadius = "5px";
+            section.style.padding = "10px";
+            section.style.marginBottom = "15px";
+
+            const duplicateSection = variantSections[duplicateIndex];
+            if (duplicateSection) {
+              duplicateSection.style.border = "2px solid red";
+              duplicateSection.style.borderRadius = "5px";
+              duplicateSection.style.padding = "10px";
+              duplicateSection.style.marginBottom = "15px";
+            }
+          } else {
+            selectedVariants.set(vId, i);
+          }
         }
 
+        // Validate minimum stock level
         if (!minStock || minStock < 1) {
           const minStockInput = section.querySelector(
             '[name="min_stock_levels[]"]'
           );
           showError(
             "min_stock_levels",
-            "Must be more than 1",
+            "Minimum stock level must be at least 1.",
             false,
             null,
             minStockInput
           );
         }
 
+        // Validate stock quantity
         if (!stockQty || stockQty < 1) {
           const stockQtyInput = section.querySelector('[name="stock_qtys[]"]');
           showError(
             "stock_qtys",
-            "Must be more than 1.",
+            "Stock quantity must be at least 1.",
             false,
             null,
             stockQtyInput
           );
         }
 
+        // Validate variant image
         const variantImageInput = section.querySelector(".variant-image-input");
         const variantPreview = section.querySelector(
           ".variant-preview-container"
@@ -604,7 +651,7 @@ function setupFormSubmission() {
             false,
             null,
             variantImageContainer,
-            true // Insert AFTER the container
+            true
           );
           isValid = false;
         }
@@ -614,14 +661,10 @@ function setupFormSubmission() {
     const isEditField = document.querySelector('[name="is_edit"]');
     const isEdit = isEditField ? isEditField.value === "1" : false;
 
-    console.log("Is edit mode?", isEdit);
-
     const previewContainer = document.getElementById("previewContainer");
-
     const totalProductImages = previewContainer
       ? previewContainer.querySelectorAll(".preview-image-container").length
       : 0;
-
 
     if (totalProductImages === 0) {
       const dropZone = document.getElementById("productDropZone");
@@ -642,7 +685,6 @@ function setupFormSubmission() {
           errorSpan.textContent = "Please upload at least one product image.";
         }
 
-        // Insert the error message AFTER the dropzone container
         dropZone.parentNode.insertBefore(errorSpan, dropZone.nextSibling);
         isValid = false;
       } else if (uploadContainer) {
@@ -670,38 +712,23 @@ function setupFormSubmission() {
       if (firstError) {
         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
 
-        // Optional: Highlight the problematic section
-        const variantSection = firstError.closest(".variant-section-basicInfo");
-        if (variantSection) {
-          variantSection.style.backgroundColor = "rgba(255, 0, 0, 0.05)";
-          variantSection.style.border = "1px solid red";
-          variantSection.style.borderRadius = "5px";
-          variantSection.style.padding = "10px";
-          variantSection.style.marginBottom = "15px";
+        setTimeout(() => {
+          document
+            .querySelectorAll(".variant-section-basicInfo")
+            .forEach((section) => {
+              section.style.backgroundColor = "";
+              section.style.border = "";
+              section.style.padding = "";
+              section.style.marginBottom = "";
+            });
 
-          // Remove highlighting after 3 seconds
-          setTimeout(() => {
-            variantSection.style.backgroundColor = "";
-            variantSection.style.border = "";
-            variantSection.style.padding = "";
-            variantSection.style.marginBottom = "";
-          }, 3000);
-        }
-
-        // Also highlight product image section if it has error
-        const productImageError = firstError.closest(
-          "#previewContainer, #productDropZone"
-        );
-        if (productImageError) {
-          productImageError.style.border = "2px solid red";
-          productImageError.style.borderRadius = "5px";
-          productImageError.style.padding = "10px";
-
-          setTimeout(() => {
-            productImageError.style.border = "";
-            productImageError.style.padding = "";
-          }, 3000);
-        }
+          document
+            .querySelectorAll("#previewContainer, #productDropZone")
+            .forEach((el) => {
+              el.style.border = "";
+              el.style.padding = "";
+            });
+        }, 5000);
       }
     }
   });
@@ -832,3 +859,214 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setupDragAndDrop(productDropZone, productInput, productPreview, 5);
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const undoToast = document.getElementById("undoToast");
+  if (!undoToast) return;
+
+  const undoBtn = document.getElementById("undoBtn");
+  const dismissBtn = document.getElementById("dismissBtn");
+  const undoTimer = document.getElementById("undoTimer");
+  const undoProgress = document.getElementById("undoProgress");
+
+  const ENDPOINT = window.location.href;
+
+  let countdown = 10;
+  let countdownInterval;
+  let autoDeleteTimeout;
+
+  function startCountdown() {
+    undoTimer.textContent = countdown;
+
+    countdownInterval = setInterval(() => {
+      countdown--;
+      undoTimer.textContent = countdown;
+
+      if (countdown <= 0) {
+        clearInterval(countdownInterval);
+        permanentDelete();
+      }
+    }, 1000);
+
+    autoDeleteTimeout = setTimeout(() => {
+      permanentDelete();
+    }, 10000);
+  }
+
+  function hideToast() {
+    undoToast.classList.add("hide");
+    setTimeout(() => undoToast.remove(), 300);
+  }
+
+  function showSuccessMessage(message) {
+    const toast = document.createElement("div");
+    toast.className = "success-toast";
+    toast.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        ${message}
+      </div>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add("hide");
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  undoBtn.addEventListener("click", function () {
+    clearInterval(countdownInterval);
+    clearTimeout(autoDeleteTimeout);
+
+    undoBtn.disabled = true;
+    undoBtn.innerHTML = "Restoring...";
+
+    fetch(ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: JSON.stringify({ action: "restore_variant" }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) throw new Error();
+
+        hideToast();
+        showSuccessMessage(data.message || "Variant(s) restored");
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
+      })
+      .catch(() => {
+        undoBtn.disabled = false;
+        undoBtn.textContent = "Restore";
+        showSuccessMessage("Failed to restore variants");
+        startCountdown();
+      });
+  });
+
+  dismissBtn.addEventListener("click", function () {
+    if (
+      !confirm(
+        "Are you sure you want to permanently delete the selected variant(s)? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    clearInterval(countdownInterval);
+    clearTimeout(autoDeleteTimeout);
+    permanentDelete();
+  });
+
+  function permanentDelete() {
+    fetch(ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: JSON.stringify({ action: "permanent_variant" }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          hideToast();
+          showSuccessMessage(data.message || "Variant(s) permanently deleted");
+          setTimeout(() => {
+            window.location.reload();
+          }, 800);
+        }
+      })
+      .catch(() => hideToast());
+  }
+
+  startCountdown();
+});
+
+window.addEventListener("pageshow", function (event) {
+  if (event.persisted) {
+    const toast = document.getElementById("undoToast");
+    if (toast) toast.remove();
+  }
+});
+
+function setupVariantDuplicateValidation() {
+  const variantSections = document.querySelectorAll(
+    ".variant-section-basicInfo"
+  );
+
+  variantSections.forEach((section) => {
+    const select = section.querySelector('select[name="variant_ids[]"]');
+    if (select) {
+      select.addEventListener("change", () => {
+        const existingError = section.querySelector(".error-message");
+        if (
+          existingError &&
+          existingError.textContent.includes("Cannot select the same variant")
+        ) {
+          existingError.remove();
+        }
+
+        section.style.border = "";
+
+        checkForDuplicateVariants();
+      });
+    }
+  });
+}
+
+function checkForDuplicateVariants() {
+  document.querySelectorAll(".error-message").forEach((error) => {
+    if (error.textContent.includes("Cannot select the same variant")) {
+      error.remove();
+    }
+  });
+
+  document.querySelectorAll(".variant-section-basicInfo").forEach((section) => {
+    section.style.border = "";
+  });
+
+  const variantSections = document.querySelectorAll(
+    ".variant-section-basicInfo"
+  );
+  const selectedVariants = new Map();
+
+  variantSections.forEach((section, i) => {
+    const vId = section.querySelector('[name="variant_ids[]"]')?.value;
+    const vSelect = section.querySelector('[name="variant_ids[]"]');
+
+    if (vId) {
+      if (selectedVariants.has(vId)) {
+        const duplicateIndex = selectedVariants.get(vId);
+        const variantName =
+          vSelect?.selectedOptions[0]?.text || `Variant ${i + 1}`;
+
+        const errorSpan = document.createElement("span");
+        errorSpan.className = "error-message";
+        errorSpan.style.cssText =
+          "color: red; font-size: 0.8em; display: block; margin-top: 5px;";
+        errorSpan.textContent = `Cannot select the same variant "${variantName}" in multiple sections.`;
+
+        vSelect.insertAdjacentElement("afterend", errorSpan);
+
+        section.style.border = "2px solid red";
+        const duplicateSection = variantSections[duplicateIndex];
+        if (duplicateSection) {
+          duplicateSection.style.border = "2px solid red";
+        }
+      } else {
+        selectedVariants.set(vId, i);
+      }
+    }
+  });
+}

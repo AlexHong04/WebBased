@@ -1,5 +1,19 @@
 <?php
 include '../../controllers/productsController.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (isset($_SESSION['undo_variants'])) {
+    if (isset($_SESSION['undo_variant_time']) && (time() - $_SESSION['undo_variant_time'] > 10)) {
+        unset(
+            $_SESSION['undo_variants'],
+            $_SESSION['undo_variant_count'],
+            $_SESSION['undo_variant_time'],
+            $_SESSION['undo_variant_batch']
+        );
+    }
+}
 
 $controller = new ProductsController();
 $controller->submitProductForm();
@@ -39,23 +53,74 @@ $viewData = $controller->showAddProductForm();
 if (is_array($viewData)) {
     extract($viewData);
 }
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_variants_submit'])) {
+
     $variantIdsRaw = $_POST['delete_variant_ids'] ?? '';
-    $variantIds = !empty($variantIdsRaw) ? explode(',', $variantIdsRaw) : [];
+    $variantIds = array_unique(array_filter(explode(',', $variantIdsRaw)));
 
     if (!empty($variantIds)) {
-        foreach ($variantIds as $variantId) {
-            $controller->handleDeleteProductVariantById($variantId);
-        }
+
+        $controller->handleSoftDeleteVariants($variantIds);
+
+        $_SESSION['undo_variants'] = $variantIds;
+        $_SESSION['undo_variant_count'] = count($variantIds);
+        $_SESSION['undo_variant_time'] = time();
+        $_SESSION['undo_variant_batch'] = uniqid();
+
+        header("Location: addSingleProduct.php?product_id={$product_id}&undo_variant=1&b=" . $_SESSION['undo_variant_batch']);
+        exit;
     }
-    header("Location: addSingleProduct.php?product_id=" . $product_id);
-    exit;
+}
+
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST' &&
+    isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+) {
+
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    if ($input['action'] === 'restore_variant' && isset($_SESSION['undo_variants'])) {
+
+        $controller->handleRestoreVariants($_SESSION['undo_variants']);
+        $count = count($_SESSION['undo_variants']);
+
+        unset(
+            $_SESSION['undo_variants'],
+            $_SESSION['undo_variant_count'],
+            $_SESSION['undo_variant_time'],
+            $_SESSION['undo_variant_batch']
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => "$count variant(s) restored"
+        ]);
+        exit;
+    }
+
+    if ($input['action'] === 'permanent_variant' && isset($_SESSION['undo_variants'])) {
+
+        $controller->handlePermanentDeleteVariants($_SESSION['undo_variants']);
+
+        unset(
+            $_SESSION['undo_variants'],
+            $_SESSION['undo_variant_count'],
+            $_SESSION['undo_variant_time'],
+            $_SESSION['undo_variant_batch']
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => "Variant(s) permanently deleted"
+        ]);
+        exit;
+    }
 }
 
 $from = $_GET['from'] ?? 'list';
-$backUrl = ($from === 'lowstock') 
-    ? '/app/views/product/lowStockAlert.php' 
+$backUrl = ($from === 'lowstock')
+    ? '/app/views/product/lowStockAlert.php'
     : '/app/views/product/productList.php';
 
 include '../adminHeader.php';
@@ -117,6 +182,28 @@ include '../adminHeader.php';
     <?php
     showToast();
     ?>
+    <?php if (isset($_SESSION['undo_variants']) && !empty($_SESSION['undo_variants'])): ?>
+        <div id="undoToast" class="undo-toast" data-count="<?= $_SESSION['undo_variant_count'] ?>">
+            <div class="undo-toast-content">
+                <div class="undo-message">
+                    <span>Product Variants(s) moved to trash</span>
+                    <span class="undo-timer" id="undoTimer">10</span>
+                </div>
+                <div class="undo-actions">
+                    <button type="button" id="undoBtn" class="undo-btn">
+                        Restore
+                    </button>
+                    <button type="button" id="dismissBtn" class="dismiss-btn" title="Delete permanently">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="undo-progress" id="undoProgress"></div>
+        </div>
+    <?php endif; ?>
     <input type="hidden" name="is_edit" value="<?= $isEdit ? '1' : '0' ?>">
     <div class="container">
         <div class="form-header-actions">

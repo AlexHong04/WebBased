@@ -982,35 +982,22 @@ class ProductsController
         return $result;
     }
 
-    public function handleDeleteProductVariantById(string $variantId)
+    // SOFT DELETE VARIANTS
+    public function handleSoftDeleteVariants(array $variantIds)
     {
-        if (empty($variantId)) return false;
+        return $this->productModel->softDeleteVariants($variantIds);
+    }
 
-        try {
-            $result = $this->productModel->deleteVariantById($variantId);
+    // RESTORE VARIANTS
+    public function handleRestoreVariants(array $variantIds)
+    {
+        return $this->productModel->restoreVariants($variantIds);
+    }
 
-            if (!empty($variant['img_url'])) {
-                $images = explode(',', $variant['img_url']);
-                $categoryName = $variant['category_name'] ?? 'uncategorized';
-                $categoryFolder = "../../../public/images/" . $categoryName . "/";
-
-                foreach ($images as $img) {
-                    $file = $categoryFolder . trim($img);
-                    if (file_exists($file)) unlink($file);
-                }
-            }
-            if ($result) {
-                $_SESSION['flash_success'] = "Variant deleted successfully.";
-            } else {
-                $_SESSION['flash_error'] = "Failed to delete variant.";
-            }
-
-            return $result;
-        } catch (Exception $e) {
-            $_SESSION['flash_error'] = "Error: " . $e->getMessage();
-            error_log("Failed to delete product variant $variantId: " . $e->getMessage());
-            return false;
-        }
+    // PERMANENT DELETE VARIANTS
+    public function handlePermanentDeleteVariants(array $variantIds)
+    {
+        return $this->productModel->permanentDeleteVariants($variantIds);
     }
 
     public function getAllProductVariantsGrouped()

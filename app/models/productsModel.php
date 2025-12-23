@@ -578,26 +578,82 @@ class ProductModel
 
         return $this->db->resultAll();
     }
-    public function deleteVariantById($variantId)
+
+    public function softDeleteVariantById(string $variantId): bool
     {
-
         try {
-            $this->db->query("START TRANSACTION");
-            $this->db->execute();
-
-            $this->db->query("DELETE FROM product_variant WHERE product_variant_id = :variantId");
+            $this->db->query("
+            UPDATE product_variant
+            SET is_deleted = TRUE
+            WHERE product_variant_id = :variantId
+        ");
             $this->db->bind(':variantId', $variantId);
-            $this->db->execute();
-
-            $this->db->query("COMMIT");
-            $this->db->execute();
-
-            return true;
+            return $this->db->execute();
         } catch (Exception $e) {
-            $this->db->query("ROLLBACK");
-            $this->db->execute();
-            throw new Exception("Failed to delete product: " . $e->getMessage());
+            throw $e;
         }
+    }
+
+    public function softDeleteVariants(array $variantIds)
+    {
+        if (empty($variantIds)) return false;
+
+        $placeholders = implode(',', array_fill(0, count($variantIds), '?'));
+
+        $sql = "
+        UPDATE product_variant
+        SET is_deleted = 1
+        WHERE product_variant_id IN ($placeholders)
+    ";
+
+        $this->db->query($sql);
+
+        foreach ($variantIds as $index => $id) {
+            $this->db->bind($index + 1, $id);
+        }
+
+        return $this->db->execute();
+    }
+
+    public function restoreVariants(array $variantIds)
+    {
+        if (empty($variantIds)) return false;
+
+        $placeholders = implode(',', array_fill(0, count($variantIds), '?'));
+
+        $sql = "
+        UPDATE product_variant
+        SET is_deleted = 0
+        WHERE product_variant_id IN ($placeholders)
+    ";
+
+        $this->db->query($sql);
+
+        foreach ($variantIds as $index => $id) {
+            $this->db->bind($index + 1, $id);
+        }
+
+        return $this->db->execute();
+    }
+
+    public function permanentDeleteVariants(array $variantIds)
+    {
+        if (empty($variantIds)) return false;
+
+        $placeholders = implode(',', array_fill(0, count($variantIds), '?'));
+
+        $sql = "
+        DELETE FROM product_variant
+        WHERE product_variant_id IN ($placeholders)
+    ";
+
+        $this->db->query($sql);
+
+        foreach ($variantIds as $index => $id) {
+            $this->db->bind($index + 1, $id);
+        }
+
+        return $this->db->execute();
     }
 
     public function getAllProductVariants()
