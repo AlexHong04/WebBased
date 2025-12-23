@@ -73,3 +73,19 @@ function authenticate()
     header("Location: /app/views/security/signIn.php");
     exit;
 }
+
+function authorizeAdmin()
+{
+    $user = authenticate(); 
+
+    $isAdmin = !empty($user['adminId']) || !empty($_SESSION['adminId']);
+
+    if (!$isAdmin) {
+        $_SESSION['flash_error']['global'] = "Access Denied: You do not have permission to view this page.";
+        
+        header("Location: /app/views/home.php"); 
+        exit;
+    }
+
+    return $user;
+}

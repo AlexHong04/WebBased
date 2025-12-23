@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../controllers/userController.php';
+require_once __DIR__ . '/../helpers/auth.php';
+authorizeAdmin();
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }

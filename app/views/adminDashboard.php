@@ -1,10 +1,14 @@
 <?php
+require_once __DIR__ . '/../helpers/html.php';
+authenticate();
+
 $title = "Admin Dashboard";
 $pageCSS = "admindashboard.css";
 
 
 require_once __DIR__ . '/../controllers/orderController.php';
-require_once __DIR__ . '/../helpers/html.php';
+
+
 $orderController = new OrderController();
 $topOrders = $orderController->getTopOrders();
 $topCategory = $orderController->getTopCategory();
