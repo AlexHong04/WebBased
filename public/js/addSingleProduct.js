@@ -258,8 +258,7 @@ function setupVariantSection(section, initialImages = []) {
   if (removeBtn) {
     if (IS_EDIT_MODE && isExistingVariant) {
       removeBtn.style.display = "none";
-    }
-    else {
+    } else {
       removeBtn.style.display = "inline-block";
       removeBtn.onclick = function () {
         section.remove();
@@ -456,16 +455,6 @@ function setupFormSubmission() {
 
   function showModal() {
     modal.style.display = "block";
-
-    const productName =
-      form.querySelector('[name="product_name"]')?.value || "this product";
-    const isEdit = form
-      .querySelector('[name="product_id"]')
-      ?.value?.startsWith("P");
-
-    const message = isEdit
-      ? `Are you sure you want to update "${productName}"?`
-      : `Are you sure you want to add "${productName}"?`;
 
     document.getElementById("deleteMessage").textContent = message;
   }
