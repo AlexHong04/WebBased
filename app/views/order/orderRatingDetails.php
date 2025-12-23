@@ -151,6 +151,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const value = star.dataset.value;
         ratingInput.value = value;
         stars.forEach((s, i) => s.classList.toggle("filled", i < value));
+
+        if (ratingError.style.display !== 'none') {
+          ratingError.style.display = 'none';
+        }
       });
     });
 
