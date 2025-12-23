@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 23, 2025 at 05:00 PM
+-- Generation Time: Dec 23, 2025 at 05:20 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,21 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `lovine`
 --
-
---
--- Table structure for table `ordertable`
---
-
-CREATE TABLE `ordertable` (
-  `order_id` varchar(6) NOT NULL,
-  `total_amount` double NOT NULL,
-  `total_order_qty` int(11) NOT NULL,
-  `reward` double DEFAULT NULL,
-  `redeemed_point` int(11) NOT NULL DEFAULT 0,
-  `tax_fee` double NOT NULL,
-  `customer_id` varchar(6) NOT NULL,
-  `address_id` varchar(6) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `ordertable`
@@ -82,19 +67,6 @@ INSERT INTO `ordertable` (`order_id`, `total_amount`, `total_order_qty`, `reward
 ('O0039', 98.9, 3, 9, 3, 4.9, 'CU0004', 'AD0002'),
 ('O0040', 60, 2, 6, 0, 3, 'CU0008', 'AD0003'),
 ('O0041', 170.75, 5, 17, 8, 7.75, 'CU0005', 'AD0002');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `orderstatus`
---
-
-CREATE TABLE `orderstatus` (
-  `order_status_id` varchar(6) NOT NULL,
-  `order_status` varchar(50) NOT NULL,
-  `created_datetime` datetime DEFAULT current_timestamp(),
-  `order_id` varchar(6) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `orderstatus`
@@ -250,24 +222,15 @@ INSERT INTO `orderstatus` (`order_status_id`, `order_status`, `created_datetime`
 ('OS0161', 'Delivered', '2025-01-29 10:00:00', 'O0040'),
 ('OS0162', 'Pending', '2025-01-30 09:00:00', 'O0041'),
 ('OS0163', 'Out for Delivery', '2025-01-30 10:00:00', 'O0041'),
-('OS0164', 'Completed', '2025-12-23 17:29:05', 'O0022');
-
--- --------------------------------------------------------
-
-
-
--- --------------------------------------------------------
-
---
--- Table structure for table `order_items`
---
-
-CREATE TABLE `order_items` (
-  `order_id` varchar(6) NOT NULL,
-  `product_variant_id` varchar(50) NOT NULL,
-  `price` double NOT NULL,
-  `order_qty` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+('OS0164', 'Completed', '2025-12-23 17:29:05', 'O0022'),
+('OS0165', 'Cancel Requested', '2025-12-24 00:10:30', 'O0021'),
+('OS0166', 'Cancelled', '2025-12-24 00:13:28', 'O0003'),
+('OS0167', 'Refunded', '2025-12-27 00:13:28', 'O0003'),
+('OS0168', 'Cancelled', '2025-12-24 00:14:39', 'O0004'),
+('OS0169', 'Refunded', '2025-12-27 00:14:39', 'O0004'),
+('OS0170', 'Packing', '2025-12-24 00:15:05', 'O0029'),
+('OS0171', 'Packing', '2025-12-24 00:16:19', 'O0025'),
+('OS0172', 'Packing', '2025-12-24 00:16:19', 'O0027');
 
 --
 -- Dumping data for table `order_items`
@@ -350,22 +313,6 @@ INSERT INTO `order_items` (`order_id`, `product_variant_id`, `price`, `order_qty
 ('O0041', 'PV0026', 34.25, 2),
 ('O0041', 'PV0040', 34.25, 3);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `payment`
---
-
-CREATE TABLE `payment` (
-  `payment_id` varchar(6) NOT NULL,
-  `order_id` varchar(6) NOT NULL,
-  `payment_method` varchar(50) NOT NULL,
-  `payment_status` varchar(50) NOT NULL,
-  `amount` double NOT NULL,
-  `created_datetime` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `updated_datetime` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 --
 -- Dumping data for table `payment`
 --
@@ -412,69 +359,6 @@ INSERT INTO `payment` (`payment_id`, `order_id`, `payment_method`, `payment_stat
 ('PM0039', 'O0039', 'TNG', 'Paid', 98.9, '2025-01-28 02:00:00', '2025-01-28 02:00:00'),
 ('PM0040', 'O0040', 'Credit Card', 'Delivered', 60, '2025-01-29 02:00:00', '2025-01-29 02:00:00'),
 ('PM0041', 'O0041', 'TNG', 'Out for Delivery', 170.75, '2025-01-30 02:00:00', '2025-01-30 02:00:00');
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `orderstatus`
---
-ALTER TABLE `orderstatus`
-  ADD PRIMARY KEY (`order_status_id`),
-  ADD KEY `fk_order_status_order` (`order_id`);
-
---
--- Indexes for table `ordertable`
---
-ALTER TABLE `ordertable`
-  ADD PRIMARY KEY (`order_id`),
-  ADD KEY `customer_id` (`customer_id`),
-  ADD KEY `fk_order_address` (`address_id`);
-
---
--- Indexes for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD PRIMARY KEY (`order_id`,`product_variant_id`),
-  ADD KEY `product_variant_id` (`product_variant_id`);
-
---
--- Indexes for table `payment`
---
-ALTER TABLE `payment`
-  ADD PRIMARY KEY (`payment_id`),
-  ADD KEY `order_id` (`order_id`);
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `orderstatus`
---
-ALTER TABLE `orderstatus`
-  ADD CONSTRAINT `fk_order_status_order` FOREIGN KEY (`order_id`) REFERENCES `ordertable` (`order_id`);
-
---
--- Constraints for table `ordertable`
---
-ALTER TABLE `ordertable`
-  ADD CONSTRAINT `fk_order_address` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`),
-  ADD CONSTRAINT `ordertable_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
-
---
--- Constraints for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `ordertable` (`order_id`),
-  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_variant_id`) REFERENCES `product_variant` (`product_variant_id`);
-
---
--- Constraints for table `payment`
---
-ALTER TABLE `payment`
-  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `ordertable` (`order_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
