@@ -1,4 +1,21 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (isset($_SESSION['undo_products'])) {
+    // Check if it's older than 10 seconds (should have been auto-deleted)
+    if (isset($_SESSION['undo_time']) && (time() - $_SESSION['undo_time'] > 10)) {
+        unset($_SESSION['undo_products']);
+        unset($_SESSION['undo_count']);
+        unset($_SESSION['undo_time']);
+    }
+}
+
+if (!isset($_SESSION['undo_id'])) {
+    $_SESSION['undo_id'] = uniqid();
+}
+
 $title = "Product Maintenance";
 $pageCSS = "productList.css";
 
@@ -33,20 +50,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['delete_selected'])) {
         $productIds = $_POST['product_ids'] ?? [];
+        $productIds = array_unique(array_filter($productIds));
 
         if (!empty($productIds)) {
-            foreach ($productIds as $id) {
-                $controller->handleDeleteProductById($id);
-            }
-            $_SESSION['flash_success'] = count($productIds) . " product(s) deleted successfully!";
-        } else {
-            $_SESSION['flash_error'] = "Failed to delete products. Please try again.";
-        }
+            $controller->handleSoftDelete($productIds);
 
-        header("Location: productList.php");
+            $actualCount = count($productIds);
+            $_SESSION['undo_products'] = $productIds;
+            $_SESSION['undo_count'] = $actualCount;
+            $_SESSION['undo_time'] = time();
+            $_SESSION['undo_batch_id'] = uniqid(); // Unique ID for this batch
+
+            header("Location: productList.php?undo=1&batch=" . $_SESSION['undo_batch_id'] . "&t=" . time());
+            exit;
+        } else {
+            $_SESSION['flash_error'] = "No products selected for deletion.";
+            header("Location: productList.php");
+            exit;
+        }
+    }
+
+    if (isset($_POST['delete_single'])) {
+        $productId = $_POST['product_id'] ?? null;
+
+        if ($productId) {
+            $controller->handleSoftDelete([$productId]);
+
+            $_SESSION['undo_products'] = [$productId];
+            $_SESSION['undo_count'] = 1;
+            $_SESSION['undo_time'] = time();
+            $_SESSION['undo_batch_id'] = uniqid();
+
+            header("Location: productList.php?undo=1&batch=" . $_SESSION['undo_batch_id'] . "&t=" . time());
+            exit;
+        }
+    }
+
+    if (isset($_POST['undo_action']) && $_POST['undo_action'] === 'restore') {
+        if (isset($_SESSION['undo_products'])) {
+            $controller->handleRestore($_SESSION['undo_products']);
+            $count = count($_SESSION['undo_products']);
+            unset($_SESSION['undo_products']);
+            unset($_SESSION['undo_count']);
+            unset($_SESSION['undo_time']);
+            unset($_SESSION['undo_batch_id']);
+
+            $_SESSION['flash_success'] = "$count product(s) restored successfully!";
+            header("Location: productList.php");
+            exit;
+        }
+    }
+
+    if (isset($_POST['undo_action']) && $_POST['undo_action'] === 'permanent') {
+        if (isset($_SESSION['undo_products'])) {
+            $controller->handlePermanentDelete($_SESSION['undo_products']);
+            unset($_SESSION['undo_products']);
+            unset($_SESSION['undo_count']);
+            unset($_SESSION['undo_time']);
+            unset($_SESSION['undo_batch_id']);
+            header("Location: productList.php");
+            exit;
+        }
+    }
+}
+
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+) {
+
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($input['action']) && $input['action'] === 'restore' && isset($_SESSION['undo_products'])) {
+        $controller->handleRestore($_SESSION['undo_products']);
+        $count = count($_SESSION['undo_products']);
+        unset($_SESSION['undo_products']);
+        unset($_SESSION['undo_count']);
+        unset($_SESSION['undo_time']);
+        echo json_encode(['success' => true, 'message' => "$count product(s) restored"]);
+        exit;
+    }
+
+    if (isset($input['action']) && $input['action'] === 'permanent' && isset($_SESSION['undo_products'])) {
+        $controller->handlePermanentDelete($_SESSION['undo_products']);
+        $count = count($_SESSION['undo_products']);
+        unset($_SESSION['undo_products']);
+        unset($_SESSION['undo_count']);
+        unset($_SESSION['undo_time']); 
+        echo json_encode(['success' => true, 'message' => "$count product(s) permanently deleted"]);
         exit;
     }
 }
+
 include '../adminHeader.php';
 
 $current_sort = $_GET['sort'] ?? 'product_id';
@@ -56,13 +151,36 @@ $products = $controller->getAllProducts($current_sort, $current_order, "all");
 $productsCount = count($products);
 $categories = $controller->getAllCategories();
 $totalVariants = $controller->getAllProductVariant($current_sort, $current_order, "countAll");
-
 ?>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <body>
     <?php
     showToast();
     ?>
+    <?php if (isset($_SESSION['undo_products']) && !empty($_SESSION['undo_products'])): ?>
+        <div id="undoToast" class="undo-toast" data-count="<?= $_SESSION['undo_count'] ?>">
+            <div class="undo-toast-content">
+                <div class="undo-message">
+                    <span>Product(s) moved to trash</span>
+                    <span class="undo-timer" id="undoTimer">10</span>
+                </div>
+                <div class="undo-actions">
+                    <button type="button" id="undoBtn" class="undo-btn">
+                        Restore
+                    </button>
+                    <button type="button" id="dismissBtn" class="dismiss-btn" title="Delete permanently">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="undo-progress" id="undoProgress"></div>
+        </div>
+    <?php endif; ?>
+
     <div class="main-content-wrapper">
 
         <div class="filter-sidebar">
@@ -220,7 +338,7 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
                                      <form method="POST" action="productList.php" class="delete-single-form" style="display:inline;">
                                         <input type="hidden" name="delete_selected" value="1">
                                         <input type="hidden" name="product_ids[]" value="' . $product['product_id'] . '">
-                                        <button type="submit" class="btn btn-delete-single" onclick="return confirm(\'Delete this product?\');">
+                                        <button type="submit" class="btn btn-delete-single" data-single-delete="1" onclick="return confirm(\'Delete this product?\');">
                                             🗑
                                         </button>
                                     </form>
@@ -256,5 +374,6 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
             </form>
         </div>
     </div>
+
     <script src="/public/js/productList.js"></script>
 </body>

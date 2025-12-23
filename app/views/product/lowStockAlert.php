@@ -166,14 +166,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'sendPdf') {
                                 <td><span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span></td>
                                 <td class="suggestQty"><?php echo htmlspecialchars($product['stock_qty'] + 20 ?? 0); ?></td>
                                 <td>
-                                    <a href="addSingleProduct.php?product_id=' . $product['product_id'] . '">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            width="16" height="16"
-                                            viewBox="0 0 512 512"
-                                            fill="currentColor" style="color:black">
-                                            <path d="M448 0H320c-17.7 0-32 14.3-32 32s14.3 32 32 32h75.3L201 258.3c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L440 109.3V184c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32z" />
-                                            <path d="M64 64v384c0 35.3 28.7 64 64 64h320c35.3 0 64-28.7 64-64V256c0-17.7-14.3-32-32-32s-32 14.3-32 32v192c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V64c0-17.7-14.3-32-32-32S64 46.3 64 64z" />
-                                        </svg>
+                                    <a href="addSingleProduct.php?product_id=<?= $product['product_id'] ?>&from=lowstock">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        width="16" height="16"
+                                        viewBox="0 0 512 512"
+                                        fill="currentColor" style="color:black">
+                                        <path d="M448 0H320c-17.7 0-32 14.3-32 32s14.3 32 32 32h75.3L201 258.3c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L440 109.3V184c0 17.7 14.3 32 32 32s32-14.3 32-32V32c0-17.7-14.3-32-32-32z" />
+                                        <path d="M64 64v384c0 35.3 28.7 64 64 64h320c35.3 0 64-28.7 64-64V256c0-17.7-14.3-32-32-32s-32 14.3-32 32v192c0 17.7-14.3 32-32 32H128c-17.7 0-32-14.3-32-32V64c0-17.7-14.3-32-32-32S64 46.3 64 64z" />
+                                    </svg>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

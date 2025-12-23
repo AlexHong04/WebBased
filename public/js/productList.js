@@ -1,7 +1,6 @@
 let isGridView = false;
 
 document.addEventListener("DOMContentLoaded", () => {
-
   const selectAllCheckbox = document.getElementById("selectAll");
   const rowCheckboxes = document.querySelectorAll(".row-checkbox");
   const deleteBtn = document.querySelector(".btn-delete");
@@ -44,17 +43,18 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleActionButtons();
 
   deleteForm.addEventListener("submit", (e) => {
+    const clickedButton = e.submitter; 
+    if (clickedButton && clickedButton.dataset.singleDelete === "1") {
+      return;
+    }
+
     const selected = document.querySelectorAll(".row-checkbox:checked");
     if (selected.length === 0) {
       e.preventDefault();
       alert("Please select at least one product.");
       return;
     }
-    if (!confirm(`Delete ${selected.length} product(s)?`)) {
-      e.preventDefault();
-    }
   });
-
   priceMinInput.value = priceMinInput.max;
   maxText.innerText = priceMinInput.max;
 
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePagination();
   }
 
-   function updatePagination() {
+  function updatePagination() {
     const rowsPerPage = parseInt(rowPerPageSelect.value);
     const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
@@ -393,4 +393,181 @@ document.addEventListener("DOMContentLoaded", () => {
 closeModal.addEventListener("click", () => (modal.style.display = "none"));
 window.addEventListener("click", (e) => {
   if (e.target === modal) modal.style.display = "none";
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const undoToast = document.getElementById("undoToast");
+  if (!undoToast) return;
+
+  const undoBtn = document.getElementById("undoBtn");
+  const dismissBtn = document.getElementById("dismissBtn");
+  const undoTimer = document.getElementById("undoTimer");
+  const undoProgress = document.getElementById("undoProgress");
+
+  let countdown = 10;
+  let countdownInterval;
+  let autoDeleteTimeout;
+
+  function startCountdown() {
+    undoTimer.textContent = countdown;
+
+    countdownInterval = setInterval(() => {
+      countdown--;
+      undoTimer.textContent = countdown;
+
+      if (countdown <= 0) {
+        clearInterval(countdownInterval);
+        permanentDelete();
+      }
+    }, 1000);
+
+    autoDeleteTimeout = setTimeout(() => {
+      permanentDelete();
+    }, 10000);
+  }
+
+  function hideToast() {
+    undoToast.classList.add("hide");
+    setTimeout(() => {
+      if (undoToast.parentNode) {
+        undoToast.parentNode.removeChild(undoToast);
+      }
+    }, 300);
+  }
+
+  function showSuccessMessage(message) {
+    const successToast = document.createElement("div");
+    successToast.className = "success-toast";
+    successToast.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                ${message}
+            </div>
+        `;
+    document.body.appendChild(successToast);
+
+    setTimeout(() => {
+      if (successToast.parentNode) {
+        successToast.classList.add("hide");
+        setTimeout(() => {
+          if (successToast.parentNode) {
+            successToast.parentNode.removeChild(successToast);
+          }
+        }, 300);
+      }
+    }, 3000);
+  }
+
+  undoBtn.addEventListener("click", function () {
+    clearInterval(countdownInterval);
+    clearTimeout(autoDeleteTimeout);
+
+    undoBtn.disabled = true;
+    undoBtn.innerHTML = '<span class="spinner"></span>Restoring...';
+
+    if (undoProgress) {
+      undoProgress.style.animationPlayState = "paused";
+    }
+
+    fetch("productList.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: JSON.stringify({ action: "restore" }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          showSuccessMessage("Product(s) restored successfully!");
+          hideToast();
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          throw new Error(data.message || "Failed to restore");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        undoBtn.disabled = false;
+        undoBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 7v6h6"></path>
+                        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+                    </svg>
+                    Try Again
+                `;
+
+        showSuccessMessage("Failed to restore. Please try again.");
+
+        if (undoProgress) {
+          undoProgress.style.animationPlayState = "running";
+        }
+
+        const remainingTime = countdown > 0 ? countdown : 10;
+        countdown = remainingTime;
+        startCountdown();
+      });
+  });
+
+  dismissBtn.addEventListener("click", function () {
+    if (
+      confirm(
+        "Are you sure you want to permanently delete the selected product(s)? This action cannot be undone."
+      )
+    ) {
+      clearInterval(countdownInterval);
+      clearTimeout(autoDeleteTimeout);
+      permanentDelete();
+    }
+  });
+
+  function permanentDelete() {
+    fetch("productList.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: JSON.stringify({ action: "permanent" }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          hideToast();
+          showSuccessMessage("Product(s) permanently deleted");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        hideToast();
+      });
+  }
+
+  startCountdown();
+
+  document.addEventListener("click", function (e) {
+    if (
+      !undoToast.contains(e.target) &&
+      e.target !== undoBtn &&
+      e.target !== dismissBtn &&
+      !undoToast.classList.contains("hide")
+    ) {
+    }
+  });
+});
+
+window.addEventListener("pageshow", function (event) {
+  if (event.persisted) {
+    const undoToast = document.getElementById("undoToast");
+    if (undoToast) {
+      undoToast.remove();
+    }
+  }
 });

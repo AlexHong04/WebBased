@@ -652,7 +652,7 @@ class ProductsController
     {
         if (empty($productId)) return false;
         try {
-            $result = $this->productModel->deleteProductById($productId);
+            $result = $this->productModel->softDeleteProductWithVariants($productId);
             $product = $this->getProductById($productId);
             if ($product && !empty($product['img_url'])) {
                 $images = explode(',', $product['img_url']);
@@ -1023,5 +1023,26 @@ class ProductsController
         }
 
         return $grouped;
+    }
+
+    public function handleSoftDelete($ids)
+    {
+        foreach ($ids as $id) {
+            $this->productModel->softDeleteProductWithVariants($id);
+        }
+    }
+
+    public function handlePermanentDelete($ids)
+    {
+        foreach ($ids as $id) {
+            $this->productModel->forceDeleteProductWithVariants($id);
+        }
+    }
+
+    public function handleRestore($ids)
+    {
+        foreach ($ids as $id) {
+            $this->productModel->restoreProductWithVariants($id);
+        }
     }
 }

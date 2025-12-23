@@ -32,9 +32,16 @@ class ProductModel
             'created_at',
             'updated_at',
         ];
-        $sort = in_array($sort_column, $safe_columns) ? $sort_column : 'product_id';
+
+        $sort  = in_array($sort_column, $safe_columns) ? $sort_column : 'product_id';
         $order = (strtoupper($sort_order) === 'DESC') ? 'DESC' : 'ASC';
-        $query = "SELECT * FROM product ORDER BY {$sort} {$order}";
+
+        $query = "
+        SELECT * 
+        FROM product 
+        WHERE is_deleted = FALSE
+        ORDER BY {$sort} {$order}
+    ";
 
         $this->db->query($query);
         $this->db->execute();
@@ -49,13 +56,12 @@ class ProductModel
     ) {
         $where_clause = '';
 
-        // 1. Handle Filtering using the stock_status attribute
         switch ($filter) {
             case 'lowStock':
-                $where_clause = "WHERE stock_status IN ('Low Stock', 'Out of Stock')";
+                $where_clause = "stock_status IN ('Low Stock', 'Out of Stock')";
                 break;
             case 'outOfStock':
-                $where_clause = "WHERE stock_status = 'Out of Stock'";
+                $where_clause = "stock_status = 'Out of Stock'";
                 break;
             case 'all':
                 $where_clause = "";
@@ -69,21 +75,24 @@ class ProductModel
         }
 
         $order = (strtoupper($sort_order) === 'DESC') ? 'DESC' : 'ASC';
-
         $safe_columns = ['product_variant_id', 'stock_qty', 'min_stock_level', 'product_name', 'stock_status'];
-
         $sort = in_array($sort_column, $safe_columns) ? $sort_column : 'product_variant_id';
-
         $sort_sql = "ORDER BY {$sort} {$order}";
 
-        // 3. Execute Query
-        $query = "SELECT * FROM product_variant {$where_clause} {$sort_sql}";
+        if ($where_clause) {
+            $where_sql = "WHERE is_deleted = FALSE AND {$where_clause}";
+        } else {
+            $where_sql = "WHERE is_deleted = FALSE";
+        }
+
+        $query = "SELECT * FROM product_variant {$where_sql} {$sort_sql}";
 
         $this->db->query($query);
         $this->db->execute();
 
         return $this->db->resultAll();
     }
+
     private function getCountByFilter(string $condition): int
     {
         $query = "SELECT COUNT(*) AS count FROM product_variant WHERE {$condition}";
@@ -607,5 +616,95 @@ class ProductModel
     ");
 
         return $this->db->resultAll();
+    }
+    public function softDeleteProductWithVariants(string $productId): bool
+    {
+        try {
+            $this->db->query("START TRANSACTION");
+            $this->db->execute();
+
+            $this->db->query("
+            UPDATE product 
+            SET is_deleted = TRUE 
+            WHERE product_id = :id
+        ");
+            $this->db->bind(':id', $productId);
+            $this->db->execute();
+
+            $this->db->query("
+            UPDATE product_variant 
+            SET is_deleted = TRUE 
+            WHERE product_id = :id
+        ");
+            $this->db->bind(':id', $productId);
+            $this->db->execute();
+
+            $this->db->query("COMMIT");
+            $this->db->execute();
+
+            return true;
+        } catch (Exception $e) {
+            $this->db->query("ROLLBACK");
+            $this->db->execute();
+            throw $e;
+        }
+    }
+
+    public function restoreProductWithVariants(string $productId): bool
+    {
+        try {
+            $this->db->query("START TRANSACTION");
+            $this->db->execute();
+
+            $this->db->query("
+            UPDATE product 
+            SET is_deleted = FALSE 
+            WHERE product_id = :id
+        ");
+            $this->db->bind(':id', $productId);
+            $this->db->execute();
+
+            $this->db->query("
+            UPDATE product_variant 
+            SET is_deleted = FALSE 
+            WHERE product_id = :id
+        ");
+            $this->db->bind(':id', $productId);
+            $this->db->execute();
+
+            $this->db->query("COMMIT");
+            $this->db->execute();
+
+            return true;
+        } catch (Exception $e) {
+            $this->db->query("ROLLBACK");
+            $this->db->execute();
+            throw $e;
+        }
+    }
+
+    public function forceDeleteProductWithVariants(string $productId): bool
+    {
+        try {
+            $this->db->query("START TRANSACTION");
+            $this->db->execute();
+
+            $this->db->query("DELETE FROM product_variant WHERE product_id = :id");
+            $this->db->bind(':id', $productId);
+            $this->db->execute();
+
+            $this->db->query("DELETE FROM product WHERE product_id = :id");
+            $this->db->bind(':id', $productId);
+            $this->db->execute();
+
+            $this->db->query("COMMIT");
+            $this->db->execute();
+
+            return true;
+        } catch (Exception $e) {
+            $this->db->query("ROLLBACK");
+            $this->db->execute();
+            throw $e;
+        }
     }
 }
