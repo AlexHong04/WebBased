@@ -26,6 +26,7 @@ class wishlistController {
             $rawImg = !empty($item['variant_img']) ? $item['variant_img'] : $item['main_img'];
             $catName = $item['category_name'] ?? '';
             $finalImg = $this->resolveImagePath($rawImg, $catName);
+            $isDeleted = ($item['p_deleted'] ?? 0) == 1 || ($item['pv_deleted'] ?? 0) == 1;
 
             $wishlistItems[] = [
                 'product_variant_id' => $item['product_variant_id'],
@@ -34,7 +35,8 @@ class wishlistController {
                 'variant_name' => $item['variant_name'],
                 'price' => $item['price'],
                 'img_url' => $finalImg,
-                'stock_qty' => (int)$item['stock_qty']
+                'stock_qty' => (int)$item['stock_qty'],
+                'is_deleted'   => $isDeleted
             ];
         }
 

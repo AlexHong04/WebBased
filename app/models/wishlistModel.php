@@ -61,28 +61,32 @@ class WishlistModel {
         return $this->db->result() ? true : false;
     }
 
-    public function getWishlistItems($customerId) {
+    public function getWishlistItems($customerId)
+    {
         $sql = "SELECT 
-                    wi.wishlist_item_id,
-                    pv.product_variant_id,
-                    pv.stock_qty,
-                    v.variant_name,
-                    p.product_id,
-                    p.product_name,
-                    p.sale_price as price,
-                    pv.img_url as variant_img,
-                    p.img_url as main_img,
-                    c.category_name
-                FROM wishlist w
-                JOIN wishlist_items wi ON w.wishlist_id = wi.wishlist_id
-                JOIN product_variant pv ON wi.product_variant_id = pv.product_variant_id
-                LEFT JOIN variant v ON pv.variant_id = v.variant_id
-                JOIN product p ON pv.product_id = p.product_id
-                LEFT JOIN category c ON p.category_id = c.category_id
-                WHERE w.customer_id = ?
-                ORDER BY
-                    CASE WHEN pv.stock_qty > 0 THEN 0 ELSE 1 END ASC,
-                    wi.wishlist_item_id DESC";
+                wi.wishlist_item_id,
+                pv.product_variant_id,
+                pv.stock_qty,
+                v.variant_name,
+                p.product_id,
+                p.product_name,
+                p.sale_price as price,
+                pv.img_url as variant_img,
+                p.img_url as main_img,
+                c.category_name,
+                p.is_deleted as p_deleted,  
+                pv.is_deleted as pv_deleted
+            FROM wishlist w
+            JOIN wishlist_items wi ON w.wishlist_id = wi.wishlist_id
+            JOIN product_variant pv ON wi.product_variant_id = pv.product_variant_id
+            LEFT JOIN variant v ON pv.variant_id = v.variant_id
+            JOIN product p ON pv.product_id = p.product_id
+            LEFT JOIN category c ON p.category_id = c.category_id
+            WHERE w.customer_id = ?
+            ORDER BY
+                CASE WHEN (IFNULL(p.is_deleted, 0) = 1 OR IFNULL(pv.is_deleted, 0) = 1) THEN 1 ELSE 0 END ASC,
+                CASE WHEN pv.stock_qty > 0 THEN 0 ELSE 1 END ASC,
+                wi.wishlist_item_id DESC";
 
         $this->db->query($sql);
         $this->db->bind(1, $customerId);

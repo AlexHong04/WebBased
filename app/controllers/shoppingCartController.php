@@ -1,21 +1,26 @@
 <?php
 require_once __DIR__ . '/../models/CartModel.php';
-require_once __DIR__ . '/../helpers/request.php'; 
+require_once __DIR__ . '/../helpers/request.php';
 
-class shoppingCartController {
+class shoppingCartController
+{
     private $cartModel;
 
-    public function __construct() {
+    public function __construct()
+    {
         if (session_status() === PHP_SESSION_NONE) {
-             session_start();
+            session_start();
         }
         $this->cartModel = new CartModel();
     }
 
     //orepares data for the main Cart View page
-    public function getCartData() {
+    // app/controllers/shoppingCartController.php
+
+    public function getCartData()
+    {
         if (!defined('IMG_BASE_PATH')) define('IMG_BASE_PATH', '/public/');
-        
+
         $deliveryFee = 5.00;
         $cartItems = [];
         $dbItems = [];
@@ -31,6 +36,7 @@ class shoppingCartController {
                 $rawImg = !empty($item['variant_img']) ? $item['variant_img'] : $item['main_img'];
                 $catName = $item['category_name'] ?? '';
                 $finalImg = $this->resolveCartImage($rawImg, $catName);
+                $isDeleted = ($item['p_deleted'] ?? 0) == 1 || ($item['pv_deleted'] ?? 0) == 1;
 
                 $cartItems[] = [
                     'product_id'   => $item['product_variant_id'],
@@ -38,13 +44,18 @@ class shoppingCartController {
                     'price'        => $item['sale_price'],
                     'quantity'     => $item['quantity'],
                     'stock_qty'    => $item['stock_qty'],
-                    'img_url'      => $finalImg
+                    'img_url'      => $finalImg,
+                    'is_deleted'   => $isDeleted  
                 ];
             }
         }
 
         // Sort: Out of Stock items go to the bottom
         usort($cartItems, function ($a, $b) {
+            if ($a['is_deleted'] != $b['is_deleted']) {
+                return $a['is_deleted'] ? 1 : -1;
+            }
+
             $stockA = $a['stock_qty'] > 0 ? 1 : 0;
             $stockB = $b['stock_qty'] > 0 ? 1 : 0;
             if ($stockA !== $stockB) return $stockB - $stockA;
@@ -61,10 +72,11 @@ class shoppingCartController {
     }
 
     //format image paths correctly
-    private function resolveCartImage($dbPath, $categoryName = '') {
+    private function resolveCartImage($dbPath, $categoryName = '')
+    {
         if (empty($dbPath)) return 'https://via.placeholder.com/150';
         if (str_starts_with($dbPath, 'http')) return $dbPath;
-        
+
         if (str_contains($dbPath, ',')) {
             $parts = explode(',', $dbPath);
             $dbPath = trim($parts[0]);
@@ -76,7 +88,8 @@ class shoppingCartController {
     }
 
     //Add item to cart
-    public function add() {
+    public function add()
+    {
         if (is_post()) {
             if (!isset($_SESSION['customerId'])) {
                 temp('flash_login_required', 'You must log in to add items to your cart.');
@@ -114,14 +127,15 @@ class shoppingCartController {
             }
 
             $this->cartModel->addCartItem($cartId, $variantId, $finalAddQty);
-            
+
             temp('keep_variant_id', $variantId);
             $this->redirectBack();
         }
     }
 
     //when user changes quantity input in cart
-    public function update() {
+    public function update()
+    {
         while (ob_get_level()) ob_end_clean(); // Clear buffer
 
         if (is_post()) {
@@ -135,10 +149,10 @@ class shoppingCartController {
 
             $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
             if (!$cartId) {
-                echo "Error: Cart ID not found"; 
+                echo "Error: Cart ID not found";
                 exit;
             }
-            
+
             $result = $this->cartModel->updateCartItemQty($cartId, $variantId, $quantity);
             echo $result ? "Success" : "Error: Database Update Failed";
             exit;
@@ -146,7 +160,8 @@ class shoppingCartController {
     }
 
     //Delete Single Item
-    public function delete() {
+    public function delete()
+    {
         while (ob_get_level()) ob_end_clean();
 
         if (is_post()) {
@@ -161,7 +176,7 @@ class shoppingCartController {
                 echo "Error: Missing ID";
                 exit;
             }
-            
+
             $cartId = $this->cartModel->getOrCreateCart($_SESSION['customerId']);
             if ($this->cartModel->removeCartItem($cartId, $variantId)) {
                 echo "Success";
@@ -173,7 +188,8 @@ class shoppingCartController {
     }
 
     //Batch Delete Items
-    public function deleteBatch() {
+    public function deleteBatch()
+    {
         while (ob_get_level()) ob_end_clean();
 
         if (is_post()) {
@@ -200,21 +216,22 @@ class shoppingCartController {
     }
 
     //Get Cart Count(updating the cart badge in the header dynamically)
-    public function count() {
+    public function count()
+    {
         while (ob_get_level()) ob_end_clean();
 
         $count = 0;
         if (isset($_SESSION['customerId'])) {
             $count = $this->cartModel->getCartCount($_SESSION['customerId']);
-        } 
-        
+        }
+
         echo $count;
         exit;
     }
-    
-    private function redirectBack() {
+
+    private function redirectBack()
+    {
         $referer = $_SERVER['HTTP_REFERER'] ?? '/app/views/home.php';
         redirect($referer);
     }
 }
-?>

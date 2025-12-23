@@ -84,16 +84,17 @@ class cartModel
     public function getMemberCartDetails($customerId)
     {
         $sql = "SELECT ci.cart_item_id, ci.quantity, pv.product_variant_id, pv.stock_qty, v.variant_name,
-                    pv.img_url as variant_img,
-                    p.product_id, p.product_name, p.sale_price, p.img_url as main_img, cat.category_name
-                FROM cart c
-                JOIN cart_items ci ON c.cart_id = ci.cart_id
-                JOIN product_variant pv ON ci.product_variant_id = pv.product_variant_id
-                JOIN product p ON pv.product_id = p.product_id
-                LEFT JOIN variant v ON pv.variant_id = v.variant_id
-                LEFT JOIN category cat ON p.category_id = cat.category_id
-                WHERE c.customer_id = ? AND ci.cart_status = 0
-                ORDER BY ci.cart_item_id DESC";
+                pv.img_url as variant_img,
+                p.product_id, p.product_name, p.sale_price, p.img_url as main_img, cat.category_name,
+                p.is_deleted as p_deleted, pv.is_deleted as pv_deleted  
+            FROM cart c
+            JOIN cart_items ci ON c.cart_id = ci.cart_id
+            JOIN product_variant pv ON ci.product_variant_id = pv.product_variant_id
+            JOIN product p ON pv.product_id = p.product_id
+            LEFT JOIN variant v ON pv.variant_id = v.variant_id
+            LEFT JOIN category cat ON p.category_id = cat.category_id
+            WHERE c.customer_id = ? AND ci.cart_status = 0
+            ORDER BY ci.cart_item_id DESC";
 
         $this->db->query($sql);
         $this->db->bind(1, $customerId);
@@ -140,13 +141,13 @@ class cartModel
         if (empty($variantIds)) return false;
 
         $placeholders = implode(',', array_fill(0, count($variantIds), '?'));
-        
+
         $sql = "DELETE FROM cart_items 
                 WHERE cart_id = ? 
                 AND product_variant_id IN ($placeholders) 
                 AND cart_status = 0";
 
-        $this->db->query($sql);        
+        $this->db->query($sql);
         $this->db->bind(1, $cartId);
         foreach ($variantIds as $k => $id) {
             $this->db->bind($k + 2, $id); // +2 because index 1 is cartId
@@ -154,7 +155,7 @@ class cartModel
 
         return $this->db->execute();
     }
-    
+
     //to check available stock for a variant.
     public function getProductStock($variantId)
     {

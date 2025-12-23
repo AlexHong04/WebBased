@@ -74,32 +74,53 @@ include '../header.php';
                     <tbody id="cartTableBody">
                         <?php foreach ($cartItems as $item): ?>
                             <?php
-                            // Determine if item is Out of Stock (OOS)
+                            $isDeleted = $item['is_deleted'] ?? false;
                             $isOOS = $item['stock_qty'] <= 0;
-                            $rowClass = $isOOS ? 'cart-row out-of-stock' : 'cart-row';
+
+                            $rowClass = 'cart-row';
+                            if ($isDeleted) {
+                                $rowClass .= ' item-unavailable';
+                            } elseif ($isOOS) {
+                                $rowClass .= ' out-of-stock';
+                            }
+
                             $pid = encode($item['product_id']);
+                            $displayPrice = $isDeleted ? 0 : $item['price'];
                             ?>
-                            <tr class="<?= $rowClass ?>" data-price="<?= encode($item['price']) ?>">
+
+                            <tr class="<?= $rowClass ?>" data-price="<?= encode($displayPrice) ?>" data-deleted="<?= $isDeleted ? '1' : '0' ?>">
                                 <td>
                                     <input type="checkbox"
                                         class="item-checkbox"
                                         name="selected_items[]"
                                         value="<?= $pid ?>"
                                         onchange="calculateTotal()"
-                                        <?= $isOOS ? 'disabled' : '' ?>>
+                                        <?= ($isOOS || $isDeleted) ? 'disabled' : '' ?>>
                                 </td>
                                 <td>
                                     <div class="product-info">
-                                        <img src="<?= encode($item['img_url']) ?>" alt="Img">
-                                        <div class="product-name"><?= encode($item['product_name']) ?></div>
+                                        <img src="<?= encode($item['img_url']) ?>" alt="Img" style="<?= $isDeleted ? 'filter: grayscale(100%); opacity: 0.6;' : '' ?>">
+                                        <div class="product-name" style="<?= $isDeleted ? 'text-decoration: line-through; color: #999;' : '' ?>">
+                                            <?= encode($item['product_name']) ?>
+                                        </div>
                                     </div>
-                                    <?php if ($isOOS): ?>
+
+                                    <?php if ($isDeleted): ?>
+                                        <div class="oos-badge" style="background-color: #dc3545;">Unavailable</div>
+                                    <?php elseif ($isOOS): ?>
                                         <div class="oos-badge">Out of Stock</div>
                                     <?php endif; ?>
                                 </td>
-                                <td class="unit-price"><?= number_format($item['price'], 2) ?></td>
+                                <td class="unit-price">
+                                    <?= $isDeleted ? '-' : number_format($item['price'], 2) ?>
+                                </td>
                                 <td>
-                                    <?php if ($isOOS): ?>
+                                    <?php if ($isDeleted): ?>
+                                        <div style="text-align:center; color:#dc3545; font-size: 0.9rem;">
+                                            Item Removed
+                                        </div>
+                                        <input type="hidden" class="qty-input" value="0">
+                                    <?php elseif ($isOOS): ?>
                                         <div style="text-align:center; color:#aaa; font-weight:bold;">-</div>
                                         <input type="hidden" class="qty-input" value="0">
                                     <?php else: ?>
@@ -124,7 +145,11 @@ include '../header.php';
                                 </td>
                                 <td>
                                     <span class="item-subtotal">
-                                        <?= $isOOS ? '-' : '<span class="row-total">' . number_format($item['price'] * $item['quantity'], 2) . '</span>' ?>
+                                        <?php if ($isDeleted || $isOOS): ?>
+                                            -
+                                        <?php else: ?>
+                                            <span class="row-total"><?= number_format($item['price'] * $item['quantity'], 2) ?></span>
+                                        <?php endif; ?>
                                     </span>
                                 </td>
                                 <td>

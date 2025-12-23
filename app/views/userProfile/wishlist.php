@@ -134,6 +134,7 @@ include '../header.php';
 
                     <div class="wishlist-grid" id="wishlistGrid">
                         <?php foreach ($wishlistItems as $item):
+                            $isDeleted = $item['is_deleted'] ?? false;
                             $isOOS = $item['stock_qty'] <= 0;
                             $vid = $item['product_variant_id'];
                             $keywords = strtolower($item['product_name'] . ' ' . $item['variant_name']);
@@ -143,18 +144,29 @@ include '../header.php';
                                     <input type="checkbox" class="wishlist-checkbox" value="<?= $vid ?>" onchange="updateBatchState()">
                                 </div>
                                 <div class="wishlist-img-wrapper">
-                                    <img src="<?= encode($item['img_url']) ?>" alt="<?= encode($item['product_name']) ?>">
-                                    <?php if ($isOOS): ?>
+                                    <img src="<?= encode($item['img_url']) ?>"
+                                        alt="<?= encode($item['product_name']) ?>"
+                                        style="<?= $isDeleted ? 'filter: grayscale(100%); opacity: 0.6;' : '' ?>">
+
+                                    <?php if ($isDeleted): ?>
+                                        <div class="sold-out-overlay"><span>Unavailable</span></div>
+                                    <?php elseif ($isOOS): ?>
                                         <div class="sold-out-overlay"><span>Sold Out</span></div>
                                     <?php endif; ?>
                                 </div>
                                 <div class="wishlist-details">
-                                    <h4><?= encode($item['product_name']) ?></h4>
+                                    <h4 style="<?= $isDeleted ? 'text-decoration: line-through; color: #999;' : '' ?>">
+                                        <?= encode($item['product_name']) ?>
+                                    </h4>
                                     <p class="variant-name"><?= encode($item['variant_name']) ?></p>
-                                    <div class="price">RM <?= number_format($item['price'], 2) ?></div>
+                                    <div class="price">
+                                        <?= $isDeleted ? '-' : 'RM ' . number_format($item['price'], 2) ?>
+                                    </div>
                                 </div>
                                 <div class="wishlist-actions">
-                                    <?php if (!$isOOS): ?>
+                                    <?php if ($isDeleted): ?>
+                                        <button class="btn-view disabled" disabled style="background-color: #ccc; cursor: not-allowed;">Unavailable</button>
+                                    <?php elseif (!$isOOS): ?>
                                         <a href="../product/product_details.php?id=<?= $item['product_id'] ?>" class="btn-view">View Product</a>
                                     <?php else: ?>
                                         <button class="btn-view disabled">Sold Out</button>
