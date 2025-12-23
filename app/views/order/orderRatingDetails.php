@@ -145,9 +145,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       w: 0,
       h: 0
     };
-    let editingIndex = -1; // Track if we are editing an existing image
+    let editingIndex = -1;
 
-    // --- Star Rating ---
+    // Star Rating
     stars.forEach(star => {
       star.addEventListener("click", () => {
         const value = star.dataset.value;
@@ -160,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       });
     });
 
-    // --- File Handling ---
+    // File Handling
     dropZone.addEventListener("click", () => mediaInput.click());
     ["dragenter", "dragover", "dragleave", "drop"].forEach(e => dropZone.addEventListener(e, ev => ev.preventDefault()));
 
@@ -179,15 +179,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (file.type.startsWith('video/')) {
           selectedFiles.push(file);
         } else if (file.type.startsWith('image/')) {
-          // For new uploads, we add them directly first, 
-          // then user can click them to crop if they want.
           selectedFiles.push(file);
         }
       });
       renderPreviews();
     }
 
-    // --- Open Cropper for Specific File ---
+    // Open Cropper for Specific File
     function openCropper(file, index) {
       editingIndex = index;
       originalFile = file;
@@ -219,8 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       reader.readAsDataURL(file);
     }
 
-    // --- Selection Logic ---
-    // --- Updated Selection Logic ---
+    // Selection Logic
     canvas.onmousedown = (e) => {
       isDrawing = true;
       const rect = canvas.getBoundingClientRect();
@@ -272,7 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     }
 
-    // --- Finalize Crop ---
+    // Finalize Crop
     document.getElementById('cropConfirm').addEventListener('click', () => {
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d');
@@ -311,7 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       cropperModal.classList.remove('show');
     });
 
-    // --- Render Previews ---
+    // Render Previews
     function renderPreviews() {
       previewDiv.innerHTML = "";
       const dataTransfer = new DataTransfer();
@@ -322,7 +319,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const fileURL = URL.createObjectURL(file);
         const type = file.type.split("/")[0];
 
-        // 1. Remove Button (The 'X')
+        // Remove Button (The 'X')
         const removeBtn = document.createElement("span");
         removeBtn.classList.add("remove-btn");
         removeBtn.innerHTML = "&times;";
@@ -332,11 +329,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           renderPreviews();
         };
 
-        // 2. Edit Button (The Pencil - Only for images)
+        // Edit Button (The Pencil - Only for images)
         if (type === "image") {
           const editBtn = document.createElement("span");
           editBtn.classList.add("edit-icon-btn");
-          // Inline SVG Pencil Icon
           editBtn.innerHTML = `
                 <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -349,12 +345,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           wrapper.appendChild(editBtn);
         }
 
-        // 3. Media Element (Img or Video)
+        // Media Element (Img or Video)
         const elem = document.createElement(type === "image" ? "img" : "video");
         elem.src = fileURL;
         if (type === "video") elem.controls = true;
 
-        // NEW LOGIC: Clicking the image opens in a NEW TAB
+        // Clicking the image opens in a NEW TAB
         elem.onclick = () => {
           window.open(fileURL, '_blank');
         };
