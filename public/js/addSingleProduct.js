@@ -455,8 +455,6 @@ function setupFormSubmission() {
 
   function showModal() {
     modal.style.display = "block";
-
-    document.getElementById("deleteMessage").textContent = message;
   }
 
   function hideModal() {
@@ -467,20 +465,41 @@ function setupFormSubmission() {
     document.querySelectorAll(".error-message").forEach((el) => el.remove());
     let isValid = true;
 
-    const showError = (inputName, message, isArray = false, index = null) => {
-      let selector = isArray
-        ? `[name="${inputName}[]"]`
-        : `[name="${inputName}"]`;
-      let inputs = document.querySelectorAll(selector);
-      let targetInput = index !== null ? inputs[index] : inputs[0];
+    const showError = (
+      inputName,
+      message,
+      isArray = false,
+      index = null,
+      targetElement = null,
+      insertAfter = false
+    ) => {
+      let errorTarget = targetElement;
 
-      if (targetInput) {
+      if (!errorTarget) {
+        let selector = isArray
+          ? `[name="${inputName}[]"]`
+          : `[name="${inputName}"]`;
+        let inputs = document.querySelectorAll(selector);
+        errorTarget = index !== null ? inputs[index] : inputs[0];
+      }
+
+      if (errorTarget) {
         const errorSpan = document.createElement("span");
         errorSpan.className = "error-message";
         errorSpan.style.cssText =
           "color: red; font-size: 0.8em; display: block; margin-top: 5px;";
         errorSpan.textContent = message;
-        targetInput.parentNode.appendChild(errorSpan);
+
+        if (insertAfter) {
+          // Insert after the target element
+          errorTarget.insertAdjacentElement("afterend", errorSpan);
+        } else {
+          // Insert inside the container (default behavior)
+          const container =
+            errorTarget.closest(".form-group") || errorTarget.parentNode;
+          container.appendChild(errorSpan);
+        }
+
         isValid = false;
       }
     };
@@ -507,43 +526,135 @@ function setupFormSubmission() {
     const variantSections = document.querySelectorAll(
       ".variant-section-basicInfo"
     );
+
     if (variantSections.length === 0) {
-      alert("At least one variant is required.");
+      const variantContainer = document.getElementById(
+        "activeVariantsContainer"
+      );
+      showError(
+        "variants",
+        "At least one variant is required.",
+        false,
+        null,
+        variantContainer
+      );
       isValid = false;
     } else {
       variantSections.forEach((section, i) => {
-        const vId = section.querySelector('[name="variant_ids[]"]').value;
+        const vId = section.querySelector('[name="variant_ids[]"]')?.value;
         const minStock = section.querySelector(
           '[name="min_stock_levels[]"]'
-        ).value;
-        const stockQty = section.querySelector('[name="stock_qtys[]"]').value;
+        )?.value;
+        const stockQty = section.querySelector('[name="stock_qtys[]"]')?.value;
 
-        if (!vId)
+        if (!vId) {
+          const variantSelect = section.querySelector('[name="variant_ids[]"]');
           showError(
             "variant_ids",
-            `Please select a variant for variant ${i + 1}.`,
-            true,
-            i
+            `Please select a variant for Variant ${i + 1}.`,
+            false,
+            null,
+            variantSelect
           );
+        }
 
         if (!minStock || minStock < 1) {
-          showError("min_stock_levels", "Must be more than 1", true, i);
+          const minStockInput = section.querySelector(
+            '[name="min_stock_levels[]"]'
+          );
+          showError(
+            "min_stock_levels",
+            "Must be more than 1",
+            false,
+            null,
+            minStockInput
+          );
         }
 
         if (!stockQty || stockQty < 1) {
-          showError("stock_qtys", "Must be more than 1.", true, i);
+          const stockQtyInput = section.querySelector('[name="stock_qtys[]"]');
+          showError(
+            "stock_qtys",
+            "Must be more than 1.",
+            false,
+            null,
+            stockQtyInput
+          );
+        }
+
+        const variantImageInput = section.querySelector(".variant-image-input");
+        const variantPreview = section.querySelector(
+          ".variant-preview-container"
+        );
+        const variantExistingImages = variantPreview
+          ? variantPreview.querySelectorAll(".preview-image-container").length
+          : 0;
+        const variantNewImages = variantImageInput
+          ? variantImageInput.files.length
+          : 0;
+
+        if (variantExistingImages === 0 && variantNewImages === 0) {
+          const variantImageContainer =
+            section.querySelector(".variant-image-upload-container") ||
+            section.querySelector(".variant-drop-zone") ||
+            variantImageInput;
+          showError(
+            `variant_images_${i}`,
+            `Please upload an image for this variant.`,
+            false,
+            null,
+            variantImageContainer,
+            true // Insert AFTER the container
+          );
+          isValid = false;
         }
       });
     }
 
-    const isEdit = document.querySelector('[name="product_id"]')?.value;
-    const images = document.getElementById("product_images").files;
-    const existingImages = document.querySelectorAll(
-      ".static-image-container"
-    ).length;
+    const isEditField = document.querySelector('[name="is_edit"]');
+    const isEdit = isEditField ? isEditField.value === "1" : false;
 
-    if (!isEdit && images.length === 0 && existingImages === 0) {
-      showError("product_images", "Please upload at least one product image.");
+    console.log("Is edit mode?", isEdit);
+
+    const previewContainer = document.getElementById("previewContainer");
+
+    const totalProductImages = previewContainer
+      ? previewContainer.querySelectorAll(".preview-image-container").length
+      : 0;
+
+
+    if (totalProductImages === 0) {
+      const dropZone = document.getElementById("productDropZone");
+      const uploadContainer = document.querySelector(
+        ".form-row-group:nth-child(4) .form-column:first-child"
+      );
+
+      if (dropZone) {
+        const errorSpan = document.createElement("span");
+        errorSpan.className = "error-message";
+        errorSpan.style.cssText =
+          "color: red; font-size: 0.8em; display: block; margin-top: 5px;";
+
+        if (isEdit) {
+          errorSpan.textContent =
+            "Product must have at least one image. Please add an image.";
+        } else {
+          errorSpan.textContent = "Please upload at least one product image.";
+        }
+
+        // Insert the error message AFTER the dropzone container
+        dropZone.parentNode.insertBefore(errorSpan, dropZone.nextSibling);
+        isValid = false;
+      } else if (uploadContainer) {
+        const errorSpan = document.createElement("span");
+        errorSpan.className = "error-message";
+        errorSpan.style.cssText =
+          "color: red; font-size: 0.8em; display: block; margin-top: 5px;";
+        errorSpan.textContent = "Please upload at least one product image.";
+
+        uploadContainer.appendChild(errorSpan);
+        isValid = false;
+      }
     }
 
     return isValid;
@@ -556,8 +667,42 @@ function setupFormSubmission() {
       showModal();
     } else {
       const firstError = document.querySelector(".error-message");
-      if (firstError)
+      if (firstError) {
         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // Optional: Highlight the problematic section
+        const variantSection = firstError.closest(".variant-section-basicInfo");
+        if (variantSection) {
+          variantSection.style.backgroundColor = "rgba(255, 0, 0, 0.05)";
+          variantSection.style.border = "1px solid red";
+          variantSection.style.borderRadius = "5px";
+          variantSection.style.padding = "10px";
+          variantSection.style.marginBottom = "15px";
+
+          // Remove highlighting after 3 seconds
+          setTimeout(() => {
+            variantSection.style.backgroundColor = "";
+            variantSection.style.border = "";
+            variantSection.style.padding = "";
+            variantSection.style.marginBottom = "";
+          }, 3000);
+        }
+
+        // Also highlight product image section if it has error
+        const productImageError = firstError.closest(
+          "#previewContainer, #productDropZone"
+        );
+        if (productImageError) {
+          productImageError.style.border = "2px solid red";
+          productImageError.style.borderRadius = "5px";
+          productImageError.style.padding = "10px";
+
+          setTimeout(() => {
+            productImageError.style.border = "";
+            productImageError.style.padding = "";
+          }, 3000);
+        }
+      }
     }
   });
 
