@@ -86,11 +86,11 @@ function displayValue($value)
             toast.style.opacity = "0";
             toast.style.transform = "translateY(-20px)";
             setTimeout(() => {
-              toast.style.display="none";
+              toast.style.display = "none";
             }, 500);
           }
         }, 3000);
-        </script>
+      </script>
     <?php endif; ?>
 
     <p>Order History</p>

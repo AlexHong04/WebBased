@@ -68,16 +68,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // document.getElementById("confirmReceived").addEventListener("click", () => {
   //   if (!selectedOrderId) return;
 
-  fetch("customerOrderHistory.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: `order_id=${selectedOrderId}&status=Completed`,
-  })
-    .then((res) => res.text())
-    .then(() => {
-      location.reload();
-    });
-
+  // fetch("customerOrderHistory.php", {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/x-www-form-urlencoded",
+  //   },
+  //   body: `order_id=${selectedOrderId}&status=Completed`,
+  // })
+  //   .then((res) => res.text())
+  //   .then(() => {
+  //     location.reload();
+  //   });
 });
