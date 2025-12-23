@@ -14,6 +14,26 @@ document.addEventListener("DOMContentLoaded", function () {
   let newStatusValue = hiddenInput.value;
   let isFormEdited = false;
 
+  // Restore active tab
+  const savedTab = localStorage.getItem("activeMemberTab");
+  if (savedTab) {
+    document
+      .querySelectorAll(".tab")
+      .forEach((t) => t.classList.remove("active"));
+    document
+      .querySelectorAll(".profile-form-container")
+      .forEach((sec) => (sec.style.display = "none"));
+
+    const activeTab = document.querySelector(`.tab[data-target="${savedTab}"]`);
+    if (activeTab) activeTab.classList.add("active");
+
+    const activeContainer = document.getElementById(savedTab);
+    if (activeContainer) activeContainer.style.display = "block";
+
+    // Optionally clear it if you only want it to persist once
+    localStorage.removeItem("activeMemberTab");
+  }
+
   if (successPopup) {
     setTimeout(() => {
       successPopup.classList.remove("show");
@@ -55,6 +75,8 @@ document.addEventListener("DOMContentLoaded", function () {
     statusDisplay.classList.toggle("blocked", newStatusValue == "1");
     statusDisplay.classList.toggle("normal", newStatusValue != "1");
 
+    isFormEdited = true;
+
     // Close modal
     statusModal.style.display = "none";
 
@@ -66,6 +88,14 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".tab").forEach((tab) => {
     tab.addEventListener("click", function (e) {
       e.preventDefault();
+
+      // Check if the user has unsaved changes
+      if (isFormEdited) {
+        showCustomPopup("Please save your changes before switching tabs.");
+        return;
+      }
+
+      // Switch tabs
       document
         .querySelectorAll(".tab")
         .forEach((t) => t.classList.remove("active"));
@@ -74,6 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .querySelectorAll(".profile-form-container")
         .forEach((sec) => (sec.style.display = "none"));
       document.getElementById(tab.dataset.target).style.display = "block";
+      localStorage.setItem("activeMemberTab", tab.dataset.target);
     });
   });
 
