@@ -115,16 +115,18 @@ class adminController
     public function getProfile()
     {
         if (!isset($_SESSION['adminId'])) {
-            redirect('security/signIn.php');
+            redirect('../security/signIn.php');
+
             return;
         }
 
+
+
         $adminId = $_SESSION['adminId'];
         $adminData = $this->adminModel->getAdminById($adminId);
-
         if (!$adminData) {
             $_SESSION['flash_error']['global'] = "Admin profile not found.";
-            redirect('security/signIn.php');
+            redirect('../security/signIn.php');
             return;
         }
 
@@ -132,7 +134,7 @@ class adminController
     }
 
     // 4. Update Admin Profile
-    public function updateProfile()
+    public function updateAdminProfile()
     {
         if (!isset($_SESSION['adminId'])) {
             redirect('security/signIn.php');
@@ -146,12 +148,11 @@ class adminController
             $firstName = post('firstName');
             $lastName = post('lastName');
             $phone = post('phone');
-            $address = post('address'); // Map to 'address' column
-            $position = post('position'); // Allow updating position?
+            $email = post('email');
+            $address = post('address');
 
             $errors = [];
 
-            // Unique Phone Validation (ignore if it's their own number)
             if ($phone != $currentAdminData['phone']) {
                 if ($this->adminModel->isPhoneExists($phone)) {
                     $errors['phone'] = "This phone number is already registered.";
@@ -161,7 +162,7 @@ class adminController
             if (!empty($errors)) {
                 $_SESSION['flash_error'] = $errors;
                 // Redirect back to profile page
-                redirect('admin/profile.php');
+                redirect('adminProfile.php');
                 return;
             }
 
@@ -171,15 +172,15 @@ class adminController
                 'lastName' => $lastName,
                 'phone' => $phone,
                 'address' => $address,
-                'position' => $position
+                'email' => $email
             ];
 
             if ($this->adminModel->updateAdmin($data)) {
                 $_SESSION['flash_success'] = "Profile updated successfully!";
-                redirect('admin/profile.php');
+                redirect('adminProfile.php');
             } else {
                 $_SESSION['flash_error']['global'] = "Failed to update profile.";
-                redirect('admin/profile.php');
+                redirect('adminProfile.php');
             }
         }
     }

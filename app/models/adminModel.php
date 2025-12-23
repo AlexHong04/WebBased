@@ -23,9 +23,9 @@ class adminModel
     // Matches column: admin_id
     public function getAdminById($adminId)
     {
-        $this->db->query("SELECT * FROM admin WHERE admin_id = :id");
+        $this->db->query("SELECT admin_id,email,firstName,lastName,phone,address,position FROM admin WHERE admin_id = :id");
         $this->db->bind(':id', $adminId);
-        return $this->db->single();
+        return $this->db->result();
     }
 
     // 3. Create New Admin (Registration)
@@ -62,14 +62,14 @@ class adminModel
                             lastName = :lname, 
                             phone = :phone, 
                             address = :addr, 
-                            position = :pos 
+                            email = :email
                           WHERE admin_id = :id");
 
         $this->db->bind(':fname', $data['firstName']);
         $this->db->bind(':lname', $data['lastName']);
         $this->db->bind(':phone', $data['phone']);
         $this->db->bind(':addr', $data['address']);
-        $this->db->bind(':pos', $data['position']);
+        $this->db->bind(':email', $data['email']);
         $this->db->bind(':id', $data['admin_id']);
 
         return $this->db->execute();
