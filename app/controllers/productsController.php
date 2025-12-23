@@ -838,14 +838,19 @@ class ProductsController
         if (!empty($rawReviews)) {
             foreach ($rawReviews as $r) {
                 $r = is_object($r) ? (array)$r : $r;
-                $imgFilename = $r['img_url'] ?? '';
+                $imgString = $r['img_url'] ?? '';
                 $reviewPhotos = [];
 
-                if (!empty($imgFilename)) {
-                    $fullPath = self::REVIEW_IMG_BASE_PATH . $imgFilename;
-                    $reviewPhotos[] = $fullPath;
-                }
+                if (!empty($imgString)) {
+                    $images = explode(',', $imgString);
 
+                    foreach ($images as $img) {
+                        $cleanImg = trim($img);
+                        if (!empty($cleanImg)) {
+                            $reviewPhotos[] = self::REVIEW_IMG_BASE_PATH . $cleanImg;
+                        }
+                    }
+                }
                 $r['processed_photos'] = $reviewPhotos;
                 $processedReviews[] = $r;
             }
