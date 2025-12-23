@@ -2,8 +2,8 @@
 include '../../controllers/orderController.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
-authenticate();
 if (session_status() === PHP_SESSION_NONE) session_start();
+authenticate();
 
 $customerId = $_SESSION['customerId'] ?? null;
 

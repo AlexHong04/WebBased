@@ -524,7 +524,8 @@ class ProductModel
     // zq
     public function fetchAllProducts()
     {
-        $this->db->query("SELECT * FROM product");
+        $this->db->query("SELECT * FROM product
+        WHERE is_deleted = 0");
         return $this->db->resultAll();
     }
 
@@ -536,7 +537,7 @@ class ProductModel
 
     public function getProductsByCategoryId($categoryID)
     {
-        $this->db->query("SELECT * FROM product WHERE category_id = :categoryID");
+        $this->db->query("SELECT * FROM product WHERE category_id = :categoryID AND is_deleted = 0");
         $this->db->bind(':categoryID', $categoryID);
         return $this->db->resultAll();
     }

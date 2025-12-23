@@ -82,6 +82,18 @@ class OrderController
     return $items;
   }
 
+  public function adminGetOrderDetails()
+  {
+    if (!isset($_GET['id'])) {
+      die("No order ID provided.");
+    }
+
+    $orderID = $_GET['id'];
+    $items = $this->orderModel->adminGetDetails($orderID);
+
+    return $items;
+  }
+
   public function getOrderStatus($orderId)
   {
     $custId = $_SESSION['customerId'] ?? null;

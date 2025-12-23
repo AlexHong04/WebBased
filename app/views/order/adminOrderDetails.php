@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["ajaxUpdate"])) {
 include '../adminheader.php';
 
 $orderController = new OrderController();
-$orders = $orderController->getOrderDetails();
+$orders = $orderController->adminGetOrderDetails();
 
 if (!empty($orders)) {
   $orderId = $orders[0]["order_id"];

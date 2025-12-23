@@ -466,6 +466,59 @@ class OrderModel
     return $this->db->resultAll();
   }
 
+  public function adminGetDetails($orderID)
+  {
+    $this->db->query("
+    SELECT 
+        o.order_id,
+        o.customer_id,
+        os_latest.order_status, 
+        os_earliest.earliest_time,
+        o.total_amount, 
+        o.tax_fee, 
+        oi.product_variant_id, 
+        oi.price, 
+        oi.order_qty,
+        p.product_name, 
+        p.description, 
+        pv.img_url,
+        c.category_name, 
+        v.variant_name,
+        pm.created_datetime AS payment_time
+    FROM ordertable o
+    JOIN order_items oi ON o.order_id = oi.order_id
+    JOIN product_variant pv ON oi.product_variant_id = pv.product_variant_id
+    JOIN variant v ON pv.variant_id = v.variant_id
+    JOIN product p ON pv.product_id = p.product_id
+    JOIN category c ON p.category_id = c.category_id
+    JOIN payment pm ON o.order_id = pm.order_id
+
+    -- Join only the latest order status
+    JOIN (
+        SELECT os1.order_id, os1.order_status
+        FROM orderstatus os1
+        JOIN (
+            SELECT order_id, MAX(created_datetime) AS latest_time
+            FROM orderstatus
+            GROUP BY order_id
+        ) os2 ON os1.order_id = os2.order_id AND os1.created_datetime = os2.latest_time
+    ) AS os_latest ON o.order_id = os_latest.order_id
+
+    -- Join to get the earliest time
+    JOIN (
+        SELECT order_id, MIN(created_datetime) AS earliest_time
+        FROM orderstatus
+        GROUP BY order_id
+    ) AS os_earliest ON o.order_id = os_earliest.order_id
+
+    WHERE o.order_id = :order_id
+");
+
+    $this->db->bind(':order_id', $orderID);
+
+    return $this->db->resultAll();
+  }
+
   public function getAllStatus($orderId, $custId)
   {
     $this->db->query("
