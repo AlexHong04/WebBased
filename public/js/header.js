@@ -1,8 +1,40 @@
 const scanBtn = document.getElementById("scanQrBtn");
 const qrPopup = document.getElementById("qrPopup");
 const qrCancel = document.getElementById("qrCancel");
+const uploadBtn = document.getElementById("uploadQrBtn");
+const fileInput = document.getElementById("qr-input-file");
 
 let qrScanner;
+let isScannerRunning = false;
+
+function handleScanSuccess(decodedText) {
+  console.log("QR Code Scanned:", decodedText);
+  stopScannerAndClose();
+
+  if (decodedText.includes("http")) {
+    window.location.href = decodedText;
+  } else {
+    window.location.href = `/app/views/admin/adminOrderDetails.php?id=${decodedText}`;
+  }
+}
+
+function stopScannerAndClose() {
+  if (qrScanner && isScannerRunning) {
+    qrScanner
+      .stop()
+      .then(() => {
+        qrScanner.clear();
+        isScannerRunning = false;
+        qrPopup.classList.remove("active");
+      })
+      .catch((err) => {
+        console.log("Stop failed: ", err);
+        qrPopup.classList.remove("active");
+      });
+  } else {
+    qrPopup.classList.remove("active");
+  }
+}
 
 scanBtn.addEventListener("click", (e) => {
   e.preventDefault();
@@ -11,7 +43,9 @@ scanBtn.addEventListener("click", (e) => {
   qrPopup.classList.add("active");
 
   // Initialize scanner
-  qrScanner = new Html5Qrcode("qr-reader");
+  if (!qrScanner) {
+    qrScanner = new Html5Qrcode("qr-reader");
+  }
 
   const config = {
     fps: 10,
@@ -37,8 +71,7 @@ scanBtn.addEventListener("click", (e) => {
           window.location.href = `/app/views/admin/adminOrderDetails.php?id=${decodedText}`;
         }
       },
-      (error) => {
-      }
+      (error) => {}
     )
     .then(() => {
       isScannerRunning = true;
@@ -55,20 +88,39 @@ scanBtn.addEventListener("click", (e) => {
     });
 });
 
-
-
 qrCancel.addEventListener("click", () => {
-  if (qrScanner) {
-    qrScanner
-      .stop()
-      .then(() => {
-        qrScanner.clear();
-      })
-      .catch((err) => console.log(err));
-  }
-  // Remove active class for fade-out
-  qrPopup.classList.remove("active");
+  stopScannerAndClose();
 });
+
+if (uploadBtn && fileInput) {
+  uploadBtn.addEventListener("click", () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener("change", (e) => {
+    if (e.target.files.length === 0) {
+      return;
+    }
+
+    const imageFile = e.target.files[0];
+
+    if (!qrScanner) {
+      qrScanner = new Html5Qrcode("qr-reader");
+    }
+
+    qrScanner
+      .scanFile(imageFile, true)
+      .then((decodedText) => {
+        handleScanSuccess(decodedText);
+      })
+      .catch((err) => {
+        console.error("Error scanning file:", err);
+        alert("No QR code found in this image. Please try another one.");
+      });
+
+    fileInput.value = "";
+  });
+}
 
 const toggleBtn = document.getElementById("themeToggle");
 const root = document.documentElement;

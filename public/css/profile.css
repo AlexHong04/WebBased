@@ -252,10 +252,11 @@
 
 /* Readonly fields styling */
 .form-control[readonly] {
-  background-color: var(--bg-body);
+  background-color: #f8f9fa;
   color: var(--text-gray);
-  cursor: default; /* Changed from not-allowed for better UX */
+  cursor: default;
   border-color: var(--border-color);
+  opacity: 1;
 }
 
 textarea.form-control {
@@ -315,21 +316,6 @@ textarea.form-control {
   transform: translateY(-3px);
   box-shadow: 0 8px 15px rgba(241, 162, 184, 0.3);
 }
-/*
-.place-order-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #fc84a3 0%, #f55783 100%);
-  color: var(--white);
-  border: none;
-  padding: 15px;
-  border-radius: 10px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: background 0.3s, transform 0.2s;
-  box-shadow: 0 5px 15px rgba(252, 132, 163, 0.4);
-}*/
 
 /* Cancel Button */
 .cancel-btn {
@@ -726,7 +712,7 @@ textarea.form-control {
 }
 
 [data-theme="dark"] .profile-avatar img.default-avatar {
-    content: url('/public/images/profile/user_white.png');
+  content: url("/public/images/profile/user_white.png");
 }
 
 .avatar-label {

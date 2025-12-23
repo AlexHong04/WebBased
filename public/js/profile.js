@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
   editBtn.addEventListener("click", function (e) {
     if (editBtn.innerText.trim() === "Edit Profile") {
       e.preventDefault();
-      console.log("进入编辑模式");
       inputs.forEach((input) => {
         input.removeAttribute("readonly");
         input.removeAttribute("disabled");

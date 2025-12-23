@@ -1,17 +1,5 @@
 @charset "utf-8";
 
-/* Variables used by header/footer */
-/* :root {
-    --primary: #FFD7D0;           
-    --primary-dark: #C45A63;    
-    --primary-light: #FF8A9A;    
-    --secondary: #FFEAE4;          
-    --dark: #2A2A2A;               
-    --light: #FFF7F5;              
-    --gray: #6c757d;
-    --light-gray: #e9d6d6;         
-} */
-
 :root {
   /* --primary: #ffeae6;  Soft Blush Pink - Main theme color */
   --primary: #f1a2b8; /* Soft Blush Pink - Main theme color */
@@ -613,16 +601,22 @@ nav a > svg::after {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8); /* 深色半透明背景 */
-    display: none; /* 默认隐藏 */
+    background: rgba(0, 0, 0, 0.8); 
+    display: none; 
     justify-content: center;
     align-items: center;
-    z-index: 9999; /* 保证在最上层 */
+    z-index: 9999; 
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
-/* JS 添加 active 类后显示 */
+.popup-actions {
+    display: flex;
+    gap: 10px;       
+    width: 100%;
+    margin-top: 15px;
+}
+
 .popup-overlay.active {
     display: flex;
     opacity: 1;
@@ -815,4 +809,36 @@ nav a > svg::after {
 
 .chat-input button:hover {
     color: var(--primary-light);
+}
+
+#uploadQrBtn, 
+#qrCancel {
+    flex: 1;             
+    padding: 12px 0;    
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;       
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    margin-top: 0;     
+}
+
+#uploadQrBtn:hover {
+    background-color:var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+#qrCancel {
+    background-color: #f3f4f6;
+    color: #333;
+}
+
+#qrCancel:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
 }
