@@ -745,6 +745,12 @@ class ProductsController
             return null;
         }
 
+        if (isset($product['is_deleted']) && $product['is_deleted'] == 1) {
+            $_SESSION['flash_error'] = 'This product has been discontinued or deleted.';
+            redirect('/app/views/home.php');
+            return null;
+        }
+
         // Get Category Name
         $categoryName = is_array($product) ? ($product['category_name'] ?? '') : ($product->category_name ?? '');
 
