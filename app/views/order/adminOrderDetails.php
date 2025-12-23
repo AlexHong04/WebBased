@@ -88,7 +88,7 @@ function calSubtotal($subtotal, $tax)
 
   <div class="dataDetailsBox">
     <div class="dataDetailsHeader">
-      <a href="#" class="back-link" onclick="history.back(); return false;">&#x293A;</a>
+      <a href="/app/views/order/adminOrderListing.php" class="back-link">&#x293A;</a>
       <h1>Order Details</h1>
     </div>
 
