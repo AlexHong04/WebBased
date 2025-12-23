@@ -48,6 +48,8 @@ $apiPath = dirname(dirname($scriptDir)) . '/controllers/address_router.php';
 $fullApiUrl = $protocol . $host . $apiPath;
 ?>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <link rel="stylesheet" href="/public/css/checkout.css">
 
@@ -211,6 +213,12 @@ $fullApiUrl = $protocol . $host . $apiPath;
             <button type="button" class="close-modal-btn" onclick="closeAddEditAddressModal()">&times;</button>
         </div>
         <div class="general-error" id="generalErrorMsg"></div>
+
+        <div id="osm-map"></div>
+        <button type="button" class="btn-locate" onclick="locateUser()">
+            <i class="fas fa-crosshairs"></i> Use My Current Location
+        </button>
+
         <form id="addEditAddressForm" novalidate>
             <input type="hidden" name="address_id" id="addressIdInput">
             <div class="form-group">
@@ -234,6 +242,7 @@ $fullApiUrl = $protocol . $host . $apiPath;
                 <input type="text" name="postCode" id="postcodeInput" class="form-control" placeholder="e.g. 56000" maxlength="5">
                 <small class="error-message" id="postcodeError"></small>
             </div>
+
             <div class="form-group" style="display: flex; gap: 15px;">
                 <div style="flex: 1;">
                     <label class="form-label">City <span style="color:red">*</span></label>
@@ -762,5 +771,257 @@ $fullApiUrl = $protocol . $host . $apiPath;
         }
         radios.forEach(r => r.addEventListener('change', updateStyle));
         updateStyle();
+    };
+
+    let map, marker;
+    const defaultLat = 3.140853; // Default Latitude
+    const defaultLng = 101.693207; // Default Longitude
+
+    // Typing timer for debounce logic
+    let typingTimer;
+    const doneTypingInterval = 1500; // Wait for 1.5 seconds after user stops typing
+
+    const addressInputIds = ['streetInput', 'cityInput', 'stateInput', 'postcodeInput'];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        addressInputIds.forEach(id => {
+            const inputElement = document.getElementById(id);
+
+            if (inputElement) {
+                inputElement.addEventListener('input', function() {
+                    clearTimeout(typingTimer);
+                    typingTimer = setTimeout(triggerMapUpdateFromInput, doneTypingInterval);
+                });
+
+                // Listen for change (e.g., losing focus or selecting autocomplete)
+                inputElement.addEventListener('change', function() {
+                    clearTimeout(typingTimer);
+                    triggerMapUpdateFromInput();
+                });
+            }
+        });
+    });
+
+    // Initializes the Leaflet map and marker
+    function initMap() {
+        // If map instance exists, just fix the rendering size 
+        if (map) {
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 200);
+            return;
+        }
+
+        // Initialize Map instance
+        map = L.map('osm-map').setView([defaultLat, defaultLng], 13);
+
+        // Add OpenStreetMap Tile Layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Add Draggable Marker
+        marker = L.marker([defaultLat, defaultLng], {
+            draggable: true
+        }).addTo(map);
+
+        // User stops dragging the marker -> Update address fields
+        marker.on('dragend', function(event) {
+            const position = marker.getLatLng();
+            fetchAddressFromAPI(position.lat, position.lng);
+        });
+
+        // User clicks on the map -> Move marker and update fields
+        map.on('click', function(e) {
+            marker.setLatLng(e.latlng);
+            fetchAddressFromAPI(e.latlng.lat, e.latlng.lng);
+        });
+    }
+
+    // Geolocation API
+    function locateUser() {
+        const btn = document.querySelector('.btn-locate');
+        const originalText = '<i class="fas fa-crosshairs"></i> Use My Current Location';
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Locating...';
+        btn.disabled = true;
+
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by this browser.");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 10000, // 10 seconds timeout
+            maximumAge: 0
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Move map view and marker to user location
+                if (map) {
+                    map.setView([lat, lng], 17);
+                    if (marker) marker.setLatLng([lat, lng]);
+                }
+
+                // Reverse geocode to get address text
+                fetchAddressFromAPI(lat, lng);
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            },
+            (error) => {
+                let errorMsg = "";
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMsg = "Permission Denied. Please enable location access in your browser settings.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMsg = "Position Unavailable. GPS signal is weak.";
+                        break;
+                    case error.TIMEOUT:
+                        errorMsg = "Request Timeout. Please try again.";
+                        break;
+                    default:
+                        errorMsg = "Unknown Error: " + error.message;
+                        break;
+                }
+                alert(errorMsg);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            },
+            options
+        );
+    }
+
+    // Converts Lat/Lng coordinates to Address Text.
+    function fetchAddressFromAPI(lat, lng) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+
+        fetch(url, {
+                headers: {
+                    'User-Agent': 'LovineWeb/1.0',
+                    'Accept-Language': 'en-US,en;q=0.9,ms;q=0.8' // Prefer English/Malay
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.address) {
+                    const addr = data.address;
+
+                    // Fill Form Fields
+                    document.getElementById('postcodeInput').value = addr.postcode || '';
+
+                    // Logic to find the best City name from OSM data
+                    const city = addr.city || addr.town || addr.village || addr.county || addr.district || '';
+                    document.getElementById('cityInput').value = city;
+
+                    document.getElementById('stateInput').value = addr.state || '';
+
+                    // Construct full Street Line
+                    let streetParts = [];
+                    if (addr.building) streetParts.push(addr.building);
+                    if (addr.house_number) streetParts.push(addr.house_number);
+                    if (addr.road) streetParts.push(addr.road);
+                    if (addr.suburb) streetParts.push(addr.suburb);
+                    if (addr.neighbourhood) streetParts.push(addr.neighbourhood);
+
+                    const streetLine = streetParts.join(', ');
+                    document.getElementById('streetInput').value = streetLine || data.display_name.split(',')[0];
+                }
+            })
+            .catch(err => console.error("Geocoding error:", err));
+    }
+    // Triggered after user stops typing in address fields
+    function triggerMapUpdateFromInput() {
+        const street = document.getElementById('streetInput').value.trim();
+        const city = document.getElementById('cityInput').value.trim();
+        const state = document.getElementById('stateInput').value.trim();
+        const postcode = document.getElementById('postcodeInput').value.trim();
+
+        // Prevent search if address is too short to avoid random jumps
+        if (street.length < 5 && city.length < 3) {
+            return;
+        }
+
+        // Construct search string: Street, Postcode City, State, Malaysia
+        let searchStr = "";
+        if (street) searchStr += street + ", ";
+        if (postcode) searchStr += postcode + " ";
+        if (city) searchStr += city + ", ";
+        if (state) searchStr += state + ", ";
+        searchStr += "Malaysia";
+
+        searchAddressOnMap(searchStr);
+    }
+
+    // Searches for an address string and moves the map/marker if found
+    function searchAddressOnMap(addressString) {
+        if (!addressString) return;
+
+        const mapDiv = document.getElementById('osm-map');
+        mapDiv.style.opacity = '0.5'; // Indicate loading
+
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressString)}&limit=1`;
+
+        fetch(url, {
+                headers: {
+                    'User-Agent': 'LovineWeb/1.0'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                mapDiv.style.opacity = '1'; // Restore opacity
+
+                if (data && data.length > 0) {
+                    const lat = data[0].lat;
+                    const lng = data[0].lon;
+
+                    if (map && marker) {
+                        const newLatLng = new L.LatLng(lat, lng);
+                        map.setView(newLatLng, 17);
+                        marker.setLatLng(newLatLng);
+                    }
+                } else {
+                    console.warn("Address not found on map.");
+                }
+            })
+            .catch(err => {
+                console.error("Search Error:", err);
+                mapDiv.style.opacity = '1';
+            });
+    }
+
+    const originalOpenAddAddressModal = openAddAddressModal;
+
+    openAddAddressModal = function(event, address = null) {
+        originalOpenAddAddressModal(event, address);
+
+        // Delay map initialization to ensure modal is fully rendere
+        setTimeout(() => {
+            initMap();
+
+            if (address) {
+                let searchStr = "";
+                if (address.street_line) searchStr += address.street_line + ", ";
+                if (address.city) searchStr += address.city + ", ";
+                if (address.state) searchStr += address.state + ", ";
+                searchStr += "Malaysia";
+                searchAddressOnMap(searchStr);
+
+            } else {
+                if (map) {
+                    map.setView([defaultLat, defaultLng], 13);
+                    marker.setLatLng([defaultLat, defaultLng]);
+                }
+            }
+        }, 100);
     };
 </script>

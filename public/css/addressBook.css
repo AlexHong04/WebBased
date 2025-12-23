@@ -413,3 +413,40 @@
     opacity: 1;
   }
 }
+
+/* Map Styles */
+#osm-map {
+    height: 250px;
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    z-index: 1;
+}
+
+/* Locate Me Button */
+.btn-locate {
+    width: 100%;
+    padding: 10px;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    transition: background 0.3s;
+}
+
+.btn-locate:hover {
+    background-color: #138496;
+}
+
+.btn-locate:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
