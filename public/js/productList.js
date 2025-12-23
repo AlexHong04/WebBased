@@ -1,74 +1,60 @@
-let selectedProduct = null;
+let isGridView = false;
 
 document.addEventListener("DOMContentLoaded", () => {
+
   const selectAllCheckbox = document.getElementById("selectAll");
   const rowCheckboxes = document.querySelectorAll(".row-checkbox");
   const deleteBtn = document.querySelector(".btn-delete");
   const bulkRestockBtn = document.getElementById("bulkRestockBtn");
-  function toggleDeleteButton() {
-    const isAnyChecked = document.querySelector(".row-checkbox:checked") !== null;
-    if (deleteBtn) deleteBtn.disabled = !isAnyChecked;
-    if (bulkRestockBtn) bulkRestockBtn.disabled = !isAnyChecked;
+  const toggleViewBtn = document.getElementById("toggleViewBtn");
+
+  const productTable = document.getElementById("productTable");
+  const productGrid = document.getElementById("productGrid");
+
+  const searchInput = document.getElementById("searchInput");
+  const categoryFilters = document.querySelectorAll(".filter-category");
+  const priceMinInput = document.getElementById("priceMin");
+  const minText = document.getElementById("minText");
+  const maxText = document.getElementById("maxText");
+
+  const rowPerPageSelect = document.getElementById("rowPerPage");
+  const paginationControls = document.getElementById("paginationControls");
+
+  const tableRows = Array.from(document.querySelectorAll("tbody tr"));
+  const deleteForm = document.getElementById("deleteForm");
+
+  let filteredRows = [...tableRows];
+  let currentPage = 1;
+
+  function toggleActionButtons() {
+    const hasChecked = document.querySelector(".row-checkbox:checked");
+    deleteBtn.disabled = !hasChecked;
+    bulkRestockBtn.disabled = !hasChecked;
   }
 
   selectAllCheckbox.addEventListener("change", () => {
-    rowCheckboxes.forEach((checkbox) => {
-      checkbox.checked = selectAllCheckbox.checked;
-    });
-    toggleDeleteButton();
+    rowCheckboxes.forEach((cb) => (cb.checked = selectAllCheckbox.checked));
+    toggleActionButtons();
   });
 
   rowCheckboxes.forEach((cb) =>
-    cb.addEventListener("change", toggleDeleteButton)
+    cb.addEventListener("change", toggleActionButtons)
   );
 
-  toggleDeleteButton();
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const deleteForm = document.getElementById("deleteForm");
+  toggleActionButtons();
 
   deleteForm.addEventListener("submit", (e) => {
     const selected = document.querySelectorAll(".row-checkbox:checked");
-
     if (selected.length === 0) {
       e.preventDefault();
       alert("Please select at least one product.");
       return;
     }
-
     if (!confirm(`Delete ${selected.length} product(s)?`)) {
       e.preventDefault();
     }
   });
-});
 
-document.addEventListener("DOMContentLoaded", () => {
-  const deleteBtn = document.querySelector(".btn-delete");
-  const checkboxes = document.querySelectorAll(".row-checkbox");
-
-  function toggleDeleteButton() {
-    deleteBtn.disabled = !document.querySelector(".row-checkbox:checked");
-  }
-
-  checkboxes.forEach((cb) => cb.addEventListener("change", toggleDeleteButton));
-  toggleDeleteButton();
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const searchInput = document.getElementById("searchInput");
-  const tableRows = Array.from(document.querySelectorAll("tbody tr"));
-  const categoryFilters = document.querySelectorAll(".filter-category");
-  const priceMinInput = document.getElementById("priceMin");
-  const minText = document.getElementById("minText");
-  const maxText = document.getElementById("maxText");
-  const rowPerPageSelect = document.getElementById("rowPerPage");
-  const paginationControls = document.getElementById("paginationControls");
-
-  let filteredRows = tableRows;
-  let currentPage = 1;
-
-  // Default price value
   priceMinInput.value = priceMinInput.max;
   maxText.innerText = priceMinInput.max;
 
@@ -77,23 +63,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectedCategories = Array.from(categoryFilters)
       .filter((cb) => cb.checked)
       .map((cb) => cb.value.toLowerCase());
-
     const maxPrice = parseFloat(priceMinInput.value);
 
     filteredRows = tableRows.filter((row) => {
       const productID = row.children[2].innerText.toLowerCase();
       const productName = row.children[3].innerText.toLowerCase();
-      const categoryName = row.children[7].innerText.toLowerCase();
       const price = parseFloat(row.children[6].innerText);
+      const category = row.children[7].innerText.toLowerCase();
 
       const matchSearch =
         productID.includes(searchValue) ||
         productName.includes(searchValue) ||
-        categoryName.includes(searchValue);
+        category.includes(searchValue);
 
       const matchCategory =
         selectedCategories.length === 0 ||
-        selectedCategories.includes(categoryName);
+        selectedCategories.includes(category);
 
       const matchPrice = price <= maxPrice;
 
@@ -104,10 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePagination();
   }
 
-  function updatePagination() {
+   function updatePagination() {
     const rowsPerPage = parseInt(rowPerPageSelect.value);
-    const totalRows = filteredRows.length;
-    const totalPages = Math.ceil(totalRows / rowsPerPage);
+    const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
     tableRows.forEach((row) => (row.style.display = "none"));
 
@@ -119,6 +103,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     renderPaginationControls(totalPages);
+
+    if (isGridView) renderGridFromVisibleRows();
   }
 
   function renderPaginationControls(totalPages) {
@@ -155,19 +141,105 @@ document.addEventListener("DOMContentLoaded", () => {
     paginationControls.appendChild(nextBtn);
   }
 
-  // Event listeners
-  searchInput.addEventListener("keyup", filterTable);
-  rowPerPageSelect.addEventListener("change", () => {
-    currentPage = 1;
-    updatePagination();
+  function renderGridFromVisibleRows() {
+    productGrid.innerHTML = "";
+
+    const visibleRows = tableRows.filter((row) => row.style.display !== "none");
+
+    visibleRows.forEach((row) => {
+      const checkbox = row.querySelector(".row-checkbox");
+      const img = row.querySelector("img").src;
+      const productId = row.children[2].innerText.trim();
+      const name = row.children[3].innerText;
+      const price = row.children[6].innerText;
+      const category = row.children[7].innerText;
+
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.dataset.productId = productId;
+
+      if (checkbox.checked) {
+        card.classList.add("selected");
+      }
+
+      card.innerHTML = `
+      <div class="grid-select">
+        <input type="checkbox" ${checkbox.checked ? "checked" : ""}>
+      </div>
+
+      <img src="${img}">
+      <h4>${name}</h4>
+      <small>ID: ${productId}</small><br>
+      <small>${category}</small><br>
+      <strong>RM ${price}</strong>
+
+<button type="button" class="grid-edit-btn">✏️</button>
+    `;
+
+      const gridCheckbox = card.querySelector(".grid-select input");
+
+      gridCheckbox.addEventListener("change", () => {
+        checkbox.checked = gridCheckbox.checked;
+        card.classList.toggle("selected", gridCheckbox.checked);
+        toggleActionButtons();
+      });
+
+      card.addEventListener("click", (e) => {
+        if (e.target.closest("button, input")) return;
+        gridCheckbox.checked = !gridCheckbox.checked;
+        checkbox.checked = gridCheckbox.checked;
+        card.classList.toggle("selected", gridCheckbox.checked);
+        toggleActionButtons();
+      });
+
+      card.querySelector(".grid-edit-btn").addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.location.href = `addSingleProduct.php?product_id=${productId}`;
+      });
+
+      productGrid.appendChild(card);
+    });
+  }
+
+  toggleViewBtn.addEventListener("click", () => {
+    isGridView = !isGridView;
+
+    localStorage.setItem("productViewMode", isGridView ? "grid" : "table");
+
+    applyViewMode();
   });
+
+  function applyViewMode() {
+    if (isGridView) {
+      productTable.style.display = "none";
+      productGrid.style.display = "grid";
+      toggleViewBtn.innerText = "📋 Table View";
+      renderGridFromVisibleRows();
+    } else {
+      productTable.style.display = "";
+      productGrid.style.display = "none";
+      toggleViewBtn.innerText = "🖼️ Grid View";
+    }
+  }
+
+  searchInput.addEventListener("keyup", filterTable);
   categoryFilters.forEach((cb) => cb.addEventListener("change", filterTable));
+
   priceMinInput.addEventListener("input", () => {
     minText.innerText = "0";
     maxText.innerText = priceMinInput.value;
     filterTable();
   });
 
+  rowPerPageSelect.addEventListener("change", () => {
+    currentPage = 1;
+    updatePagination();
+  });
+
+  const savedView = localStorage.getItem("productViewMode");
+  isGridView = savedView === "grid";
+
+  applyViewMode();
   filterTable();
 });
 
@@ -232,9 +304,8 @@ bulkRestockBtn.addEventListener("click", () => {
   });
 
   modal.style.display = "flex";
-  toggleSubmitButton(); // Check on open
+  toggleSubmitButton();
 
-  // FIX: Add event listeners to the NEW checkboxes inside the modal
   container.querySelectorAll(".variant-checkbox").forEach((cb) => {
     cb.addEventListener("change", (e) => {
       const row = e.target.closest(".variant-item");
@@ -251,7 +322,6 @@ bulkRestockBtn.addEventListener("click", () => {
         errorMsg.style.display = "none";
       }
 
-      // CALL THE TOGGLE FUNCTION HERE
       toggleSubmitButton();
     });
   });
@@ -268,7 +338,7 @@ function toggleSubmitButton() {
 function removeProductFromModal(productId) {
   const item = document.getElementById(`product-group-${productId}`);
   if (item) item.remove();
-  toggleSubmitButton(); // Re-check after removal
+  toggleSubmitButton();
   if (container.querySelectorAll(".modal-product-item").length === 0) {
     modal.style.display = "none";
   }
@@ -318,4 +388,9 @@ window.addEventListener("click", (e) => {
 document.addEventListener("DOMContentLoaded", () => {
   modal.style.display = "none";
   container.innerHTML = "";
+});
+
+closeModal.addEventListener("click", () => (modal.style.display = "none"));
+window.addEventListener("click", (e) => {
+  if (e.target === modal) modal.style.display = "none";
 });

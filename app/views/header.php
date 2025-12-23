@@ -101,7 +101,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                             <?php endif; ?>
                         </ul>
                     </li>
-                    <li><a href="#">Order</a></li>
+                    <li><a href="/app/views/order/customerOrderHistory.php?id=<?= $cid ?>">Order</a></li>
                 </ul>
             </nav>
 

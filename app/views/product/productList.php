@@ -142,11 +142,15 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
                         <button type="submit" name="delete_selected" class="btn btn-delete">
                             🗑 Delete Selected
                         </button>
+
+                        <button type="button" id="toggleViewBtn" class="btn btn-view">
+                            🖼️ Grid View
+                        </button>
                     </div>
                 </div>
 
                 <div class="table_overview">
-                    <table>
+                    <table id="productTable" class="product-table">
                         <thead>
                             <tr>
                                 <th><input type="checkbox" id="selectAll"></th>
@@ -231,6 +235,8 @@ $totalVariants = $controller->getAllProductVariant($current_sort, $current_order
                             ?>
                         </tbody>
                     </table>
+                    <div id="productGrid" class="product-grid" style="display: none;">
+                    </div>
                 </div>
                 <div id="paginationControls" class="pagination-controls"></div>
             </form>

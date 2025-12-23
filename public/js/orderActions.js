@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     // Show/Hide buttons
-    viewBtn.style.display = checkedCount >= 1 ? "inline-block" : "none";
+    viewBtn.style.display = checkedCount === 1 ? "inline-block" : "none";
 
     if (checkedCount === 1) {
       updateBtn.style.display = anyFinalStatus ? "none" : "inline-block";
@@ -87,16 +87,16 @@ document.addEventListener("DOMContentLoaded", function () {
   //   );
   //   const allSameStatus = statuses.every((status) => status === statuses[0]);
 
-  //   if (checkedCount === 1) {
-  //     viewBtn.style.display = "inline-block";
-  //     updateBtn.style.display = "inline-block";
-  //   } else if (checkedCount > 1 && allSameStatus) {
-  //     viewBtn.style.display = "none";
-  //     updateBtn.style.display = "inline-block";
-  //   } else {
-  //     viewBtn.style.display = "none";
-  //     updateBtn.style.display = "none";
-  //   }
+  // if (checkedCount === 1) {
+  //   viewBtn.style.display = "inline-block";
+  //   updateBtn.style.display = "inline-block";
+  // } else if (checkedCount > 1 && allSameStatus) {
+  //   viewBtn.style.display = "none";
+  //   updateBtn.style.display = "inline-block";
+  // } else {
+  //   viewBtn.style.display = "none";
+  //   updateBtn.style.display = "none";
+  // }
   // }
 
   // Show popup when clicking Update
