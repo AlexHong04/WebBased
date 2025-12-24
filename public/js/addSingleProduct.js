@@ -797,7 +797,7 @@ document.addEventListener("DOMContentLoaded", () => {
       checkboxWrapper.style.marginBottom = "8px";
       checkboxWrapper.innerHTML = `
                 <label>
-                    <input type="radio" name="variant_to_delete" value="${variantId}">
+                    <input type="checkbox" name="variant_to_delete" value="${variantId}">
                     Variant ${index + 1}: ${variantName}
                 </label>
             `;
@@ -812,11 +812,28 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   confirmDeleteVariants.addEventListener("click", () => {
+    const variantSections = activeVariantsContainer.querySelectorAll(
+      ".variant-section-basicInfo"
+    );
+
+    const totalVariants = variantSections.length;
+
     const checkedBoxes = variantCheckboxContainer.querySelectorAll(
       "input[name='variant_to_delete']:checked"
     );
+
     if (checkedBoxes.length === 0) {
       alert("Please select at least one variant to delete.");
+      return;
+    }
+
+    const selectedCount = checkedBoxes.length;
+    const remainingVariants = totalVariants - selectedCount;
+
+    if (remainingVariants < 1) {
+      alert(
+        "You cannot delete all variants. A product must have at least one variant."
+      );
       return;
     }
 
