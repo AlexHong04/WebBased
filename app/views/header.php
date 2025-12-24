@@ -101,7 +101,11 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
                             <?php endif; ?>
                         </ul>
                     </li>
-                    <li><a href="/app/views/order/customerOrderHistory.php?id=<?= $cid ?>">Order</a></li>
+                    <?php if (!empty($cid)): ?>
+                        <li><a href="/app/views/order/customerOrderHistory.php?id=<?= $cid ?>">Order</a></li>
+                    <?php else: ?>
+                        <li><a href="/app/views/order/customerOrderHistory.php">Order</a></li>
+                    <?php endif; ?>
                 </ul>
             </nav>
 
@@ -205,7 +209,7 @@ $currentId = $_SESSION['customerId'] ?? $_SESSION['adminId'] ?? null;
 
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="/public/js/header.js"></script>
-    
+
 </body>
 
 </html>

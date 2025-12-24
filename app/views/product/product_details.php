@@ -13,9 +13,7 @@ require_once __DIR__ . '/../../controllers/productsController.php';
 require_once __DIR__ . '/../../helpers/html.php';
 require_once __DIR__ . '/../../helpers/request.php';
 require_once __DIR__ . '/../../helpers/validation.php';
-require_once __DIR__ . '/../../helpers/auth.php';
 
-authenticate();
 $id = get('id', 'P00001');
 
 $controller = new productsController();
@@ -894,13 +892,13 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         }
 
         overlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; 
+        document.body.style.overflow = 'hidden';
     }
 
     function closeShareModal(event, force = false) {
         if (force || event.target.id === 'shareModalOverlay') {
             document.getElementById('shareModalOverlay').style.display = 'none';
-            document.body.style.overflow = 'auto'; 
+            document.body.style.overflow = 'auto';
         }
     }
 
@@ -910,7 +908,7 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         navigator.clipboard.writeText(url).then(() => {
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-            btn.style.background = '#d4edda'; 
+            btn.style.background = '#d4edda';
 
             setTimeout(() => {
                 btn.innerHTML = originalHTML;
