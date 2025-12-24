@@ -229,8 +229,8 @@ class userController
     public function loginWithGoogle()
     {
         $client_id = '129399541762-kulgn2g9c3cp5gpdt18sgopu2u1volcg.apps.googleusercontent.com';
-        // $redirect_uri = 'http://localhost/app/views/security/signIn.php?action=googleCallback';
-        $redirect_uri = 'http://lovine.kesug.com/app/views/security/signIn.php?action=googleCallback';
+        $redirect_uri = 'http://localhost/app/views/security/signIn.php?action=googleCallback';
+        // $redirect_uri = 'http://lovine.kesug.com/app/views/security/signIn.php?action=googleCallback';
 
         $params = [
             'response_type' => 'code',
@@ -250,8 +250,8 @@ class userController
     {
         $client_id = '129399541762-kulgn2g9c3cp5gpdt18sgopu2u1volcg.apps.googleusercontent.com';
         $client_secret = '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';
-        // $redirect_uri = 'http://localhost/app/views/security/signIn.php?action=googleCallback';
-        $redirect_uri = 'http://lovine.kesug.com/app/views/security/signIn.php?action=googleCallback';
+        $redirect_uri = 'http://localhost/app/views/security/signIn.php?action=googleCallback';
+        // $redirect_uri = 'http://lovine.kesug.com/app/views/security/signIn.php?action=googleCallback';
 
         $userInfo = handleGoogleCallback($client_id, $client_secret, $redirect_uri);
 

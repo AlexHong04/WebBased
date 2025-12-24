@@ -180,7 +180,7 @@ $fields = [
             <td><?= displayValue($m->phone) ?></td>
             <td><?= displayValue($m->created_at) ?></td>
             <td><?= displayValue($m->updated_at) ?></td>
-            <td><?= displayValue($m->rewardPoint) ?></td>
+            <td><?= $m->rewardPoint ?></td>
             <td><?= activeStatusLabel($m->isActive) ?></td>
             <td><?= blockStatusLabel($m->isBlocked) ?></td>
           </tr>
