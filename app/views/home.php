@@ -127,6 +127,34 @@ function renderProducts($products, $category, $title, $viewAll = 'category/categ
 
     <?php renderProducts($new_arrivals, 'new', 'New Arrivals Products'); ?>
 
+    <!-- About Us Section -->
+    <section class="about-us">
+        <div class="about-container">
+            <h2>About Us</h2>
+            <p class="about-intro">
+                We are committed to delivering high-quality products and a seamless online shopping experience.
+                Our platform is designed to make discovering, purchasing, and reviewing products simple and enjoyable.
+            </p>
+
+            <div class="about-features">
+                <div class="about-item">
+                    <h3>Quality Products</h3>
+                    <p>We carefully select products to ensure quality, reliability, and value for our customers.</p>
+                </div>
+
+                <div class="about-item">
+                    <h3>Customer Focused</h3>
+                    <p>Your satisfaction is our priority. We continuously improve our services based on customer feedback.</p>
+                </div>
+
+                <div class="about-item">
+                    <h3>Secure & Trusted</h3>
+                    <p>We provide a secure platform with trusted payment methods and data protection.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
 </main>
 <?php showToast(); ?>
 <?php include 'footer.php'; ?>

@@ -10,9 +10,9 @@
   --text-main-dark: #e4e6eb;
   --text-muted-dark: #b0b3b8;
   --border-dark: #3e4042;
-  
+
   /* 品牌色 */
-  --primary-pink: #f1a2b8; 
+  --primary-pink: #f1a2b8;
   --btn-dark-bg: #d88a98;
   --btn-dark-hover: #c67585;
 }
@@ -33,15 +33,15 @@
   width: 12px;
 }
 [data-theme="dark"] ::-webkit-scrollbar-track {
-  background: var(--bg-body-dark); 
+  background: var(--bg-body-dark);
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background-color: #444; 
-  border-radius: 6px; 
-  border: 3px solid var(--bg-body-dark); 
+  background-color: #444;
+  border-radius: 6px;
+  border: 3px solid var(--bg-body-dark);
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background-color: #666; 
+  background-color: #666;
 }
 
 /* --- 鼠标选中文本的颜色 --- */
@@ -59,9 +59,11 @@
 [data-theme="dark"] .form-box,
 [data-theme="dark"] .popup-box,
 [data-theme="dark"] .modal-content,
-[data-theme="dark"] .product-card, 
+[data-theme="dark"] .product-card,
 [data-theme="dark"] .profile-container,
-[data-theme="dark"] .step-container {
+[data-theme="dark"] .step-container,
+[data-theme="dark"] .about-us-container,
+[data-theme="dark"] .about-item {
   background: var(--bg-card-dark) !important;
   /* 深色阴影，更有质感 */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
@@ -69,16 +71,20 @@
   color: var(--text-main-dark) !important;
 }
 
+[data-theme="dark"] .about-us {
+  background: var(--bg-body-dark) !important;
+}
+
 /* =========================================
    4. 文字颜色修复 (Typography)
    ========================================= */
 
 /* 亮色标题 */
-[data-theme="dark"] h1, 
-[data-theme="dark"] h2, 
-[data-theme="dark"] h3, 
-[data-theme="dark"] h4, 
-[data-theme="dark"] h5, 
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
 [data-theme="dark"] strong,
 [data-theme="dark"] b,
 [data-theme="dark"] .field-label,
@@ -86,8 +92,15 @@
 [data-theme="dark"] .section-title,
 [data-theme="dark"] .product-name,
 [data-theme="dark"] .modal-title,
-[data-theme="dark"] #profile-name {
+[data-theme="dark"] #profile-name,
+[data-theme="dark"] .about-intro,
+[data-theme="dark"] .about-item p {
   color: #ffffff !important;
+}
+
+[data-theme="dark"] .about-item h3,
+[data-theme="dark"] .about-container h2 {
+  color: #ec5d86 !important;
 }
 
 /* 灰色副标题/说明文字 */
@@ -164,7 +177,7 @@
 }
 
 /* Checkbox 说明文字 */
-[data-theme="dark"] .two-col, 
+[data-theme="dark"] .two-col,
 [data-theme="dark"] .two-col .text {
   color: var(--text-muted-dark) !important;
 }
@@ -184,7 +197,7 @@
   background: var(--btn-dark-bg) !important;
   color: #ffffff !important;
   border: none !important;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* 悬停变亮 */
@@ -261,7 +274,7 @@
 
 /* Sidebar (Profile Page) */
 [data-theme="dark"] .profile-sidebar {
-  background-color: #181818 !important; 
+  background-color: #181818 !important;
   border-right: 1px solid var(--border-dark) !important;
 }
 
@@ -310,7 +323,7 @@
 
 /* 降低图片亮度防止刺眼 (可选，如果不需要可删除) */
 [data-theme="dark"] img {
-  filter: brightness(0.9); 
+  filter: brightness(0.9);
 }
 /* 头像和特定图片保持原亮 */
 [data-theme="dark"] .profile-avatar img,
@@ -323,21 +336,21 @@
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  
+
   /* 2. 字体与颜色：模仿 header_footer.css 中的 nav a */
-  color: white !important;      /* 默认白色，适应粉色 Header */
+  color: white !important; /* 默认白色，适应粉色 Header */
   font-family: inherit;
-  font-weight: 500;             /* 保持一致的字重 */
-  font-size: 1rem;              /* 字体大小 */
-  
+  font-weight: 500; /* 保持一致的字重 */
+  font-size: 1rem; /* 字体大小 */
+
   /* 3. 布局与间距 */
   display: inline-flex;
   align-items: center;
-  gap: 8px;                     /* 图标和文字的间距 */
-  padding: 0.5rem 0;            /* 上下内边距 */
-  /*margin: 0 1rem;*/               /* 左右外边距，模仿 nav li 的间距 */
+  gap: 8px; /* 图标和文字的间距 */
+  padding: 0.5rem 0; /* 上下内边距 */
+  /*margin: 0 1rem;*/ /* 左右外边距，模仿 nav li 的间距 */
   cursor: pointer;
-  
+
   /* 4. 动画效果 */
   transition: transform 0.3s ease, color 0.3s ease;
 }
@@ -355,5 +368,5 @@
 
 /* Dark Mode 切换按钮本身 */
 [data-theme="dark"] #themeToggle {
-  color: #e0e0e0 !important;    /* 深色模式下的文字颜色 */
+  color: #e0e0e0 !important; /* 深色模式下的文字颜色 */
 }
