@@ -173,6 +173,41 @@ document.addEventListener("DOMContentLoaded", function () {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const malaysiaPhoneRegex = /^(\+?6?01)[0-9]{8,9}$/;
 
+  function validateInput(input) {
+    const name = input.name;
+    const value = input.value.trim();
+
+    // Required fields
+    if (input.required && value === "") {
+      showError(input, "This field is required");
+      return false;
+    }
+
+    // Email validation
+    if (name === "email" && value !== "" && !emailRegex.test(value)) {
+      showError(input, "Invalid email format");
+      return false;
+    }
+
+    // Phone validation
+    if (name === "phone" && value !== "") {
+      const cleaned = value.replace(/[\s\-]/g, "");
+      if (!malaysiaPhoneRegex.test(cleaned)) {
+        showError(input, "Invalid Malaysian phone number");
+        return false;
+      }
+    }
+
+    // Reward points validation
+    if (name === "rewardPoint" && value !== "" && Number(value) < 0) {
+      showError(input, "Reward points cannot be negative");
+      return false;
+    }
+
+    clearError(input);
+    return true;
+  }
+
   function showError(input, message) {
     const group = input.closest(".info-group");
     if (!group) return;
@@ -200,25 +235,22 @@ document.addEventListener("DOMContentLoaded", function () {
     input.classList.remove("input-error");
   }
 
-  memberForm.querySelectorAll("input").forEach((input) => {
-    input.addEventListener("input", () => clearError(input));
-  });
+  // memberForm.querySelectorAll("input").forEach((input) => {
+  //   input.addEventListener("input", () => clearError(input));
+  // });
 
   // Track changes in all inputs
   memberForm.querySelectorAll("input").forEach((input) => {
-    const initialValue = input.type === "file" ? null : input.value;
+    if (input.type === "hidden") return;
 
     input.addEventListener("input", () => {
-      if (input.type !== "hidden" && input.value !== initialValue) {
-        isFormEdited = true;
-      }
+      validateInput(input);
+      isFormEdited = true;
     });
 
-    if (input.type === "file") {
-      input.addEventListener("change", () => {
-        if (input.files.length > 0) isFormEdited = true;
-      });
-    }
+    input.addEventListener("blur", () => {
+      validateInput(input);
+    });
   });
 
   function beforeUnloadHandler(e) {
@@ -239,32 +271,13 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    memberForm.querySelectorAll("input[required]").forEach((input) => {
-      if (!input.value.trim()) {
-        showError(input, "This field is required");
+    memberForm.querySelectorAll("input").forEach((input) => {
+      if (input.type === "hidden") return;
+
+      if (!validateInput(input)) {
         isValid = false;
-      } else {
-        clearError(input);
       }
     });
-
-    const email = memberForm.querySelector('input[name="email"]');
-    if (email && !emailRegex.test(email.value.trim())) {
-      showError(email, "Invalid email format");
-      isValid = false;
-    }
-
-    const phone = memberForm.querySelector('input[name="phone"]');
-    if (phone && !malaysiaPhoneRegex.test(phone.value.replace(/[\s\-]/g, ""))) {
-      showError(phone, "Invalid Malaysian phone number");
-      isValid = false;
-    }
-
-    const reward = memberForm.querySelector('input[name="rewardPoint"]');
-    if (reward && reward.value !== "" && Number(reward.value) < 0) {
-      showError(reward, "Reward points cannot be negative");
-      isValid = false;
-    }
 
     if (!isValid) {
       e.preventDefault();
