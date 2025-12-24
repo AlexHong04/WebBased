@@ -113,6 +113,17 @@ if ($selectedVid && $variantImgFound) {
 
 $realAvailable = $currStock;
 $isWishlisted = $product['is_wishlisted'] ?? false;
+$youtubeUrl = $product['youtube_link'] ?? null;
+$youtubeEmbedUrl = null;
+
+if (!empty($youtubeUrl)) {
+    // Extract only the video ID
+    if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $youtubeUrl, $matches)) {
+        $videoId = $matches[1];
+        $youtubeEmbedUrl = "https://www.youtube.com/embed/" . $videoId;
+    }
+}
+
 ?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -126,6 +137,19 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
         </div>
 
         <div class="product-content-row">
+            <?php if ($youtubeEmbedUrl): ?>
+                <div class="product-video-wrapper" style="margin-bottom: 15px;">
+                    <div class="video-container" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; max-width:100%;">
+                        <iframe
+                            src="<?= encode($youtubeEmbedUrl) ?>"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                            style="position:absolute; top:0; left:0; width:100%; height:100%;">
+                        </iframe>
+                    </div>
+                </div>
+            <?php endif; ?>
             <div class="product-images">
                 <div class="main-image-wrapper">
                     <button class="main-arrow prev-arrow" onclick="navigateImage(-1)"><i class="fas fa-chevron-left"></i></button>
@@ -253,6 +277,13 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
                         <button type="button" class="share-btn" onclick="openShareModal()" title="Share Product">
                             <i class="fas fa-share-alt"></i>
                         </button>
+
+                        <?php if (!empty($youtubeEmbedUrl)): ?>
+                            <button type="button" id="openVideoBtn" class="youtube-btn" data-video="<?= encode($youtubeEmbedUrl) ?>">
+                                <i class="fab fa-youtube youtube-icon"></i>
+                            </button>
+                        <?php endif; ?>
+
                     </div>
                 </form>
             </div>
@@ -425,6 +456,16 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
             <button class="btn-share-action btn-download" onclick="downloadQRCode()">
                 <i class="fas fa-download"></i> Save QR
             </button>
+        </div>
+    </div>
+</div>
+
+<div id="videoModal" class="video-modal-overlay" style="display:none;">
+    <div class="video-modal-content">
+        <span class="close-video" onclick="closeVideoModal()">&times;</span>
+        <div class="video-container" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; max-width:100%;">
+            <iframe id="videoIframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen
+                style="position:absolute; top:0; left:0; width:100%; height:100%;"></iframe>
         </div>
     </div>
 </div>
@@ -948,6 +989,28 @@ $isWishlisted = $product['is_wishlisted'] ?? false;
             }
         }
     }
+    // Open video modal
+    document.getElementById('openVideoBtn').addEventListener('click', function() {
+        const videoUrl = this.getAttribute('data-video');
+        const iframe = document.getElementById('videoIframe');
+
+        iframe.src = videoUrl + "?autoplay=1"; // autoplay the video
+        document.getElementById('videoModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // prevent background scroll
+    });
+
+    function closeVideoModal() {
+        const iframe = document.getElementById('videoIframe');
+
+        iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+
+        document.getElementById('videoModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    document.getElementById('videoModal').addEventListener('click', function(e) {
+        if (e.target === this) closeVideoModal();
+    });
 </script>
 
 <?php include '../footer.php' ?>

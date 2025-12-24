@@ -295,6 +295,17 @@ include '../adminHeader.php';
                 </div>
             </div>
 
+            <div class="form-row-group">
+                <div class="form-column">
+                    <label for="youtube_link">Product Video (YouTube URL)</label>
+                    <?php html_text(
+                        'youtube_link',
+                        "maxlength='255' placeholder='Paste YouTube link here'",
+                        $product['youtube_link'] ?? ''
+                    ); ?>
+                </div>
+            </div>
+
             <div class="button-container">
                 <button type='button' id='add-variant-btn'>Variant +</button>
             </div>

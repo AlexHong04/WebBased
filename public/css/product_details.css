@@ -374,7 +374,7 @@ body {
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 10px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -391,7 +391,7 @@ body {
 }
 
 .add-to-cart-btn i {
-  margin-right: 10px;
+  margin-right: 5px;
 }
 
 .add-to-cart-btn.disabled {
@@ -406,7 +406,8 @@ body {
 
 /* --- Wishlist Button / Share Button --- */
 .wishlist-btn,
-.share-btn {
+.share-btn,
+.youtube-btn {
   width: 55px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -421,7 +422,8 @@ body {
 }
 
 .wishlist-btn:hover,
-.share-btn:hover {
+.share-btn:hover,
+.youtube-btn:hover {
   border-color: var(--primary-pink);
   color: var(--primary-pink);
 }
@@ -1137,3 +1139,21 @@ body {
     min-width: 160px;
   }
 }
+
+.video-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex; /* center content */
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+}
+.video-modal-content {
+  width: 80%;
+  max-width: 800px;
+}
+

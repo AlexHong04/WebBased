@@ -116,9 +116,10 @@ class ProductModel
             // Insert product
             $this->db->query('
                 INSERT INTO product 
-                (product_id, product_name, description, cost_price, sale_price, category_id, img_url, created_at, updated_at)
-                VALUES (:product_id, :product_name, :description, :cost_price, :sale_price, :category_id, :img_url, NOW(), NOW())
+                (product_id, product_name, description, cost_price, sale_price, category_id, img_url, youtube_link, created_at, updated_at)
+                VALUES (:product_id, :product_name, :description, :cost_price, :sale_price, :category_id, :img_url, :youtube_link, NOW(), NOW())
             ');
+
             foreach ($data['product'] as $key => $value) {
                 $this->db->bind(":$key", $value);
             }
@@ -254,7 +255,8 @@ class ProductModel
                 sale_price = :sale_price,
                 category_id = :category_id,
                 img_url = :img_url,
-                updated_at = NOW()
+                updated_at = NOW(),
+                youtube_link = :youtube_link
             WHERE product_id = :product_id
         ');
 
@@ -266,6 +268,7 @@ class ProductModel
             $this->db->bind(':sale_price', $data['product']['sale_price']);
             $this->db->bind(':category_id', $data['product']['category_id']);
             $this->db->bind(':img_url', $data['product']['img_url']);
+            $this->db->bind(':youtube_link', $data['product']['youtube_link']);
             $this->db->execute();
 
             // 2. Update Variants

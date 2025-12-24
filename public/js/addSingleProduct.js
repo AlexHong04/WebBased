@@ -797,7 +797,7 @@ document.addEventListener("DOMContentLoaded", () => {
       checkboxWrapper.style.marginBottom = "8px";
       checkboxWrapper.innerHTML = `
                 <label>
-                    <input type="checkbox" name="variant_to_delete" value="${variantId}">
+                    <input type="radio" name="variant_to_delete" value="${variantId}">
                     Variant ${index + 1}: ${variantName}
                 </label>
             `;

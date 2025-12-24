@@ -193,7 +193,8 @@ class ProductsController
             'cost_price' => $_POST['cost_price'] ?? 0,
             'sale_price' => $_POST['sales_price'] ?? 0,
             'category_id' => $categoryId,
-            'img_url' => implode(',', $productImages)
+            'img_url' => implode(',', $productImages),
+            'youtube_link' => $_POST['youtube_link'] ?? null
         ];
 
         try {
@@ -612,7 +613,8 @@ class ProductsController
                 'cost_price' => $_POST['cost_price'],
                 'sale_price' => $_POST['sales_price'],
                 'category_id' => $categoryId,
-                'img_url' => implode(',', $productImages)
+                'img_url' => implode(',', $productImages),
+                'youtube_link' => $_POST['youtube_link'] ?? null
             ];
 
             $this->productModel->updateProduct($productId, [
