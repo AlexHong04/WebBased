@@ -265,6 +265,20 @@ document.addEventListener("DOMContentLoaded", function () {
   memberForm.addEventListener("submit", (e) => {
     let isValid = true;
 
+    memberForm.querySelectorAll("input").forEach((input) => {
+      if (input.type === "hidden") return;
+
+      if (!validateInput(input)) {
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      e.preventDefault();
+      showCustomPopup("Please fix the highlighted errors before submitting.");
+      return;
+    }
+
     if (!isFormEdited) {
       e.preventDefault();
       showCustomPopup("Please enter something before submitting.");
@@ -278,11 +292,6 @@ document.addEventListener("DOMContentLoaded", function () {
         isValid = false;
       }
     });
-
-    if (!isValid) {
-      e.preventDefault();
-      return;
-    }
 
     isFormEdited = false;
     window.removeEventListener("beforeunload", beforeUnloadHandler);
