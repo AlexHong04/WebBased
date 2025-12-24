@@ -12,7 +12,7 @@ class receiptController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $this->orderModel = new OrderModel();
+        $this->orderModel = new orderModel();
     }
 
     public function index($returnOnly = false)

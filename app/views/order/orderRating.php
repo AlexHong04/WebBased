@@ -8,8 +8,8 @@ include '../../controllers/reviewController.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$orderController = new OrderController();
-$reviewController = new ReviewController();
+$orderController = new orderController();
+$reviewController = new reviewController();
 
 if (!isset($_GET['id'])) {
   die("No order ID provided.");

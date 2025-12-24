@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../app/config/database.php';
 
-class WishlistModel {
+class wishlistModel {
     private $db;
 
     public function __construct() {

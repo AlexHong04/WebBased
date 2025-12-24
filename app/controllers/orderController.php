@@ -2,17 +2,17 @@
 require_once __DIR__ . '/../models/orderModel.php';
 require_once __DIR__ . '/../models/userModel.php';
 require_once __DIR__ . '/../../app/helpers/mail.php';
-require_once __DIR__ . '/../lib/Pagination.php';
+require_once __DIR__ . '/../lib/pagination.php';
 
-class OrderController
+class orderController
 {
   private $orderModel;
   private $userModel;
 
   public function __construct()
   {
-    $this->orderModel = new OrderModel();
-    $this->userModel = new UserModel();
+    $this->orderModel = new orderModel();
+    $this->userModel = new userModel();
   }
 
   public function index()
@@ -26,7 +26,7 @@ class OrderController
     ];
 
     $total = $this->orderModel->countOrders($filters['status']);
-    $pagination = new Pagination($total, 10, $filters['page']);
+    $pagination = new pagination($total, 10, $filters['page']);
 
     $orders = $this->orderModel->getOrders(
       $pagination->offset,

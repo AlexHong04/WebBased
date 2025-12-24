@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../models/OrderModel.php';
+require_once __DIR__ . '/../models/orderModel.php';
 require_once __DIR__ . '/../models/productsModel.php';
 require_once __DIR__ . '/../models/paymentModel.php';
 
@@ -10,9 +10,9 @@ class cronController {
     private $paymentModel;
 
     public function __construct() {
-        $this->orderModel = new OrderModel();
-        $this->productModel = new ProductModel();
-        $this->paymentModel = new PaymentModel();
+        $this->orderModel = new orderModel();
+        $this->productModel = new productsModel();
+        $this->paymentModel = new paymentModel();
     }
 
     public function runOrderCleanup() {

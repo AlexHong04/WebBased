@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../models/CartModel.php';
+require_once __DIR__ . '/../models/cartModel.php';
 require_once __DIR__ . '/../helpers/request.php';
 
 class shoppingCartController
@@ -11,7 +11,7 @@ class shoppingCartController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $this->cartModel = new CartModel();
+        $this->cartModel = new cartModel();
     }
 
     //orepares data for the main Cart View page

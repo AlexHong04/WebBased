@@ -5,7 +5,7 @@ $pageCSS = "admindashboard.css";
 
 require_once __DIR__ . '/../controllers/orderController.php';
 require_once __DIR__ . '/../helpers/html.php';
-$orderController = new OrderController();
+$orderController = new orderController();
 $topOrders = $orderController->getTopOrders();
 $topCategory = $orderController->getTopCategory();
 $statusOrders = $orderController->getOrdersByStatus();

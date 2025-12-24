@@ -5,7 +5,7 @@ require_once __DIR__ . '/../models/paymentModel.php';
 require_once __DIR__ . '/../models/orderModel.php';
 require_once __DIR__ . '/../../stripe-php/init.php';
 
-class PaymentController
+class paymentController
 {
     private $paymentModel;
     private $orderModel;
@@ -15,8 +15,8 @@ class PaymentController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $this->paymentModel = new PaymentModel();
-        $this->orderModel = new OrderModel();
+        $this->paymentModel = new paymentModel();
+        $this->orderModel = new orderModel();
     }
 
     public function index($returnOnly = false)

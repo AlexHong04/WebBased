@@ -8,7 +8,7 @@ $customerId = $_SESSION['customerId'] ?? null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'complete_order') {
   ob_clean();
-  $orderController = new OrderController();
+  $orderController = new orderController();
   header('Content-Type: application/json');
   $orderController->completeOrder();
   exit;
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $status  = $_POST['status'] ?? null;
 
   if ($orderId && $status) {
-    $orderController = new OrderController();
+    $orderController = new orderController();
     $orderController->updateStatus($orderId, $status);
   }
 }
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $title = "Order Details Page";
 $pageCSS = "orderhistorydetails.css";
 
-$orderController = new OrderController();
+$orderController = new orderController();
 $orders = $orderController->getOrderDetails();
 
 include '../header.php';

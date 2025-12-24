@@ -3,7 +3,7 @@ include '../../controllers/productsController.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$controller = new ProductsController();
+$controller = new productsController();
 $products = $controller->getAllProductVariant('', '', 'lowStock');
 
 header('Content-Type: text/csv');

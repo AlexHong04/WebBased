@@ -3,15 +3,15 @@ require_once __DIR__ . '/../models/productsModel.php';
 require_once __DIR__ . '/../models/wishlistModel.php';
 require_once __DIR__ . '/../helpers/request.php';
 require_once __DIR__ . '/../helpers/mail.php';
-require_once __DIR__ . '/../lib/TwilioSMS.php';
+require_once __DIR__ . '/../lib/twilioSMS.php';
 
-class ProductsController
+class productsController
 {
     private $productModel;
 
     public function __construct()
     {
-        $this->productModel = new ProductModel();
+        $this->productModel = new productsModel();
     }
 
     public function showAddProductForm()
@@ -642,9 +642,9 @@ class ProductsController
 
         // if (isset($_SESSION['email'])) {
         // $email = $_SESSION['email'];
-        $loginLink = base('app/views/product/lowStockAlert.php?action=sendPdf&email=wongweixin116@gmail.com');
+        $loginLink = base('app/views/product/lowStockAlert.php?action=sendPdf&email=kokhong704@gmail.com');
         // $loginLink = base('app/views/product/lowStockAlert.php?action=sendPdf&email=' . $email);
-        sendPdf('wongweixin116@gmail.com', "Wei Xin", $loginLink);
+        sendPdf('kokhong704@gmail.com', "Wei Xin", $loginLink);
         $_SESSION['flash_success'] = "Email sent successfully!";
         return true;
         // }

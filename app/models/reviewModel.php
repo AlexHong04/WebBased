@@ -2,7 +2,7 @@
 
   require_once __DIR__ . '/../config/database.php';
 
-  class ReviewModel
+  class reviewModel
   {
     private $db;
 

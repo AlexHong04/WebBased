@@ -5,7 +5,7 @@ ini_set('display_errors', 0);
 require_once __DIR__ . '/addressController.php';
 require_once __DIR__ . '/../helpers/request.php';
 
-$controller = new AddressController();
+$controller = new addressController();
 $action = req('action');
 
 

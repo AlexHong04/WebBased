@@ -1,6 +1,6 @@
 <?php
 
-class TwilioSMS
+class twilioSMS
 {
     private $accountSid;
     private $authToken;

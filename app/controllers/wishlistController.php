@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../models/WishlistModel.php';
+require_once __DIR__ . '/../models/wishlistModel.php';
 
 include __DIR__ . '/../helpers/request.php';
 
@@ -10,7 +10,7 @@ class wishlistController {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $this->model = new WishlistModel();
+        $this->model = new wishlistModel();
     }
 
     public function index() {

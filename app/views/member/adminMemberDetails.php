@@ -8,7 +8,7 @@ include '../../controllers/userController.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$controller = new UserController();
+$controller = new userController();
 $data = $controller->getMembers();
 $member = (object)$data;
 

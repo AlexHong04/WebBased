@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 
 // Fetch Data
-// $data = $adminController->index();
+$data = $adminController->index();
 $admins = $data['admins'] ?? [];
 $pagination = $data['pagination'] ?? null;
 

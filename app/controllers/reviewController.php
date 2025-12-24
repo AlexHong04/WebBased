@@ -1,13 +1,13 @@
 <?php
 require_once __DIR__ . '/../models/reviewModel.php';
 
-class ReviewController
+class reviewController
 {
   private $reviewModel;
 
   public function __construct()
   {
-    $this->reviewModel = new ReviewModel();
+    $this->reviewModel = new reviewModel();
   }
 
   // public function addReview($orderId, $rating, $review)

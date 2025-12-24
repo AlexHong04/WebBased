@@ -5,7 +5,7 @@ require_once __DIR__ . '/../lib/PHPMailer/src/SMTP.php';
 require_once __DIR__ . '/../config/database.php';
 
 require_once __DIR__ . '/html.php';
-require_once __DIR__ . '/../models/OrderModel.php';
+require_once __DIR__ . '/../models/orderModel.php';
 
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -18,8 +18,8 @@ function _sendEmail($toEmail, $toName, $subject, $body, $altBody = '')
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'unknowsuser050@gmail.com';
-        $mail->Password   = 'dgsj nahj zsld nekl';
+        $mail->Username   = 'alexhong704@gmail.com';
+        $mail->Password   = 'nxup ogzs xgyq geps';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 

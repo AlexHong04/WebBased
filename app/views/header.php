@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../controllers/userController.php';
-require_once __DIR__ . '/../models/CartModel.php';
+require_once __DIR__ . '/../models/cartModel.php';
 require_once __DIR__ . '/../helpers/validation.php';
 require_once __DIR__ . '/../controllers/productsController.php';
 
@@ -10,8 +10,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 
 $cartCount = 0;
-$cartModel = new CartModel();
-$controller = new ProductsController();
+$cartModel = new cartModel();
+$controller = new productsController();
 
 $categories = $controller->fetchAllCategories();
 

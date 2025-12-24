@@ -7,7 +7,7 @@ require_once __DIR__ . '/../models/orderModel.php';
 require_once __DIR__ . '/../models/userModel.php';
 require_once __DIR__ . '/../models/addressModel.php';
 
-class CheckoutController
+class checkoutController
 {
     private $cartModel;
     private $userModel;

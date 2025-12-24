@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../helpers/auth.php';
 // Handle AJAX update request
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["ajaxUpdate"])) {
 
-  $orderController = new OrderController();
+  $orderController = new orderController();
 
   foreach ($_POST["orders"] as $orderId) {
     $orderController->updateStatus($orderId, $_POST["status"]);
@@ -19,7 +19,7 @@ $title = "Order Listing Page";
 $pageCSS = "datalisting.css";
 
 include  '../adminHeader.php';
-$orderController = new OrderController();
+$orderController = new orderController();
 $data = $orderController->index();
 
 authenticate();

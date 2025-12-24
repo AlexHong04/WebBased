@@ -38,7 +38,7 @@ function renderTemplate($templateText, $customer, $item)
     return str_replace(array_keys($replacements), array_values($replacements), $templateText);
 }
 
-$controller = new ProductsController();
+$controller = new productsController();
 if (isset($_GET['action']) && $_GET['action'] === 'systemCall' && isset($_GET['phone'])) {
     $phone = $_GET['phone'];
     $cname = $_GET['cname'] ?? 'Customer';

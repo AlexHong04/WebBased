@@ -19,7 +19,7 @@ if (isset($_SESSION['undo_variants'])) {
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$controller = new ProductsController();
+$controller = new productsController();
 $controller->submitProductForm();
 $title = "Add Single Products";
 $pageCSS = "addSingleProduct.css";

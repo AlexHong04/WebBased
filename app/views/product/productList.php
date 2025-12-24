@@ -24,7 +24,7 @@ include_once '../../helpers/html.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$controller = new ProductsController();
+$controller = new productsController();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 

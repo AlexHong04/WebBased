@@ -18,7 +18,7 @@ if (isset($_GET['status']) && $_GET['status'] === 'pending_payment') {
 
 include '../header.php';
 
-$orderController = new OrderController();
+$orderController = new orderController();
 $orders = $orderController->getOrderItems();
 
 $groupedOrders = [];

@@ -2,7 +2,7 @@
 require_once __DIR__ . '../../helpers/request.php'; 
 require_once __DIR__ . '/../models/addressModel.php';
 
-class AddressController {
+class addressController {
     private $addressModel;
     private $customerId;
 

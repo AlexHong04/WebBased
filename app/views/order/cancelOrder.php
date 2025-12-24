@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../helpers/auth.php';
 authenticate();
 $orderId = $_GET['id'];
 $custId = $_SESSION['customerId'];
-$orderController = new OrderController();
+$orderController = new orderController();
 $orders = $orderController->getOrderDetails();
 // $custId = $orders[0]['customer_id'];
 

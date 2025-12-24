@@ -8,7 +8,7 @@ include_once '../../helpers/html.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$controller = new ProductsController();
+$controller = new productsController();
 
 $current_sort = $_GET['sort'] ?? 'product_variant_id';
 $current_order = $_GET['order'] ?? 'asc';

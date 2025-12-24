@@ -10,7 +10,7 @@ authenticate();
 // Handle AJAX update request
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["ajaxUpdate"])) {
 
-  $orderController = new OrderController();
+  $orderController = new orderController();
 
   foreach ($_POST["orders"] as $orderId) {
     $updated = $orderController->updateStatus($orderId, $_POST["status"]);
@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["ajaxUpdate"])) {
 
 include '../adminheader.php';
 
-$orderController = new OrderController();
+$orderController = new orderController();
 $orders = $orderController->adminGetOrderDetails();
 
 if (!empty($orders)) {

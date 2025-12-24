@@ -14,19 +14,19 @@ class adminController
     }
 
     // 1. Dashboard / List all Admins
-    // public function index()
-    // {
-    //     // Check if logged in as admin (Helper function suggested)
-    //     if (!isset($_SESSION['adminId'])) {
-    //         redirect('../security/signIn.php');
-    //         return;
-    //     }
+    public function index()
+    {
+        // Check if logged in as admin (Helper function suggested)
+        // if (!isset($_SESSION['adminId'])) {
+        //     redirect('../security/signIn.php');
+        //     return;
+        // }
 
-    //     $admins = $this->adminModel->getAllAdmins();
-    //     return [
-    //         'admins' => $admins
-    //     ];
-    // }
+        $admins = $this->adminModel->getAllAdmins();
+        return [
+            'admins' => $admins
+        ];
+    }
 
     // 2. Add New Admin / Staff (Similar to signUp)
     public function addStaff()

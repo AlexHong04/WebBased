@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../controllers/checkoutController.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$controller = new CheckoutController();
+$controller = new checkoutController();
 $data = $controller->getCheckoutData();
 extract($data);
 

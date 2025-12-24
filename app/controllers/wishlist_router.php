@@ -1,8 +1,8 @@
 <?php
-require_once __DIR__ . '/WishlistController.php';
+require_once __DIR__ . '/wishlistController.php';
 require_once __DIR__ . '/../helpers/request.php';
 
-$controller = new WishlistController();
+$controller = new wishlistController();
 $action = req('action', 'index');
 
 switch ($action) {

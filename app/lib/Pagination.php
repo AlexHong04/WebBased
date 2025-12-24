@@ -1,6 +1,6 @@
 <?php
 
-class Pagination
+class pagination
 {
   public $totalRecords;
   public $recordsPerPage;

@@ -7,7 +7,7 @@ include '../../controllers/orderController.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$orderController = new OrderController();
+$orderController = new orderController();
 
 if (!isset($_GET['id'])) {
   die("No order ID provided.");

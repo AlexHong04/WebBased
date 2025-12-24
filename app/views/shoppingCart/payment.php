@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../controllers/paymentController.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$controller = new PaymentController();
+$controller = new paymentController();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $controller->process();
     exit;

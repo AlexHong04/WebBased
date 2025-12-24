@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../helpers/request.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$controller = new ReceiptController();
+$controller = new receiptController();
 $data = $controller->index(true);
 
 if (!is_array($data)) {

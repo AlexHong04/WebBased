@@ -10,8 +10,8 @@ require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
 $memberController = new userController();
-$orderController = new OrderController();
-$reviewController = new ReviewController();
+$orderController = new orderController();
+$reviewController = new reviewController();
 
 // $orderId = $_GET['order_id'] ?? null;
 // $reviewItems = $orderController->getReviewOrders($orderId);

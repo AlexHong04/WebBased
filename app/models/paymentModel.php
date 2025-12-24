@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../app/config/database.php';
 
-class PaymentModel {
+class paymentModel {
     private $db;
 
     public function __construct() {

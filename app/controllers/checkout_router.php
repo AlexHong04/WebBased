@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$controller = new CheckoutController();
+$controller = new checkoutController();
 $action = req('action', 'index');
 
 switch ($action) {

@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   require_once '../../controllers/userController.php';
 
-  $memberController = new UserController();
+  $memberController = new userController();
   $success = $memberController->updateStatus($data['customer_ids']);
 
   if ($success) {
@@ -40,7 +40,7 @@ include  '../adminHeader.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
-$memberController = new UserController();
+$memberController = new userController();
 $data = $memberController->index();
 
 $filters    = $data['filters'];

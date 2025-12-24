@@ -56,7 +56,7 @@ class userModel
     {
         $customerId = $this->db->generateId('customer', 'customer_id', 'CU');
 
-        $this->db->query("INSERT INTO customer (customer_id,firstName,lastName,email,phone,password,created_at,isActive) VALUES (:customer_id, :firstName, :lastName, :email, :phone, :password, NOW(), 0)");
+        $this->db->query("INSERT INTO customer (customer_id,firstName,lastName,email,phone,password,created_at,isActive,rewardPoint,isBlocked) VALUES (:customer_id, :firstName, :lastName, :email, :phone, :password, NOW(), 0, 0, 0)");
         $this->db->bind(':customer_id', $customerId);
         $this->db->bind(':firstName', $firstName);
         $this->db->bind(':lastName', $lastName);

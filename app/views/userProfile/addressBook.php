@@ -4,13 +4,13 @@ $pageCSS = "profile.css";
 
 require_once __DIR__ . '/../../helpers/html.php';
 require_once __DIR__ . '/../../helpers/request.php';
-require_once __DIR__ . '/../../controllers/AddressController.php';
+require_once __DIR__ . '/../../controllers/addressController.php';
 require_once __DIR__ .  '/../../controllers/userController.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 
 authenticate();
 $userController = new userController();
-$controller = new AddressController();
+$controller = new addressController();
 $addresses = $controller->index();
 $profileData = $userController->getProfile();
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
