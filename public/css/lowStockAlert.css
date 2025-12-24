@@ -1,5 +1,3 @@
-
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -7,6 +5,7 @@
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: Arial, sans-serif;
 }
 
 h1 {
@@ -90,8 +89,8 @@ h1 {
 }
 
 .low-stock-table th {
-  background-color:#fff0f5;
-  color:black;
+  background-color: #fff0f5;
+  color: black;
   font-weight: 600;
   cursor: pointer;
   padding: 20px 0px;
@@ -102,7 +101,6 @@ h1 {
   color: inherit;
   display: block;
 }
-
 
 .low-stock-table td {
   padding: 15px;
