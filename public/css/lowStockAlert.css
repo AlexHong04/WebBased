@@ -90,8 +90,8 @@ h1 {
 }
 
 .low-stock-table th {
-  background-color: rgb(192, 192, 192);
-  color: #fff;
+  background-color:#fff0f5;
+  color:black;
   font-weight: 600;
   cursor: pointer;
   padding: 20px 0px;
